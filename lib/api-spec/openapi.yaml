@@ -3,20 +3,34 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: TeamFlow API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: users
+    description: User management
+  - name: projects
+    description: Project management
+  - name: tasks
+    description: Task management
+  - name: performance
+    description: Performance metrics
+  - name: roadmap
+    description: Monthly roadmap
+  - name: github
+    description: GitHub integration
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,534 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+
+  # USERS
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users in the team
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get a user by ID
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{userId}/performance/{period}:
+    get:
+      operationId: getUserPerformance
+      tags: [users]
+      summary: Get performance stats for a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: period
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [day, week, month, year]
+      responses:
+        "200":
+          description: Performance stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPerformance"
+
+  /users/{userId}/health-history:
+    get:
+      operationId: getUserHealthHistory
+      tags: [users]
+      summary: Get health history for a user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Health history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HealthEvent"
+
+  # PROJECTS
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      responses:
+        "200":
+          description: Projects list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a project (team leader only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{projectId}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get a project by ID
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /projects/{projectId}/contributions/{period}:
+    get:
+      operationId: getProjectContributions
+      tags: [projects]
+      summary: Get GitHub contribution data for a project
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: period
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [day, week, month, year]
+      responses:
+        "200":
+          description: Contributions per member
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContributionStat"
+
+  /projects/{projectId}/summary:
+    get:
+      operationId: getProjectSummary
+      tags: [projects]
+      summary: Get project summary stats
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectSummary"
+
+  # TASKS
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List tasks (filtered by project/user)
+      parameters:
+        - name: projectId
+          in: query
+          schema:
+            type: integer
+        - name: assigneeId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, in_progress, completed, overdue]
+      responses:
+        "200":
+          description: Tasks list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a task (team leader only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{taskId}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get a task by ID
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /tasks/{taskId}/complete:
+    post:
+      operationId: completeTask
+      tags: [tasks]
+      summary: Mark a task as complete (member or system)
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  # PERFORMANCE
+  /performance/team:
+    get:
+      operationId: getTeamPerformance
+      tags: [performance]
+      summary: Get performance overview for all team members
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, year]
+            default: week
+      responses:
+        "200":
+          description: Team performance
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPerformance"
+
+  /performance/dashboard:
+    get:
+      operationId: getPerformanceDashboard
+      tags: [performance]
+      summary: Get dashboard summary stats for current user
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  # ROADMAP
+  /roadmap:
+    get:
+      operationId: listRoadmapItems
+      tags: [roadmap]
+      summary: List roadmap objectives for a month
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: integer
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Roadmap items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RoadmapItem"
+    post:
+      operationId: createRoadmapItem
+      tags: [roadmap]
+      summary: Create a roadmap objective
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoadmapItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoadmapItem"
+
+  /roadmap/{itemId}:
+    patch:
+      operationId: updateRoadmapItem
+      tags: [roadmap]
+      summary: Update a roadmap item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoadmapItemUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoadmapItem"
+    delete:
+      operationId: deleteRoadmapItem
+      tags: [roadmap]
+      summary: Delete a roadmap item
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # GITHUB
+  /github/webhook:
+    post:
+      operationId: githubWebhook
+      tags: [github]
+      summary: GitHub push webhook — auto-completes linked programming tasks
+      responses:
+        "200":
+          description: Webhook processed
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +576,390 @@ components:
       required:
         - status
 
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    RegisterInput:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [leader, member]
+
+    AuthResponse:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+
+    User:
+      type: object
+      required: [id, name, email, role, healthPoints, performanceScore]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [leader, member]
+        healthPoints:
+          type: integer
+          description: "0-100 health score, decreases with late tasks"
+        performanceScore:
+          type: number
+          description: "0-100 performance percentage"
+        avatarUrl:
+          type: ["string", "null"]
+        githubUsername:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    UserPerformance:
+      type: object
+      required: [userId, name, performanceScore, healthPoints, tasksCompleted, tasksOnTime, tasksLate, tasksPending, workloadPercentage]
+      properties:
+        userId:
+          type: integer
+        name:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        performanceScore:
+          type: number
+        healthPoints:
+          type: integer
+        tasksCompleted:
+          type: integer
+        tasksOnTime:
+          type: integer
+        tasksLate:
+          type: integer
+        tasksPending:
+          type: integer
+        workloadPercentage:
+          type: number
+          description: "Percentage of total team work assigned to this user"
+
+    HealthEvent:
+      type: object
+      required: [id, userId, eventType, delta, description, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        eventType:
+          type: string
+          enum: [completed_on_time, completed_late, task_overdue, bonus]
+        delta:
+          type: integer
+          description: "Positive or negative change in health points"
+        description:
+          type: string
+        createdAt:
+          type: string
+
+    Project:
+      type: object
+      required: [id, name, status, leaderId, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        githubRepoUrl:
+          type: ["string", "null"]
+        githubRepoName:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, completed, paused]
+        leaderId:
+          type: integer
+        taskCount:
+          type: integer
+        completedTaskCount:
+          type: integer
+        memberCount:
+          type: integer
+        createdAt:
+          type: string
+
+    ProjectInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        githubRepoUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, paused]
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        githubRepoUrl:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, paused]
+
+    ProjectSummary:
+      type: object
+      required: [projectId, totalTasks, completedTasks, overdueTasks, onTimePct, memberBreakdown]
+      properties:
+        projectId:
+          type: integer
+        totalTasks:
+          type: integer
+        completedTasks:
+          type: integer
+        overdueTasks:
+          type: integer
+        onTimePct:
+          type: number
+        memberBreakdown:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberWorkload"
+
+    MemberWorkload:
+      type: object
+      required: [userId, name, taskCount, workloadPct]
+      properties:
+        userId:
+          type: integer
+        name:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        taskCount:
+          type: integer
+        workloadPct:
+          type: number
+
+    ContributionStat:
+      type: object
+      required: [userId, name, commits, date]
+      properties:
+        userId:
+          type: integer
+        name:
+          type: string
+        githubUsername:
+          type: ["string", "null"]
+        commits:
+          type: integer
+        date:
+          type: string
+
+    Task:
+      type: object
+      required: [id, title, type, status, projectId, assigneeId, workloadPct, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        type:
+          type: string
+          enum: [programming, documentation, research]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, overdue]
+        projectId:
+          type: integer
+        projectName:
+          type: ["string", "null"]
+        assigneeId:
+          type: integer
+        assigneeName:
+          type: ["string", "null"]
+        assigneeAvatar:
+          type: ["string", "null"]
+        workloadPct:
+          type: number
+          description: "Percentage of work assigned relative to total team workload"
+        dueDate:
+          type: ["string", "null"]
+        completedAt:
+          type: ["string", "null"]
+        githubCommitSha:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TaskInput:
+      type: object
+      required: [title, type, projectId, assigneeId, workloadPct]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [programming, documentation, research]
+        projectId:
+          type: integer
+        assigneeId:
+          type: integer
+        workloadPct:
+          type: number
+        dueDate:
+          type: string
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [programming, documentation, research]
+        status:
+          type: string
+          enum: [pending, in_progress, completed, overdue]
+        workloadPct:
+          type: number
+        dueDate:
+          type: string
+
+    DashboardStats:
+      type: object
+      required: [healthPoints, performanceScore, activeTasksCount, overdueTasksCount, completedThisWeek, upcomingDeadlines, teamHealthAvg, recentActivity]
+      properties:
+        healthPoints:
+          type: integer
+        performanceScore:
+          type: number
+        activeTasksCount:
+          type: integer
+        overdueTasksCount:
+          type: integer
+        completedThisWeek:
+          type: integer
+        teamHealthAvg:
+          type: number
+        upcomingDeadlines:
+          type: array
+          items:
+            $ref: "#/components/schemas/Task"
+        recentActivity:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActivityItem"
+
+    ActivityItem:
+      type: object
+      required: [id, userId, userName, action, entityType, entityTitle, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        userName:
+          type: string
+        avatarUrl:
+          type: ["string", "null"]
+        action:
+          type: string
+        entityType:
+          type: string
+        entityTitle:
+          type: string
+        createdAt:
+          type: string
+
+    RoadmapItem:
+      type: object
+      required: [id, title, month, year, status, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        month:
+          type: integer
+        year:
+          type: integer
+        status:
+          type: string
+          enum: [planned, in_progress, achieved, missed]
+        assignedUserIds:
+          type: array
+          items:
+            type: integer
+        createdAt:
+          type: string
+
+    RoadmapItemInput:
+      type: object
+      required: [title, month, year]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        month:
+          type: integer
+        year:
+          type: integer
+        status:
+          type: string
+          enum: [planned, in_progress, achieved, missed]
+        assignedUserIds:
+          type: array
+          items:
+            type: integer
+
+    RoadmapItemUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [planned, in_progress, achieved, missed]
+        assignedUserIds:
+          type: array
+          items:
+            type: integer
