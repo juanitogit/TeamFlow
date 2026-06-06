@@ -9,7 +9,7 @@ router.use(requireAuth);
 
 router.get("/", async (req: AuthedRequest, res: Response) => {
   const { month, year } = req.query;
-  const conditions = [];
+  const conditions: any[] = [];
   if (month) conditions.push(eq(roadmapItemsTable.month, parseInt(month as string)));
   if (year) conditions.push(eq(roadmapItemsTable.year, parseInt(year as string)));
   const items = conditions.length > 0

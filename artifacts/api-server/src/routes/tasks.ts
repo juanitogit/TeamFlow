@@ -37,7 +37,7 @@ async function recalcPerformance(userId: number) {
 router.get("/", async (req: AuthedRequest, res: Response) => {
   const { projectId, assigneeId, status } = req.query;
   let query = db.select().from(tasksTable);
-  const conditions = [];
+  const conditions: any[] = [];
   if (projectId) conditions.push(eq(tasksTable.projectId, parseInt(projectId as string)));
   if (assigneeId) conditions.push(eq(tasksTable.assigneeId, parseInt(assigneeId as string)));
   if (status) conditions.push(eq(tasksTable.status, status as "pending" | "in_progress" | "completed" | "overdue"));
