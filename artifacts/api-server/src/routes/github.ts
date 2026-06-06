@@ -79,12 +79,26 @@ router.post("/webhook", async (req: Request, res: Response) => {
           description: `Auto-completed "${task.title}" via GitHub commit ${sha.slice(0, 7)}`,
         });
 
-        const [user] = await db.select({ healthPoints: usersTable.healthPoints })
+        const [user] = await db.select({ healthPoints: usersTable.healthPoints, name: usersTable.name, email: usersTable.email })
           .from(usersTable).where(eq(usersTable.id, task.assigneeId));
         if (user) {
+          const newHp = Math.max(0, Math.min(100, user.healthPoints + healthDelta));
           await db.update(usersTable).set({
-            healthPoints: Math.max(0, Math.min(100, user.healthPoints + healthDelta)),
+            healthPoints: newHp,
           }).where(eq(usersTable.id, task.assigneeId));
+
+          if (isOnTime && user.email) {
+            import("../lib/email").then(({ sendEmail }) => {
+              sendEmail(
+                user.email!,
+                "¡Magia de GitHub! Tarea entregada a tiempo 🚀",
+                `<h2>¡Felicidades ${user.name}!</h2>
+                <p>Detectamos tu commit <code>${sha.slice(0, 7)}</code> y hemos completado tu tarea <strong>${task.title}</strong> automáticamente.</p>
+                <p>¡Has ganado +5 puntos de salud!</p>
+                <p>Tu salud actual es: <strong>${newHp}</strong></p>`
+              );
+            });
+          }
         }
 
         await db.insert(activityLogTable).values({

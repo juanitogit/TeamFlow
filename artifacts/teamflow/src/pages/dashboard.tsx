@@ -6,8 +6,19 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, CheckCircle2, AlertCircle, Clock, Heart, TrendingUp } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, Clock, Heart, TrendingUp, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+
+const mockContributionData = [
+  { name: 'Mon', commits: 4, tasks: 2 },
+  { name: 'Tue', commits: 7, tasks: 3 },
+  { name: 'Wed', commits: 2, tasks: 1 },
+  { name: 'Thu', commits: 8, tasks: 4 },
+  { name: 'Fri', commits: 5, tasks: 2 },
+  { name: 'Sat', commits: 1, tasks: 0 },
+  { name: 'Sun', commits: 0, tasks: 0 },
+];
 
 export function Dashboard() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -120,6 +131,42 @@ export function Dashboard() {
             </div>
             <div className="text-sm text-slate">
               Requires immediate attention
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="col-span-3 lg:col-span-3 card-monday border-none">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl text-ink font-medium">
+              <BarChart3 className="h-5 w-5 text-primary" /> Aportes de la Semana
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={mockContributionData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorCommits" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#222222" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#222222" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#e57373" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="#e57373" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#888888', fontSize: 12 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#888888', fontSize: 12 }} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
+                  <Area type="monotone" dataKey="commits" stroke="#222222" fillOpacity={1} fill="url(#colorCommits)" name="Commits en GitHub" strokeWidth={2} />
+                  <Area type="monotone" dataKey="tasks" stroke="#e57373" fillOpacity={1} fill="url(#colorTasks)" name="Tareas Completadas" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>

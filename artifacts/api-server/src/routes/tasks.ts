@@ -3,6 +3,7 @@ import { db, tasksTable, usersTable, projectsTable, healthEventsTable, activityL
 import { eq, and, inArray } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { CreateTaskBody, UpdateTaskBody } from "@workspace/api-zod";
+import { sendEmail } from "../lib/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -78,6 +79,19 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
   });
 
   const enriched = await enrichTask(task);
+
+  const [assignee] = await db.select().from(usersTable).where(eq(usersTable.id, assigneeId));
+  if (assignee?.email) {
+    await sendEmail(
+      assignee.email,
+      "Nueva Tarea Asignada",
+      `<h2>Hola ${assignee.name},</h2>
+      <p>Se te ha asignado una nueva tarea: <strong>${task.title}</strong>.</p>
+      <p>Tipo: ${task.type}</p>
+      ${task.dueDate ? `<p>Fecha de entrega: ${task.dueDate}</p>` : ""}`
+    );
+  }
+
   res.status(201).json(enriched);
 });
 
@@ -147,11 +161,22 @@ router.post("/:taskId/complete", async (req: AuthedRequest, res: Response) => {
     description,
   });
 
-  const [user] = await db.select({ healthPoints: usersTable.healthPoints })
+  const [user] = await db.select({ healthPoints: usersTable.healthPoints, name: usersTable.name, email: usersTable.email })
     .from(usersTable).where(eq(usersTable.id, task.assigneeId));
   if (user) {
     const newHp = Math.max(0, Math.min(100, user.healthPoints + healthDelta));
     await db.update(usersTable).set({ healthPoints: newHp }).where(eq(usersTable.id, task.assigneeId));
+
+    if (isOnTime && user.email) {
+      await sendEmail(
+        user.email,
+        "¡Excelente trabajo! Tarea entregada a tiempo 🎉",
+        `<h2>¡Felicidades ${user.name}!</h2>
+        <p>Has completado la tarea <strong>${task.title}</strong> a tiempo.</p>
+        <p>¡Has ganado +5 puntos de salud!</p>
+        <p>Tu salud actual es: <strong>${newHp}</strong></p>`
+      );
+    }
   }
 
   await recalcPerformance(task.assigneeId);

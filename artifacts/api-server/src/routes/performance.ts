@@ -87,4 +87,35 @@ router.get("/dashboard", async (req: AuthedRequest, res: Response) => {
   });
 });
 
+router.post("/evaluate", async (req: AuthedRequest, res: Response) => {
+  if (req.userRole !== "leader") {
+    res.status(403).json({ error: "Only team leaders can trigger evaluations" });
+    return;
+  }
+
+  const users = await db.select().from(usersTable).where(eq(usersTable.role, "member"));
+  let warnedCount = 0;
+
+  for (const user of users) {
+    if (user.healthPoints <= 50 || user.performanceScore <= 50) {
+      if (user.email) {
+        import("../lib/email").then(({ sendEmail }) => {
+          sendEmail(
+            user.email!,
+            "⚠️ ATENCIÓN: Rendimiento por debajo de lo esperado",
+            `<h2>Hola ${user.name},</h2>
+            <p>Se ha realizado una evaluación del rendimiento del equipo.</p>
+            <p>Actualmente tu nivel de <strong>Salud (${user.healthPoints} hp)</strong> o tu <strong>Rendimiento (${user.performanceScore}%)</strong> están muy bajos.</p>
+            <p style="color: red;"><strong>Advertencia:</strong> Estás en riesgo de ser separado del proyecto si tus números no mejoran pronto.</p>
+            <p>Por favor, revisa tus tareas pendientes y complétalas a tiempo.</p>`
+          );
+        });
+        warnedCount++;
+      }
+    }
+  }
+
+  res.json({ message: "Evaluation complete", warnedUsers: warnedCount });
+});
+
 export default router;
