@@ -7,11 +7,13 @@ import tasksRouter from "./tasks";
 import performanceRouter from "./performance";
 import roadmapRouter from "./roadmap";
 import githubRouter from "./github";
+import githubAuthRouter from "./auth-github";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use("/auth", authRouter);
+router.use("/auth", githubAuthRouter);
 router.use("/users", usersRouter);
 router.use("/projects", projectsRouter);
 router.use("/tasks", tasksRouter);
