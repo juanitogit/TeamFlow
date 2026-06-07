@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Copy, RefreshCw, Timer, UserPlus, Users, Github, Target, Activity, Trash2, ClipboardList } from "lucide-react";
+import { Copy, RefreshCw, Timer, UserPlus, Users, Github, Target, Activity, Trash2, ClipboardList, Settings, Plus, CheckCircle2, AlertCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -81,8 +81,6 @@ export function Team() {
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [inviteData?.expiresAt]);
-  }, [inviteData?.expiresAt]);
-
   // Repos & config logic
   const [editingRepos, setEditingRepos] = useState(false);
   const [repos, setRepos] = useState<string[]>([]);
