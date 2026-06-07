@@ -24,10 +24,8 @@ async function fetchGithubCommits(repoUrl: string, since?: string, until?: strin
     "User-Agent": "TeamFlow-App",
   };
 
-  // Use GitHub token if available for higher rate limits
-  if (process.env.GITHUB_CLIENT_SECRET) {
-    headers.Authorization = `token ${process.env.GITHUB_CLIENT_SECRET}`;
-  }
+  // Removed invalid OAuth secret usage for Bearer token. Public repos don't need auth,
+  // and using client_secret as token causes 401 Unauthorized errors.
 
   const allCommits: any[] = [];
   let page = 1;
