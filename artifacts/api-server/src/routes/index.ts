@@ -11,6 +11,7 @@ import githubRouter from "./github";
 import githubAuthRouter from "./auth-github";
 import workspacesRouter from "./workspaces";
 import contributionsRouter from "./contributions";
+import workspaceTasksRouter from "./workspace-tasks";
 
 const router: IRouter = Router();
 
@@ -25,5 +26,6 @@ router.use("/roadmap", roadmapRouter);
 router.use("/github", githubRouter);
 router.use("/workspaces", workspacesRouter);
 router.use("/contributions", contributionsRouter);
+router.use("/workspace-tasks", workspaceTasksRouter);
 
 export default router;

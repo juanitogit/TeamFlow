@@ -161,4 +161,34 @@ router.get("/:id/members", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Remove a member (leader only)
+router.delete("/:id/members/:memberId", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+  const memberId = parseInt(req.params.memberId);
+
+  try {
+    // Check requester is leader
+    const [myMembership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!myMembership || myMembership.role !== "leader") {
+      res.status(403).json({ error: "Solo el líder puede eliminar miembros" });
+      return;
+    }
+
+    if (memberId === userId) {
+      res.status(400).json({ error: "No puedes eliminarte a ti mismo" });
+      return;
+    }
+
+    await db.delete(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, memberId)));
+
+    res.json({ success: true, message: "Miembro eliminado" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar miembro" });
+  }
+});
+
 export default router;

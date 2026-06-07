@@ -9,3 +9,4 @@ export * from "./sessions";
 export * from "./workspaces";
 export * from "./workspace_members";
 export * from "./contributions";
+export * from "./workspace_tasks";
