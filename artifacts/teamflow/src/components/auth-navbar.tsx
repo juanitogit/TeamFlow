@@ -18,13 +18,13 @@ export function AuthNavbar() {
         borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
       }}
     >
-      <div className="max-w-[1024px] mx-auto flex items-center justify-between h-16 px-5">
+      <div className="max-w-[1024px] mx-auto flex items-center justify-between h-[72px] px-5">
         {/* Logo */}
         <Link href="/login" className="flex items-center gap-2.5 no-underline">
           <img
             src="/teamflow-logo.png"
             alt="TeamFlow"
-            className="h-8 w-auto object-contain mix-blend-multiply"
+            className="h-12 w-auto object-contain drop-shadow-sm"
           />
         </Link>
 
