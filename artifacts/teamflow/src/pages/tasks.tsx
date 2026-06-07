@@ -176,17 +176,19 @@ export function Tasks() {
                       </div>
                       
                       <div className="flex items-center justify-between md:flex-col md:items-end gap-2 pl-12 md:pl-0 shrink-0">
-                        <div className="flex items-center gap-1.5 text-sm">
+                        <div className="flex items-center text-sm">
                           {task.dueDate ? (
-                            <>
-                              <Clock className={`h-4 w-4 ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`} />
-                              <span className={`font-medium ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`}>
-                                {daysLeft && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
+                            <Badge variant="outline" className={`flex items-center gap-1.5 px-2.5 py-1 font-medium ${daysLeft !== null && daysLeft < 0 ? 'border-red-200 bg-red-50 text-red-600' : daysLeft === 0 ? 'border-amber-200 bg-amber-50 text-amber-600' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
+                              <Clock className="h-3.5 w-3.5" />
+                              <span>
+                                {daysLeft !== null && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
                               </span>
-                              <span className="text-slate/70 ml-1">({format(new Date(task.dueDate), "d 'de' MMM", { locale: es })})</span>
-                            </>
+                              <span className="opacity-70 ml-0.5 border-l pl-1.5 border-current">
+                                {format(new Date(task.dueDate), "d MMM", { locale: es })}
+                              </span>
+                            </Badge>
                           ) : (
-                            <span className="text-slate text-xs">Sin fecha</span>
+                            <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-normal px-2.5 py-1">Sin fecha límite</Badge>
                           )}
                         </div>
                       </div>

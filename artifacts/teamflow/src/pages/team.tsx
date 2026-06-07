@@ -228,19 +228,19 @@ export function Team() {
             <Card key={member.id} className="card-monday border-none">
               <CardHeader className="pb-2 border-b border-mist">
                 <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="h-11 w-11 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="h-11 w-11 shrink-0 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
                       {member.avatarUrl ? <img src={member.avatarUrl} alt={member.name} className="h-full w-full object-cover" /> : member.name.charAt(0).toUpperCase()}
                     </div>
-                    <div>
-                      <CardTitle className="text-base font-medium text-ink">{member.name}</CardTitle>
+                    <div className="min-w-0">
+                      <CardTitle className="text-base font-medium text-ink truncate" title={member.name}>{member.name}</CardTitle>
                       <span className="text-xs text-slate">{member.id === user?.id ? "(Tú)" : ""}</span>
                     </div>
                   </div>
                   {isMainLeader && member.id !== user?.id ? (
                     <Select defaultValue={member.role} onValueChange={(val) => roleMutation.mutate({ memberId: member.id, role: val })}>
                       <SelectTrigger className={`h-6 text-[10px] uppercase font-bold tracking-wider ${
-                        member.role === 'leader' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                        member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                         member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                         'bg-slate-50 text-slate-700 border-slate-200'
                       }`}>
@@ -254,7 +254,7 @@ export function Team() {
                     </Select>
                   ) : (
                     <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider ${
-                      member.role === 'leader' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                      member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                       member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                       'bg-slate-50 text-slate-700 border-slate-200'
                     }`}>
@@ -333,9 +333,9 @@ export function Team() {
                 <Select value={taskType} onValueChange={setTaskType}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="programacion">💻 Programación</SelectItem>
-                    <SelectItem value="documentacion">📄 Documentación</SelectItem>
-                    <SelectItem value="investigacion">🔍 Investigación</SelectItem>
+                    <SelectItem value="programacion">Programación</SelectItem>
+                    <SelectItem value="documentacion">Documentación</SelectItem>
+                    <SelectItem value="investigacion">Investigación</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

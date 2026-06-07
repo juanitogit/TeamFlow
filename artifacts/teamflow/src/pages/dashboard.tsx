@@ -119,6 +119,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-green-500">{dashboard.healthPoints}</div>
+            <p className="text-xs text-slate mt-1 leading-tight">Mide la constancia y calidad de tus aportes recientes.</p>
             <Progress value={dashboard.healthPoints} className="h-2 mt-3 bg-green-100 [&>div]:bg-green-500" />
           </CardContent>
         </Card>
@@ -130,6 +131,7 @@ export function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-primary">{Math.round(dashboard.performanceScore)}%</div>
+            <p className="text-xs text-slate mt-1 leading-tight">Evaluación global de tu desempeño y tareas completadas.</p>
             <Progress value={dashboard.performanceScore} className="h-2 mt-3" />
           </CardContent>
         </Card>

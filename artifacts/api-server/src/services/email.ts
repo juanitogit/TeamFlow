@@ -282,7 +282,7 @@ export async function sendEmail(to: string, subject: string, body: string, html?
   let processedHtml = html;
 
   try {
-    const logoPath = path.resolve(__dirname, "../../teamflow/public/logo.png");
+    const logoPath = path.resolve(__dirname, "../../teamflow/public/teamflow-logo.png");
     if (fs.existsSync(logoPath)) {
       attachments.push({
         filename: "logo.png",
