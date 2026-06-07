@@ -3,7 +3,7 @@ import { pgTable, text, serial, timestamp, integer, pgEnum, jsonb } from "drizzl
 import { usersTable } from "./users";
 import { workspacesTable } from "./workspaces";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const contributionStatusEnum = pgEnum("contribution_status", ["pending", "approved", "rejected"]);
 

@@ -3,7 +3,7 @@ import { Router, Request, Response } from "express";
 import { db, workspacesTable, workspaceMembersTable, usersTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 const router = Router();
 router.use(requireAuth);

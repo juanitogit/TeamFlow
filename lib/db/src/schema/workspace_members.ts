@@ -3,7 +3,7 @@ import { pgTable, serial, timestamp, integer, pgEnum } from "drizzle-orm/pg-core
 import { usersTable } from "./users";
 import { workspacesTable } from "./workspaces";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 export const workspaceRoleEnum = pgEnum("workspace_role", ["leader", "co-leader", "member"]);
 
