@@ -44,24 +44,34 @@ export function Team() {
   const isLeaderOrCoLeader = myRole === "leader" || myRole === "co-leader";
   const isMainLeader = myRole === "leader";
 
-  // Repos logic
+  // Repos & config logic
   const [editingRepos, setEditingRepos] = useState(false);
   const [repos, setRepos] = useState<string[]>([]);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
 
   useEffect(() => {
-    if (activeWorkspace?.workspace?.githubRepos) {
-      try { setRepos(JSON.parse(activeWorkspace.workspace.githubRepos)); } catch(e) { setRepos([]); }
-    } else {
-      setRepos([]);
+    if (activeWorkspace?.workspace) {
+      setEditName(activeWorkspace.workspace.name || "");
+      setEditDesc(activeWorkspace.workspace.description || "");
+      if (activeWorkspace.workspace.githubRepos) {
+        try { setRepos(JSON.parse(activeWorkspace.workspace.githubRepos)); } catch(e) { setRepos([]); }
+      } else {
+        setRepos([]);
+      }
     }
   }, [activeWorkspace]);
 
   const workspaceMutation = useMutation({
-    mutationFn: async (githubRepos: string[]) => {
+    mutationFn: async ({ repos, name, description }: { repos: string[], name: string, description: string }) => {
       const res = await fetch(`/api/workspaces/${workspaceId}`, {
         method: "PATCH",
         headers: getAuthHeader(),
-        body: JSON.stringify({ githubRepos: githubRepos.filter(r => r.trim() !== "") })
+        body: JSON.stringify({ 
+          githubRepos: repos.filter(r => r.trim() !== ""),
+          name,
+          description
+        })
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
       return res.json();
@@ -290,13 +300,25 @@ export function Team() {
                 <CardDescription>Gestiona los repositorios de GitHub vinculados a este espacio.</CardDescription>
               </div>
               <Button variant="outline" onClick={() => setEditingRepos(!editingRepos)}>
-                {editingRepos ? "Cancelar" : "Editar Repositorios"}
+                {editingRepos ? "Cancelar" : "Editar Configuración"}
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             {editingRepos ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nombre del Workspace</label>
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Descripción</label>
+                  <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
+                </div>
+                
+                <div className="space-y-2 pt-4 border-t">
+                  <label className="text-sm font-medium">Repositorios de GitHub</label>
+                  <div className="space-y-3">
                 {repos.map((repo, i) => (
                   <div key={i} className="flex gap-2">
                     <Input 
@@ -318,15 +340,28 @@ export function Team() {
                     <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
                   </Button>
                 </div>
-                <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate(repos)}>
+                <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc })}>
                   {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {repos.length === 0 ? (
-                  <p className="text-sm text-slate">No hay repositorios vinculados.</p>
-                ) : (
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-slate mb-1">Nombre</h4>
+                    <p className="text-ink font-semibold">{activeWorkspace.workspace.name}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-slate mb-1">Descripción</h4>
+                    <p className="text-ink text-sm">{activeWorkspace.workspace.description || "Sin descripción"}</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 pt-4 border-t border-mist">
+                  <h4 className="text-sm font-medium text-slate">Repositorios</h4>
+                  {repos.length === 0 ? (
+                    <p className="text-sm text-slate italic">No hay repositorios vinculados.</p>
+                  ) : (
                   repos.map((repo, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
                       <Github className="h-5 w-5 text-slate" />

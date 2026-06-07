@@ -249,11 +249,11 @@ router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Resp
   }
 });
 
-// Update workspace settings (e.g. repos) (leader only)
+// Update workspace settings (e.g. repos, name, description) (leader only)
 router.patch("/:id", async (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const workspaceId = parseInt(req.params.id);
-  const { githubRepos } = req.body;
+  const { githubRepos, name, description } = req.body;
 
   try {
     const [myMembership] = await db.select().from(workspaceMembersTable)
@@ -264,8 +264,13 @@ router.patch("/:id", async (req: AuthedRequest, res: Response) => {
       return;
     }
 
+    const updates: any = {};
+    if (githubRepos !== undefined) updates.githubRepos = JSON.stringify(githubRepos || []);
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+
     const [updated] = await db.update(workspacesTable)
-      .set({ githubRepos: JSON.stringify(githubRepos || []) })
+      .set(updates)
       .where(eq(workspacesTable.id, workspaceId))
       .returning();
 

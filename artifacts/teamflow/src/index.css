@@ -68,43 +68,43 @@
 }
 
 :root {
-  --background: 220 16% 96%; /* #f5f6f8 Cloud */
-  --foreground: 0 0% 20%; /* #333333 Ink */
-  --card: 0 0% 100%; /* #ffffff Snow */
-  --card-foreground: 0 0% 20%; /* Ink */
-  --card-border: 228 26% 85%; /* #d0d4e4 Mist */
+  --background: 220 16% 96%; /* Cloud */
+  --foreground: 216 63% 18%; /* Deep blue for text instead of ink */
+  --card: 0 0% 100%;
+  --card-foreground: 216 63% 18%;
+  --card-border: 228 26% 85%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 20%;
+  --popover-foreground: 216 63% 18%;
   --popover-border: 228 26% 85%;
   
-  --primary: 240 100% 69%; /* #6161ff Monday Violet */
-  --primary-foreground: 0 0% 100%; /* Snow */
+  --primary: 215 63% 50%; /* #2f72ce Mid Blue */
+  --primary-foreground: 0 0% 100%;
   
-  --secondary: 228 11% 37%; /* Slate */
+  --secondary: 195 73% 59%; /* #46bce5 Cyan */
   --secondary-foreground: 0 0% 100%;
   
-  --muted: 220 16% 96%; /* Cloud */
-  --muted-foreground: 228 11% 37%; /* Slate */
+  --muted: 220 16% 96%;
+  --muted-foreground: 228 11% 37%;
   
-  --accent: 228 100% 95%; /* Periwinkle */
-  --accent-foreground: 240 100% 69%; /* Monday Violet */
+  --accent: 216 63% 18%; /* #11284a Deep Blue */
+  --accent-foreground: 0 0% 100%;
   
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   
-  --border: 230 25% 89%; /* Pebble */
-  --input: 230 25% 89%; /* Pebble */
-  --ring: 240 100% 69%; /* Monday Violet */
+  --border: 230 25% 89%;
+  --input: 230 25% 89%;
+  --ring: 215 63% 50%;
   
-  --sidebar: 0 0% 100%; /* Snow */
-  --sidebar-foreground: 0 0% 20%; /* Ink */
-  --sidebar-border: 230 25% 89%; /* Pebble */
-  --sidebar-primary: 240 100% 69%; /* Monday Violet */
-  --sidebar-primary-foreground: 0 0% 100%; /* Snow */
-  --sidebar-accent: 228 100% 95%; /* Periwinkle */
-  --sidebar-accent-foreground: 240 100% 69%; /* Monday Violet */
-  --sidebar-ring: 240 100% 69%; /* Monday Violet */
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 216 63% 18%;
+  --sidebar-border: 230 25% 89%;
+  --sidebar-primary: 215 63% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 216 63% 18%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 215 63% 50%;
 
   --chart-1: 240 100% 69%;
   --chart-2: 96 98% 78%;
@@ -136,35 +136,35 @@
 }
 
 .dark {
-  --background: 220 16% 10%;
-  --foreground: 0 0% 90%;
-  --card: 220 16% 12%;
-  --card-foreground: 0 0% 90%;
-  --card-border: 220 16% 20%;
-  --popover: 220 16% 12%;
-  --popover-foreground: 0 0% 90%;
-  --popover-border: 220 16% 20%;
-  --primary: 240 100% 75%;
+  --background: 0 0% 0%; /* Black background */
+  --foreground: 0 0% 95%; /* Almost white */
+  --card: 216 63% 8%; /* Very deep blue for cards */
+  --card-foreground: 0 0% 95%;
+  --card-border: 216 63% 18%; /* Deep blue border */
+  --popover: 216 63% 8%;
+  --popover-foreground: 0 0% 95%;
+  --popover-border: 216 63% 18%;
+  --primary: 215 63% 50%; /* Mid blue */
   --primary-foreground: 0 0% 100%;
-  --secondary: 220 16% 20%;
-  --secondary-foreground: 0 0% 90%;
-  --muted: 220 16% 15%;
-  --muted-foreground: 220 16% 60%;
-  --accent: 220 16% 20%;
-  --accent-foreground: 0 0% 90%;
+  --secondary: 195 73% 59%; /* Cyan */
+  --secondary-foreground: 0 0% 10%;
+  --muted: 216 63% 15%;
+  --muted-foreground: 216 20% 70%;
+  --accent: 216 63% 18%; /* Deep blue */
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 220 16% 20%;
-  --input: 220 16% 20%;
-  --ring: 240 100% 75%;
-  --sidebar: 220 16% 12%;
-  --sidebar-foreground: 0 0% 90%;
-  --sidebar-border: 220 16% 20%;
-  --sidebar-primary: 240 100% 75%;
+  --border: 216 63% 18%;
+  --input: 216 63% 18%;
+  --ring: 215 63% 50%;
+  --sidebar: 0 0% 0%;
+  --sidebar-foreground: 0 0% 95%;
+  --sidebar-border: 216 63% 18%;
+  --sidebar-primary: 215 63% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 220 16% 20%;
-  --sidebar-accent-foreground: 0 0% 90%;
-  --sidebar-ring: 240 100% 75%;
+  --sidebar-accent: 216 63% 18%;
+  --sidebar-accent-foreground: 0 0% 100%;
+  --sidebar-ring: 215 63% 50%;
 }
 
 @layer base {

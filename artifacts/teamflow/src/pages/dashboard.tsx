@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useGetPerformanceDashboard, getGetPerformanceDashboardQueryKey } from "@workspace/api-client-react";
-import { useContributions } from "@/hooks/use-workspaces";
+import { useContributions, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -35,6 +35,9 @@ export function Dashboard() {
       }
     }
   }, [authLoading, isAuthenticated, setLocation]);
+
+  const { data: workspaces } = useWorkspaces();
+  const activeWorkspace = workspaces?.find((w: any) => w.workspaceId === workspaceId);
 
   const { data: dashboard, isLoading: dashboardLoading } = useGetPerformanceDashboard({
     query: {
@@ -78,15 +81,19 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8 pb-8">
-      <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
-          <p className="text-slate mt-1">
-            Revisa tus métricas reales y el progreso de tu equipo. 
-            <span className="ml-2 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold uppercase">
-              {workspaceRole}
+          <div className="flex items-center gap-3 mt-2">
+            {activeWorkspace && (
+              <span className="text-lg font-semibold text-slate dark:text-slate-300">
+                🏢 {activeWorkspace.workspace.name}
+              </span>
+            )}
+            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-md text-xs font-bold uppercase tracking-wider border border-primary/20">
+              Rol: {workspaceRole}
             </span>
-          </p>
+          </div>
         </div>
         <div className="flex gap-3">
           <Button onClick={() => setLocation("/contributions/new")} className="shadow-lg">

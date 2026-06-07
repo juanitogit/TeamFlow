@@ -2,12 +2,34 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, CheckCircle2, Home, ListTodo, Users, Map, LayoutDashboard } from "lucide-react";
+import { Loader2, Home, ListTodo, Users, Moon, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const [location] = useLocation();
   const { data: workspaces } = useWorkspaces();
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isDarkMode = localStorage.getItem("theme") === "dark" || (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDark(isDarkMode);
+      if (isDarkMode) document.documentElement.classList.add("dark");
+    }
+  }, []);
+
+  const toggleDark = () => {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -48,15 +70,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="container max-w-[1200px] mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-4 md:gap-8">
             <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-2 font-bold text-xl text-primary tracking-tight">
-                <CheckCircle2 className="h-6 w-6" />
-                <span className="hidden sm:inline-block">TeamFlow</span>
+              <Link href="/" className="flex items-center gap-2">
+                <img src="/logo.png" alt="Logo" className="h-8 object-contain dark:invert" />
               </Link>
-              {activeWorkspace && (
-                <div className="hidden lg:flex items-center bg-primary/10 text-primary px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider">
-                  {activeWorkspace.workspace.name}
-                </div>
-              )}
             </div>
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
@@ -85,10 +101,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 localStorage.removeItem("active_workspace_role");
                 window.location.href = "/workspaces";
               }}>
-                Cambiar
+                Cambiar Workspace
               </Button>
             )}
-            <div className="h-6 w-px bg-slate-200 hidden sm:block mx-1"></div>
+            <Button variant="ghost" size="icon" onClick={toggleDark} className="text-slate">
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </Button>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block mx-1"></div>
             <div className="flex items-center gap-2 cursor-default" title={user.name}>
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
