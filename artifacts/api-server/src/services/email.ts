@@ -246,6 +246,26 @@ export function memberRemovedEmail(userName: string, workspaceName: string): { s
   return { subject: `Fuiste removido del workspace "${workspaceName}"`, html: emailLayout(content) };
 }
 
+export function githubInviteEmail(userName: string, workspaceName: string, inviteUrl: string): { subject: string; html: string } {
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">¡Te han invitado a un Workspace!</h1>
+    <p style="margin:0 0 24px;font-size:16px;color:#535768;line-height:1.6;">
+      Hola <strong style="color:#333333;">${userName}</strong>, has sido invitado al workspace <strong>"${workspaceName}"</strong> en TeamFlow a través de tu cuenta de GitHub.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="text-align:center;padding:24px;background-color:#e7f1ff;border-radius:16px;">
+          <p style="margin:0;font-size:16px;color:#333333;line-height:1.6;">Esta invitación expirará en <strong>1 día</strong>.</p>
+        </td>
+      </tr>
+    </table>
+
+    ${button("Aceptar Invitación", inviteUrl)}
+  `;
+  return { subject: `Invitación al workspace "${workspaceName}"`, html: emailLayout(content) };
+}
+
 // ─── Main Send Function ─────────────────────────────────────
 export async function sendEmail(to: string, subject: string, body: string, html?: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {

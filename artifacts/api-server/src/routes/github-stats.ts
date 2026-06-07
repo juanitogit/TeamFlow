@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Router, Request, Response } from "express";
 import { db, workspacesTable, workspaceMembersTable, usersTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNotNull } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 
 const router = Router();
@@ -127,16 +127,15 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
       })));
     }
 
-    // Get workspace members with their github usernames
-    const members = await db.select({
+    // Get ALL registered users who have a github username to match against
+    const registeredUsers = await db.select({
       id: usersTable.id,
       name: usersTable.name,
       githubUsername: usersTable.githubUsername,
       avatarUrl: usersTable.avatarUrl,
     })
-    .from(workspaceMembersTable)
-    .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
-    .where(eq(workspaceMembersTable.workspaceId, workspaceId));
+    .from(usersTable)
+    .where(isNotNull(usersTable.githubUsername));
 
     // Group commits by author
     const commitsByAuthor: Record<string, { 
@@ -151,16 +150,16 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
     for (const commit of allCommits) {
       const login = commit.authorLogin.toLowerCase();
       if (!commitsByAuthor[login]) {
-        // Try to match to a workspace member
-        const matchedMember = members.find(m => 
-          m.githubUsername?.toLowerCase() === login
+        // Match against any registered user in the platform
+        const matchedUser = registeredUsers.find(u => 
+          u.githubUsername?.toLowerCase() === login
         );
 
         commitsByAuthor[login] = {
-          name: matchedMember?.name || commit.authorName,
+          name: matchedUser?.name || commit.authorName,
           login: commit.authorLogin,
-          avatar: commit.authorAvatar || matchedMember?.avatarUrl || null,
-          memberId: matchedMember?.id || null,
+          avatar: commit.authorAvatar || matchedUser?.avatarUrl || null,
+          memberId: matchedUser?.id || null,
           commits: 0,
           repos: {},
         };
@@ -170,8 +169,9 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
       commitsByAuthor[login].repos[repoName] = (commitsByAuthor[login].repos[repoName] || 0) + 1;
     }
 
-    // Convert to sorted array
+    // Convert to sorted array, KEEPING ONLY those who are registered in the platform (memberId !== null)
     const authors = Object.values(commitsByAuthor)
+      .filter(a => a.memberId !== null)
       .sort((a, b) => b.commits - a.commits);
 
     res.json({

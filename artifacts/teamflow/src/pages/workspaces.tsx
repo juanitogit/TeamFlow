@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { Plus, Users, FolderKanban, LogOut, Copy } from "lucide-react";
@@ -10,6 +10,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useWorkspaces, useCreateWorkspace, useJoinWorkspace } from "@/hooks/use-workspaces";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+function getAuthHeader() {
+  return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
+}
 
 export function Workspaces() {
   const [_, setLocation] = useLocation();
@@ -27,11 +32,50 @@ export function Workspaces() {
   const [githubRepos, setGithubRepos] = useState<string[]>([""]);
   const [joinCode, setJoinCode] = useState("");
 
+  const queryClient = useQueryClient();
+
   const handleSelectWorkspace = (workspaceId: number, workspaceRole: string) => {
     localStorage.setItem("active_workspace_id", workspaceId.toString());
     localStorage.setItem("active_workspace_role", workspaceRole);
     setLocation("/dashboard");
   };
+
+  const acceptGithubInviteMutation = useMutation({
+    mutationFn: async (token: string) => {
+      const res = await fetch("/api/workspaces/accept-github-invite", {
+        method: "POST",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        const e = await res.json();
+        throw new Error(e.error);
+      }
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: "¡Te uniste al workspace con éxito!" });
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      if (data.workspace) {
+        handleSelectWorkspace(data.workspace.id, "member");
+      }
+      // Remove query param from URL
+      window.history.replaceState({}, document.title, "/workspaces");
+    },
+    onError: (err: any) => {
+      toast({ variant: "destructive", title: "Error al aceptar invitación", description: err.message });
+      // Remove query param from URL
+      window.history.replaceState({}, document.title, "/workspaces");
+    }
+  });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const token = searchParams.get("accept_github_invite");
+    if (token) {
+      acceptGithubInviteMutation.mutate(token);
+    }
+  }, []);
 
   const handleCreate = async () => {
     if (!name) return;

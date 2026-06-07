@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
-import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail } from "../services/email";
+import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail, githubInviteEmail } from "../services/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -130,6 +130,131 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
     res.json({ success: true, message: "Joined workspace", workspace });
   } catch (error) {
     res.status(500).json({ error: "Failed to join workspace" });
+  }
+});
+
+// Invite user via GitHub username
+router.post("/:id/invite-github", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+  const { githubUsername } = req.body;
+
+  if (!githubUsername) {
+    res.status(400).json({ error: "El usuario de GitHub es requerido" });
+    return;
+  }
+
+  try {
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden enviar invitaciones directas" });
+      return;
+    }
+
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
+    if (!workspace) {
+      res.status(404).json({ error: "Workspace no encontrado" });
+      return;
+    }
+
+    // Find user by github username
+    const [targetUser] = await db.select().from(usersTable)
+      .where(eq(usersTable.githubUsername, githubUsername.toLowerCase()));
+
+    if (!targetUser) {
+      res.status(404).json({ error: "El usuario de GitHub no está registrado en TeamFlow" });
+      return;
+    }
+
+    // Generate signed token
+    const exp = Date.now() + 24 * 60 * 60 * 1000; // 1 day
+    const payload = { workspaceId, targetUserId: targetUser.id, exp };
+    const data = Buffer.from(JSON.stringify(payload)).toString("base64");
+    const signature = crypto.createHmac("sha256", process.env.SESSION_SECRET || "default_secret").update(data).digest("hex");
+    const token = `${data}.${signature}`;
+
+    const appUrl = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:5173");
+    const inviteUrl = `${appUrl}/workspaces?accept_github_invite=${token}`;
+
+    if (targetUser.email) {
+      const emailData = githubInviteEmail(targetUser.name, workspace.name, inviteUrl);
+      await sendEmail(targetUser.email, emailData.subject, "Invitación", emailData.html);
+      res.json({ success: true, message: "Invitación enviada por correo" });
+    } else {
+      res.status(400).json({ error: "El usuario no tiene un email configurado" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "Error al enviar invitación" });
+  }
+});
+
+// Accept GitHub invite token
+router.post("/accept-github-invite", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const { token } = req.body;
+
+  if (!token) {
+    res.status(400).json({ error: "Token inválido" });
+    return;
+  }
+
+  try {
+    const [dataStr, signature] = token.split(".");
+    if (!dataStr || !signature) {
+      res.status(400).json({ error: "Token malformado" });
+      return;
+    }
+
+    const expectedSignature = crypto.createHmac("sha256", process.env.SESSION_SECRET || "default_secret").update(dataStr).digest("hex");
+    if (signature !== expectedSignature) {
+      res.status(400).json({ error: "Firma de token inválida" });
+      return;
+    }
+
+    const payload = JSON.parse(Buffer.from(dataStr, "base64").toString("utf-8"));
+    if (Date.now() > payload.exp) {
+      res.status(410).json({ error: "La invitación ha expirado" });
+      return;
+    }
+
+    if (payload.targetUserId !== userId) {
+      res.status(403).json({ error: "Esta invitación no es para ti" });
+      return;
+    }
+
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, payload.workspaceId));
+    if (!workspace) {
+      res.status(404).json({ error: "Workspace no encontrado" });
+      return;
+    }
+
+    const [existing] = await db.select()
+      .from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspace.id), eq(workspaceMembersTable.userId, userId)));
+
+    if (existing) {
+      res.json({ success: true, message: "Ya eras miembro", workspace });
+      return;
+    }
+
+    await db.insert(workspaceMembersTable).values({
+      workspaceId: workspace.id,
+      userId,
+      role: "member",
+    });
+
+    const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (userRecord && userRecord.email) {
+      const emailData = joinedWorkspaceEmail(userRecord.name, workspace.name);
+      await sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html);
+    }
+
+    res.json({ success: true, message: "Joined workspace", workspace });
+  } catch (error) {
+    console.error("Error accepting invite:", error);
+    res.status(500).json({ error: "Error al aceptar la invitación" });
   }
 });
 

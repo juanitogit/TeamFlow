@@ -3,14 +3,15 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy, Trash2, ClipboardList, Settings, Plus, Github, RefreshCw, Timer } from "lucide-react";
+import { Copy, RefreshCw, Timer, UserPlus, Users, Github, Target, Activity, Trash2, ClipboardList } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -31,6 +32,8 @@ export function Team() {
   const [taskDesc, setTaskDesc] = useState("");
   const [taskType, setTaskType] = useState("programacion");
   const [taskDueDate, setTaskDueDate] = useState("");
+  const [githubInviteUsername, setGithubInviteUsername] = useState("");
+  const [githubInviteOpen, setGithubInviteOpen] = useState(false);
 
   useEffect(() => {
     const id = localStorage.getItem("active_workspace_id");
@@ -78,20 +81,7 @@ export function Team() {
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, [inviteData?.expiresAt]);
-
-  const handleRegenerate = async () => {
-    if (!workspaceId) return;
-    setRegenerating(true);
-    try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { method: "POST", headers: getAuthHeader() });
-      if (res.ok) {
-        const data = await res.json();
-        setInviteData(data);
-        toast({ title: "Nuevo código generado" });
-      }
-    } catch {}
-    setRegenerating(false);
-  };
+  }, [inviteData?.expiresAt]);
 
   // Repos & config logic
   const [editingRepos, setEditingRepos] = useState(false);
@@ -150,6 +140,20 @@ export function Team() {
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
+  const handleRegenerate = async () => {
+    if (!workspaceId) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { method: "POST", headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json();
+        setInviteData(data);
+        toast({ title: "Nuevo código generado" });
+      }
+    } catch {}
+    setRegenerating(false);
+  };
+
   const removeMutation = useMutation({
     mutationFn: async (memberId: number) => {
       const res = await fetch(`/api/workspaces/${workspaceId}/members/${memberId}`, { method: "DELETE", headers: getAuthHeader() });
@@ -158,6 +162,24 @@ export function Team() {
     },
     onSuccess: () => { toast({ title: "Miembro eliminado" }); queryClient.invalidateQueries({ queryKey: ["workspace_members"] }); },
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
+
+  const githubInviteMutation = useMutation({
+    mutationFn: async (githubUsername: string) => {
+      const res = await fetch(`/api/workspaces/${workspaceId}/invite-github`, { 
+        method: "POST", 
+        headers: getAuthHeader(),
+        body: JSON.stringify({ githubUsername })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: () => { 
+      toast({ title: "¡Invitación enviada!", description: "Se ha enviado un correo al usuario." }); 
+      setGithubInviteOpen(false);
+      setGithubInviteUsername("");
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error al invitar", description: e.message }),
   });
 
   const assignMutation = useMutation({
@@ -219,6 +241,44 @@ export function Team() {
           </div>
         )}
       </div>
+
+      {isLeaderOrCoLeader && (
+        <div className="flex justify-end">
+          <Dialog open={githubInviteOpen} onOpenChange={setGithubInviteOpen}>
+            <DialogTrigger asChild>
+              <Button variant="default" className="gap-2">
+                <Github className="h-4 w-4" />
+                Invitar por GitHub
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invitar miembro por GitHub</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label>Usuario de GitHub</Label>
+                  <Input 
+                    placeholder="ej: octocat" 
+                    value={githubInviteUsername}
+                    onChange={(e) => setGithubInviteUsername(e.target.value)}
+                  />
+                  <p className="text-xs text-slate-500">
+                    El usuario debe estar previamente registrado en TeamFlow con su cuenta de GitHub. Se enviará una invitación a su correo con validez de 1 día.
+                  </p>
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => githubInviteMutation.mutate(githubInviteUsername)}
+                  disabled={!githubInviteUsername || githubInviteMutation.isPending}
+                >
+                  {githubInviteMutation.isPending ? "Enviando..." : "Enviar Invitación"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      )}
 
       {!workspaceId ? (
         <div className="text-center py-12 text-slate bg-card rounded-xl shadow-sm border">Selecciona un workspace para ver a tu equipo.</div>
