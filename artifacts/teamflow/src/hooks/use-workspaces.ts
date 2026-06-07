@@ -58,3 +58,18 @@ export function useJoinWorkspace() {
     },
   });
 }
+
+export function useContributions(workspaceId: number | null) {
+  return useQuery({
+    queryKey: ["contributions", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      const res = await fetch(`/api/contributions/workspace/${workspaceId}`, {
+        headers: getAuthHeader(),
+      });
+      if (!res.ok) throw new Error("Failed to fetch contributions");
+      return res.json();
+    },
+    enabled: !!workspaceId,
+  });
+}

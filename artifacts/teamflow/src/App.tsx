@@ -15,6 +15,8 @@ import { Tasks } from "@/pages/tasks";
 import { Team } from "@/pages/team";
 import { Roadmap } from "@/pages/roadmap";
 import { Workspaces } from "@/pages/workspaces";
+import { NewContribution } from "@/pages/new-contribution";
+import { ReviewContributions } from "@/pages/review-contributions";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +33,8 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/workspaces" component={Workspaces} />
+      <Route path="/contributions/new" component={NewContribution} />
+      <Route path="/contributions/review" component={ReviewContributions} />
       <Route path="/" component={Dashboard} />
       <Route path="/projects" component={Projects} />
       <Route path="/projects/:id" component={ProjectDetail} />

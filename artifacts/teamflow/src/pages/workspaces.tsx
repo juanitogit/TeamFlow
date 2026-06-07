@@ -27,7 +27,6 @@ export function Workspaces() {
   const [githubRepoUrl, setGithubRepoUrl] = useState("");
   const [joinId, setJoinId] = useState("");
 
-  // Select active workspace in localStorage
   const handleSelectWorkspace = (workspaceId: number, workspaceRole: string) => {
     localStorage.setItem("active_workspace_id", workspaceId.toString());
     localStorage.setItem("active_workspace_role", workspaceRole);
@@ -57,7 +56,7 @@ export function Workspaces() {
     joinWorkspace.mutate(id, {
       onSuccess: () => {
         setIsJoinOpen(false);
-        toast({ title: "Joined workspace successfully!" });
+        toast({ title: "¡Te uniste al workspace con éxito!" });
       },
       onError: (err) => {
         toast({ variant: "destructive", title: "Error", description: err.message });
@@ -66,7 +65,7 @@ export function Workspaces() {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading workspaces...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Cargando espacios de trabajo...</div>;
   }
 
   return (
@@ -77,12 +76,12 @@ export function Workspaces() {
             {user?.name?.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h2 className="font-semibold text-ink leading-tight">Welcome, {user?.name}</h2>
-            <p className="text-sm text-slate">Select a workspace to continue</p>
+            <h2 className="font-semibold text-ink leading-tight">Bienvenido, {user?.name}</h2>
+            <p className="text-sm text-slate">Selecciona un Espacio de Trabajo para continuar</p>
           </div>
         </div>
         <Button variant="ghost" onClick={logout} className="text-slate hover:text-red-500">
-          <LogOut className="h-4 w-4 mr-2" /> Logout
+          <LogOut className="h-4 w-4 mr-2" /> Cerrar sesión
         </Button>
       </div>
 
@@ -90,7 +89,7 @@ export function Workspaces() {
         {workspaces?.map((membership: any) => (
           <motion.div key={membership.workspaceId} whileHover={{ y: -4 }}>
             <Card 
-              className="h-full cursor-pointer hover:shadow-lg transition-all card-monday"
+              className="h-full cursor-pointer hover:shadow-lg transition-all card-monday flex flex-col"
               onClick={() => handleSelectWorkspace(membership.workspaceId, membership.role)}
             >
               <CardHeader>
@@ -103,16 +102,17 @@ export function Workspaces() {
                     membership.role === 'co-leader' ? 'bg-blue-100 text-blue-700' :
                     'bg-slate/10 text-slate'
                   }`}>
-                    {membership.role}
+                    {membership.role === 'leader' ? 'Líder' : membership.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
                   </span>
                 </div>
                 <CardTitle className="mt-4">{membership.workspace.name}</CardTitle>
                 <CardDescription className="line-clamp-2">
-                  {membership.workspace.description || "No description provided."}
+                  {membership.workspace.description || "Sin descripción."}
                 </CardDescription>
               </CardHeader>
+              <div className="flex-1"></div>
               <CardFooter className="pt-4 border-t border-slate/10 text-xs text-slate">
-                ID: {membership.workspaceId}
+                ID del Workspace: {membership.workspaceId}
               </CardFooter>
             </Card>
           </motion.div>
@@ -125,33 +125,33 @@ export function Workspaces() {
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Plus className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-medium text-ink">Create Workspace</h3>
-                <p className="text-sm text-center text-slate mt-2">Start a new project space as a Leader</p>
+                <h3 className="font-medium text-ink">Crear Workspace</h3>
+                <p className="text-sm text-center text-slate mt-2">Empieza un nuevo proyecto como Líder</p>
               </Card>
             </motion.div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Workspace</DialogTitle>
-              <DialogDescription>Create a space for your team to track performance.</DialogDescription>
+              <DialogTitle>Crear Nuevo Workspace</DialogTitle>
+              <DialogDescription>Crea un espacio para que tu equipo registre su rendimiento.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Workspace Name</label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Frontend Team" />
+                <label className="text-sm font-medium">Nombre del Workspace</label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej. Equipo Frontend" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What is this workspace for?" />
+                <label className="text-sm font-medium">Descripción</label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="¿Para qué es este espacio?" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">GitHub Repository URL (Optional)</label>
+                <label className="text-sm font-medium">URL del Repositorio de GitHub (Opcional)</label>
                 <Input value={githubRepoUrl} onChange={(e) => setGithubRepoUrl(e.target.value)} placeholder="https://github.com/org/repo" />
               </div>
             </div>
             <DialogFooter>
               <Button disabled={createWorkspace.isPending} onClick={handleCreate}>
-                {createWorkspace.isPending ? "Creating..." : "Create Workspace"}
+                {createWorkspace.isPending ? "Creando..." : "Crear Workspace"}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -164,25 +164,25 @@ export function Workspaces() {
                 <div className="h-12 w-12 rounded-full bg-slate/10 flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-slate" />
                 </div>
-                <h3 className="font-medium text-ink">Join Workspace</h3>
-                <p className="text-sm text-center text-slate mt-2">Enter an ID to join an existing team</p>
+                <h3 className="font-medium text-ink">Unirse a un Workspace</h3>
+                <p className="text-sm text-center text-slate mt-2">Ingresa el ID para unirte a un equipo</p>
               </Card>
             </motion.div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Join Workspace</DialogTitle>
-              <DialogDescription>Enter the workspace ID provided by your leader.</DialogDescription>
+              <DialogTitle>Unirse a Workspace</DialogTitle>
+              <DialogDescription>Ingresa el ID del workspace proporcionado por tu líder.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Workspace ID</label>
-                <Input value={joinId} onChange={(e) => setJoinId(e.target.value)} placeholder="e.g. 12" />
+                <label className="text-sm font-medium">ID del Workspace</label>
+                <Input value={joinId} onChange={(e) => setJoinId(e.target.value)} placeholder="Ej. 12" />
               </div>
             </div>
             <DialogFooter>
               <Button disabled={joinWorkspace.isPending} onClick={handleJoin}>
-                {joinWorkspace.isPending ? "Joining..." : "Join Workspace"}
+                {joinWorkspace.isPending ? "Uniéndose..." : "Unirse al Workspace"}
               </Button>
             </DialogFooter>
           </DialogContent>
