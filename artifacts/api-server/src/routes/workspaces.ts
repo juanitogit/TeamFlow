@@ -249,4 +249,30 @@ router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Resp
   }
 });
 
+// Update workspace settings (e.g. repos) (leader only)
+router.patch("/:id", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+  const { githubRepos } = req.body;
+
+  try {
+    const [myMembership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!myMembership || (myMembership.role !== "leader" && myMembership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden editar el workspace" });
+      return;
+    }
+
+    const [updated] = await db.update(workspacesTable)
+      .set({ githubRepos: JSON.stringify(githubRepos || []) })
+      .where(eq(workspacesTable.id, workspaceId))
+      .returning();
+
+    res.json({ success: true, workspace: updated });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar workspace" });
+  }
+});
+
 export default router;

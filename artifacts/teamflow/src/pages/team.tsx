@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy, Trash2, ClipboardList } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy, Trash2, ClipboardList, Settings, Plus, Github } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,36 @@ export function Team() {
   const myRole = activeWorkspace?.role;
   const isLeaderOrCoLeader = myRole === "leader" || myRole === "co-leader";
   const isMainLeader = myRole === "leader";
+
+  // Repos logic
+  const [editingRepos, setEditingRepos] = useState(false);
+  const [repos, setRepos] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (activeWorkspace?.workspace?.githubRepos) {
+      try { setRepos(JSON.parse(activeWorkspace.workspace.githubRepos)); } catch(e) { setRepos([]); }
+    } else {
+      setRepos([]);
+    }
+  }, [activeWorkspace]);
+
+  const workspaceMutation = useMutation({
+    mutationFn: async (githubRepos: string[]) => {
+      const res = await fetch(`/api/workspaces/${workspaceId}`, {
+        method: "PATCH",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ githubRepos: githubRepos.filter(r => r.trim() !== "") })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Repositorios actualizados" });
+      setEditingRepos(false);
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
 
   const roleMutation = useMutation({
     mutationFn: async ({ memberId, role }: { memberId: number, role: string }) => {
@@ -249,6 +279,74 @@ export function Team() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Workspace Config (Repos) */}
+      {isMainLeader && workspaceId && activeWorkspace && (
+        <Card className="mt-12 border-mist">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-lg flex items-center gap-2"><Settings className="h-5 w-5 text-slate" /> Configuración del Workspace</CardTitle>
+                <CardDescription>Gestiona los repositorios de GitHub vinculados a este espacio.</CardDescription>
+              </div>
+              <Button variant="outline" onClick={() => setEditingRepos(!editingRepos)}>
+                {editingRepos ? "Cancelar" : "Editar Repositorios"}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {editingRepos ? (
+              <div className="space-y-4">
+                {repos.map((repo, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input 
+                      value={repo} 
+                      onChange={(e) => {
+                        const newRepos = [...repos];
+                        newRepos[i] = e.target.value;
+                        setRepos(newRepos);
+                      }} 
+                      placeholder="https://github.com/org/repo" 
+                    />
+                    <Button variant="outline" size="icon" onClick={() => setRepos(repos.filter((_, idx) => idx !== i))}>
+                      <span className="text-red-500 font-bold">X</span>
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <Button variant="outline" className="w-full text-slate" onClick={() => setRepos([...repos, ""])}>
+                    <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
+                  </Button>
+                </div>
+                <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate(repos)}>
+                  {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {repos.length === 0 ? (
+                  <p className="text-sm text-slate">No hay repositorios vinculados.</p>
+                ) : (
+                  repos.map((repo, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                      <Github className="h-5 w-5 text-slate" />
+                      <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
+                        {repo.replace("https://github.com/", "")}
+                      </a>
+                      {/* Fake stats for demonstration */}
+                      <div className="ml-auto text-xs text-slate flex gap-4">
+                        <span><strong className="text-ink">{Math.floor(Math.random() * 50) + 10}</strong> commits (Semana)</span>
+                        <span><strong className="text-emerald-500">{Math.floor(Math.random() * 5) + 1}</strong> PRs Activos</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
     </motion.div>
   );
 }

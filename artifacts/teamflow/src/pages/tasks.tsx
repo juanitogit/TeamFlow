@@ -1,148 +1,203 @@
-import { useListTasks, getListTasksQueryKey, useCompleteTask, ListTasksStatus } from "@workspace/api-client-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Clock, ListTodo } from "lucide-react";
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { CheckCircle2, Clock, ListTodo, AlertCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
+import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+
+function getAuthHeader() {
+  return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
+}
 
 export function Tasks() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState<ListTasksStatus | "all">("all");
+  const [workspaceId, setWorkspaceId] = useState<number | null>(null);
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [commitSha, setCommitSha] = useState("");
+  const [completingTask, setCompletingTask] = useState<number | null>(null);
 
-  const { data: tasks, isLoading } = useListTasks(
-    { assigneeId: user?.id, ...(statusFilter !== "all" ? { status: statusFilter } : {}) },
-    { query: { enabled: !!user, queryKey: getListTasksQueryKey({ assigneeId: user?.id, ...(statusFilter !== "all" ? { status: statusFilter } : {}) }) } }
-  );
+  useEffect(() => {
+    const id = localStorage.getItem("active_workspace_id");
+    if (id) setWorkspaceId(parseInt(id));
+  }, []);
 
-  const completeTask = useCompleteTask();
+  const { data: tasks, isLoading } = useQuery({
+    queryKey: ["workspace_tasks", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      const res = await fetch(`/api/workspace-tasks/workspace/${workspaceId}`, { headers: getAuthHeader() });
+      if (!res.ok) throw new Error("Error fetching tasks");
+      return res.json();
+    },
+    enabled: !!workspaceId
+  });
 
-  const handleCompleteTask = (taskId: number) => {
-    completeTask.mutate(
-      { taskId },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: getListTasksQueryKey() });
-        }
-      }
-    );
+  const completeMutation = useMutation({
+    mutationFn: async ({ taskId, sha }: { taskId: number, sha?: string }) => {
+      const res = await fetch(`/api/workspace-tasks/${taskId}/complete`, {
+        method: "POST",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ commitSha: sha })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "¡Tarea completada!" });
+      setCompletingTask(null);
+      setCommitSha("");
+      queryClient.invalidateQueries({ queryKey: ["workspace_tasks", workspaceId] });
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
+
+  const handleComplete = (task: any) => {
+    if (task.type === "programacion" && !commitSha) {
+      setCompletingTask(task.id);
+      return;
+    }
+    completeMutation.mutate({ taskId: task.id, sha: commitSha });
   };
 
   if (isLoading) {
-    return (
-      <div className="h-96 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return (<div className="h-96 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>);
   }
 
+  // Filter tasks assigned to ME
+  const myTasks = tasks?.filter((t: any) => t.assignedTo.id === user?.id) || [];
+  const filteredTasks = myTasks.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
+
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-heading font-light tracking-heading text-ink flex items-center gap-3">
-            <ListTodo className="h-8 w-8 text-primary" />
-            My Tasks
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
+            <ListTodo className="h-7 w-7 text-primary" />
+            Mis Tareas
           </h1>
-          <p className="text-slate mt-1">Manage your assigned work across all projects</p>
+          <p className="text-slate mt-1 text-sm">Gestiona el trabajo que te han asignado en este workspace</p>
         </div>
         
-        <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
-          <SelectTrigger className="w-[180px] bg-card border-none shadow-sm h-10">
-            <SelectValue placeholder="Filter by status" />
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px] bg-card shadow-sm">
+            <SelectValue placeholder="Filtrar por estado" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Tasks</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="overdue">Overdue</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="todos">Todas</SelectItem>
+            <SelectItem value="pendiente">Pendientes</SelectItem>
+            <SelectItem value="completada">Completadas</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <div className="space-y-4">
-        {tasks?.length === 0 ? (
-          <div className="py-16 flex flex-col items-center justify-center text-center bg-cloud rounded-3xl border border-dashed border-mist">
-            <CheckCircle2 className="h-12 w-12 text-slate/50 mb-4" />
-            <h3 className="text-lg font-medium text-ink">You're all caught up!</h3>
-            <p className="text-slate mt-1">No tasks found for the selected filter.</p>
-          </div>
-        ) : (
-          tasks?.map(task => {
-            const daysLeft = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
-            
-            return (
-              <Card key={task.id} className="card-monday border-none hover:shadow-xl-2 transition-all">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className={`rounded-full h-8 w-8 mt-0.5 ${task.status === 'completed' ? 'text-emerald-500 bg-emerald-50' : 'text-slate hover:text-primary hover:bg-primary/10 bg-cloud'}`}
-                        onClick={() => task.status !== 'completed' && handleCompleteTask(task.id)}
-                        disabled={task.status === 'completed' || completeTask.isPending}
-                      >
-                        <CheckCircle2 className="h-6 w-6" />
-                      </Button>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs text-slate font-medium">{task.projectName}</span>
-                          <Badge variant="outline" className={`
-                            ${task.type === 'programming' ? 'bg-[#e7ecff] text-[#6161ff] border-none text-[10px] px-2 py-0' : ''}
-                            ${task.type === 'documentation' ? 'bg-[#bcfe90] text-[#2a5c4e] border-none text-[10px] px-2 py-0' : ''}
-                            ${task.type === 'research' ? 'bg-[#eddff7] text-[#9450fd] border-none text-[10px] px-2 py-0' : ''}
-                          `}>
-                            {task.type}
-                          </Badge>
-                          {task.status === 'overdue' && (
-                            <Badge variant="outline" className="bg-red-50 text-red-500 border-none text-[10px] px-2 py-0">Overdue</Badge>
+      {!workspaceId ? (
+        <div className="text-center py-12 text-slate bg-white rounded-xl shadow-sm border">Selecciona un workspace arriba.</div>
+      ) : (
+        <div className="space-y-4">
+          {filteredTasks.length === 0 ? (
+            <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-xl border border-dashed border-mist shadow-sm">
+              <CheckCircle2 className="h-12 w-12 text-slate/30 mb-4" />
+              <h3 className="text-lg font-medium text-ink">¡Estás al día!</h3>
+              <p className="text-slate mt-1">No hay tareas para el filtro seleccionado.</p>
+            </div>
+          ) : (
+            filteredTasks.map((task: any) => {
+              const daysLeft = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
+              
+              return (
+                <Card key={task.id} className="card-monday border-none">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className={`rounded-full h-8 w-8 mt-0.5 shrink-0 ${task.status === 'completada' ? 'text-emerald-500 bg-emerald-50' : 'text-slate hover:text-primary hover:bg-primary/10 bg-slate-50'}`}
+                          onClick={() => task.status !== 'completada' && handleComplete(task)}
+                          disabled={task.status === 'completada' || completeMutation.isPending}
+                        >
+                          <CheckCircle2 className="h-6 w-6" />
+                        </Button>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <Badge variant="outline" className={`
+                              ${task.type === 'programacion' ? 'bg-blue-50 text-blue-600 border-none' : ''}
+                              ${task.type === 'documentacion' ? 'bg-emerald-50 text-emerald-600 border-none' : ''}
+                              ${task.type === 'investigacion' ? 'bg-purple-50 text-purple-600 border-none' : ''}
+                              text-[10px] px-2 py-0 uppercase tracking-wider
+                            `}>
+                              {task.type}
+                            </Badge>
+                            {task.status === 'completada' && (
+                              <Badge variant="outline" className="bg-emerald-50 text-emerald-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">Completada</Badge>
+                            )}
+                          </div>
+                          <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through' : 'text-ink'}`}>
+                            {task.title}
+                          </h3>
+                          {task.description && (
+                            <p className="text-sm text-slate mt-1 whitespace-pre-wrap">{task.description}</p>
+                          )}
+
+                          {completingTask === task.id && (
+                            <div className="mt-4 flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                              <Input 
+                                placeholder="Pega el Commit SHA de GitHub aquí..." 
+                                value={commitSha} 
+                                onChange={e => setCommitSha(e.target.value)}
+                                className="h-8 text-sm"
+                              />
+                              <Button size="sm" className="h-8 shrink-0" onClick={() => handleComplete(task)}>
+                                Confirmar
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-8 shrink-0 text-slate" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>
+                                Cancelar
+                              </Button>
+                            </div>
+                          )}
+
+                          {task.commitSha && (
+                            <div className="mt-3 text-xs text-slate flex items-center gap-1">
+                              <span className="font-semibold">Commit SHA:</span> 
+                              <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">{task.commitSha.substring(0, 7)}</code>
+                            </div>
                           )}
                         </div>
-                        <h3 className={`text-lg font-medium ${task.status === 'completed' ? 'text-slate line-through' : 'text-ink'}`}>
-                          {task.title}
-                        </h3>
-                        {task.description && (
-                          <p className="text-sm text-slate mt-1 line-clamp-2 max-w-2xl">{task.description}</p>
-                        )}
+                      </div>
+                      
+                      <div className="flex items-center justify-between md:flex-col md:items-end gap-2 pl-12 md:pl-0 shrink-0">
+                        <div className="flex items-center gap-1.5 text-sm">
+                          {task.dueDate ? (
+                            <>
+                              <Clock className={`h-4 w-4 ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`} />
+                              <span className={`font-medium ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`}>
+                                {daysLeft && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
+                              </span>
+                              <span className="text-slate/70 ml-1">({format(new Date(task.dueDate), "d 'de' MMM", { locale: es })})</span>
+                            </>
+                          ) : (
+                            <span className="text-slate text-xs">Sin fecha</span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center justify-between md:flex-col md:items-end gap-2 pl-12 md:pl-0">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-slate bg-cloud px-2 py-1 rounded-md font-medium">{task.workloadPct}% workload</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-sm">
-                        {task.dueDate ? (
-                          <>
-                            <Clock className={`h-4 w-4 ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`} />
-                            <span className={`font-medium ${daysLeft && daysLeft < 0 ? 'text-red-500' : 'text-slate'}`}>
-                              {daysLeft && daysLeft < 0 ? 'Overdue' : daysLeft === 0 ? 'Due today' : `Due in ${daysLeft} days`}
-                            </span>
-                            <span className="text-slate/70 ml-1">({format(new Date(task.dueDate), 'MMM d')})</span>
-                          </>
-                        ) : (
-                          <span className="text-slate">No due date</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
