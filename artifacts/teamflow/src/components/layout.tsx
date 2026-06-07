@@ -19,6 +19,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
+  if (location === "/workspaces") {
+    return <>{children}</>;
+  }
+
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/projects", label: "Projects", icon: LayoutDashboard },

@@ -32,8 +32,16 @@ export function Dashboard() {
   });
 
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation("/login");
+    if (!authLoading) {
+      if (!isAuthenticated) {
+        setLocation("/login");
+        return;
+      }
+      
+      const activeWorkspaceId = localStorage.getItem("active_workspace_id");
+      if (!activeWorkspaceId) {
+        setLocation("/workspaces");
+      }
     }
   }, [authLoading, isAuthenticated, setLocation]);
 

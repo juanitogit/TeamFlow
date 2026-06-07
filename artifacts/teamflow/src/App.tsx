@@ -14,6 +14,7 @@ import { ProjectDetail } from "@/pages/project-detail";
 import { Tasks } from "@/pages/tasks";
 import { Team } from "@/pages/team";
 import { Roadmap } from "@/pages/roadmap";
+import { Workspaces } from "@/pages/workspaces";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ function Router() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/workspaces" component={Workspaces} />
       <Route path="/" component={Dashboard} />
       <Route path="/projects" component={Projects} />
       <Route path="/projects/:id" component={ProjectDetail} />
