@@ -124,6 +124,14 @@ router.get("/github/callback", async (req: Request, res: Response) => {
         })
         .returning();
       user = newUser;
+
+      // Send welcome email
+      const { sendEmail } = require("../services/email");
+      await sendEmail(
+        user.email,
+        "¡Bienvenido a TeamFlow!",
+        `Hola ${user.name},\n\nGracias por registrarte en TeamFlow con tu cuenta de GitHub.\nYa puedes crear o unirte a un workspace y empezar a medir tu rendimiento.\n\nSaludos,\nEl equipo de TeamFlow`
+      );
     }
 
     const token = await createSession(user.id);
