@@ -55,6 +55,20 @@ export function Team() {
           </h1>
           <p className="text-slate mt-1">Métricas de salud y productividad reales de tu workspace</p>
         </div>
+        {workspaceId && (
+          <div className="flex items-center gap-4 bg-slate-50 border px-4 py-2 rounded-lg">
+            <div className="text-sm">
+              <span className="text-slate block text-xs uppercase font-bold">ID para Invitar:</span>
+              <span className="font-mono font-bold text-ink">{workspaceId}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => {
+              navigator.clipboard.writeText(workspaceId.toString());
+              alert("ID copiado al portapapeles. ¡Pásaselo a tu equipo!");
+            }}>
+              Copiar ID
+            </Button>
+          </div>
+        )}
       </div>
 
       {!workspaceId ? (

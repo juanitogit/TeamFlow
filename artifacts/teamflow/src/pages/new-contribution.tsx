@@ -127,20 +127,51 @@ export function NewContribution() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="evidenceUrl" className="flex items-center gap-2">
+                <Label htmlFor="evidenceFile" className="flex items-center gap-2">
                   <UploadCloud className="h-4 w-4 text-slate" />
-                  URL de la Evidencia (Imagen o Video)
+                  Evidencia (Captura de pantalla)
                 </Label>
-                <Input 
-                  id="evidenceUrl" 
-                  type="url"
-                  placeholder="https://imgur.com/... o enlace de Loom" 
-                  value={evidenceUrl}
-                  onChange={(e) => setEvidenceUrl(e.target.value)}
-                />
-                <p className="text-xs text-slate">
-                  Pega un enlace directo a una captura de pantalla, un video de Loom, o un GIF mostrando tu código en acción.
-                </p>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition-colors">
+                  <Input 
+                    id="evidenceFile" 
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast({ variant: "destructive", title: "Error", description: "La imagen debe pesar menos de 5MB" });
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setEvidenceUrl(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <Label htmlFor="evidenceFile" className="cursor-pointer flex flex-col items-center">
+                    <UploadCloud className="h-8 w-8 text-slate-400 mb-2" />
+                    <span className="text-sm font-medium text-primary">Haz clic para subir imagen</span>
+                    <span className="text-xs text-slate mt-1">PNG, JPG, GIF hasta 5MB</span>
+                  </Label>
+                </div>
+                {evidenceUrl && (
+                  <div className="mt-4 relative rounded-md overflow-hidden border">
+                    <img src={evidenceUrl} alt="Evidencia" className="max-h-[200px] w-full object-contain bg-slate-50" />
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      size="sm" 
+                      className="absolute top-2 right-2"
+                      onClick={() => setEvidenceUrl("")}
+                    >
+                      Quitar
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

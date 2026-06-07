@@ -128,12 +128,21 @@ export function ReviewContributions() {
                         Ver en el Repositorio
                       </a>
                     )}
-                    {contrib.evidenceUrls?.map((url: string, i: number) => (
-                      <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-emerald-600 hover:underline bg-emerald-50 p-2 rounded w-fit">
-                        <Search className="h-4 w-4 mr-2" />
-                        Ver Evidencia Adjunta
-                      </a>
-                    ))}
+                    {contrib.evidenceUrls?.map((url: string, i: number) => {
+                      if (url.startsWith("data:image")) {
+                        return (
+                          <div key={i} className="mt-2 border rounded-md overflow-hidden max-w-sm">
+                            <img src={url} alt="Evidencia adjunta" className="w-full h-auto object-contain bg-slate-50" />
+                          </div>
+                        );
+                      }
+                      return (
+                        <a key={i} href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-emerald-600 hover:underline bg-emerald-50 p-2 rounded w-fit mt-2">
+                          <Search className="h-4 w-4 mr-2" />
+                          Ver Evidencia Adjunta
+                        </a>
+                      );
+                    })}
                   </div>
                 )}
 

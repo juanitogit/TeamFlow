@@ -71,6 +71,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </nav>
           </div>
           <div className="flex items-center gap-4">
+            {activeWorkspace && (
+              <Button variant="outline" size="sm" className="hidden sm:flex text-xs" onClick={() => {
+                localStorage.removeItem("active_workspace_id");
+                localStorage.removeItem("active_workspace_role");
+                window.location.href = "/workspaces";
+              }}>
+                Cambiar Workspace
+              </Button>
+            )}
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
@@ -80,7 +89,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </span>
             </div>
             <Button variant="outline" className="btn-pill" onClick={logout}>
-              Log out
+              Cerrar sesión
             </Button>
           </div>
         </div>
