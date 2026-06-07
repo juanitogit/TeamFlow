@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, Users, FolderKanban, LogOut } from "lucide-react";
+import { Plus, Users, FolderKanban, LogOut, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,7 +25,7 @@ export function Workspaces() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [githubRepoUrl, setGithubRepoUrl] = useState("");
-  const [joinId, setJoinId] = useState("");
+  const [joinCode, setJoinCode] = useState("");
 
   const handleSelectWorkspace = (workspaceId: number, workspaceRole: string) => {
     localStorage.setItem("active_workspace_id", workspaceId.toString());
@@ -40,7 +40,11 @@ export function Workspaces() {
       {
         onSuccess: (newWorkspace) => {
           setIsCreateOpen(false);
+          setName("");
+          setDescription("");
+          setGithubRepoUrl("");
           handleSelectWorkspace(newWorkspace.id, "leader");
+          toast({ title: "¡Workspace creado!", description: `Código de invitación: ${newWorkspace.inviteCode}` });
         },
         onError: (err) => {
           toast({ variant: "destructive", title: "Error", description: err.message });
@@ -50,13 +54,16 @@ export function Workspaces() {
   };
 
   const handleJoin = async () => {
-    const id = parseInt(joinId);
-    if (isNaN(id)) return;
+    if (!joinCode.trim()) return;
     
-    joinWorkspace.mutate(id, {
-      onSuccess: () => {
+    joinWorkspace.mutate(joinCode, {
+      onSuccess: (data) => {
         setIsJoinOpen(false);
+        setJoinCode("");
         toast({ title: "¡Te uniste al workspace con éxito!" });
+        if (data.workspace) {
+          handleSelectWorkspace(data.workspace.id, "member");
+        }
       },
       onError: (err) => {
         toast({ variant: "destructive", title: "Error", description: err.message });
@@ -100,7 +107,7 @@ export function Workspaces() {
                   <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                     membership.role === 'leader' ? 'bg-amber-100 text-amber-700' :
                     membership.role === 'co-leader' ? 'bg-blue-100 text-blue-700' :
-                    'bg-slate/10 text-slate'
+                    'bg-slate-100 text-slate-600'
                   }`}>
                     {membership.role === 'leader' ? 'Líder' : membership.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
                   </span>
@@ -111,17 +118,27 @@ export function Workspaces() {
                 </CardDescription>
               </CardHeader>
               <div className="flex-1"></div>
-              <CardFooter className="pt-4 border-t border-slate/10 text-xs text-slate">
-                ID del Workspace: {membership.workspaceId}
+              <CardFooter className="pt-4 border-t border-slate-100 flex justify-between items-center">
+                <div className="text-xs text-slate">
+                  Código: <span className="font-mono font-bold text-ink tracking-wider">{membership.workspace.inviteCode}</span>
+                </div>
+                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(membership.workspace.inviteCode);
+                  toast({ title: "¡Código copiado!" });
+                }}>
+                  <Copy className="h-3 w-3" />
+                </Button>
               </CardFooter>
             </Card>
           </motion.div>
         ))}
 
+        {/* Create Workspace */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ y: -4 }} className="h-full">
-              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate/5 transition-all flex flex-col items-center justify-center p-8">
+              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate-50 transition-all flex flex-col items-center justify-center p-8">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                   <Plus className="h-6 w-6 text-primary" />
                 </div>
@@ -157,31 +174,38 @@ export function Workspaces() {
           </DialogContent>
         </Dialog>
 
+        {/* Join Workspace */}
         <Dialog open={isJoinOpen} onOpenChange={setIsJoinOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ y: -4 }} className="h-full">
-              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate/5 transition-all flex flex-col items-center justify-center p-8">
-                <div className="h-12 w-12 rounded-full bg-slate/10 flex items-center justify-center mb-4">
+              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate-50 transition-all flex flex-col items-center justify-center p-8">
+                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-slate" />
                 </div>
                 <h3 className="font-medium text-ink">Unirse a un Workspace</h3>
-                <p className="text-sm text-center text-slate mt-2">Ingresa el ID para unirte a un equipo</p>
+                <p className="text-sm text-center text-slate mt-2">Ingresa el código de invitación</p>
               </Card>
             </motion.div>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Unirse a Workspace</DialogTitle>
-              <DialogDescription>Ingresa el ID del workspace proporcionado por tu líder.</DialogDescription>
+              <DialogDescription>Ingresa el código de invitación proporcionado por tu líder.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">ID del Workspace</label>
-                <Input value={joinId} onChange={(e) => setJoinId(e.target.value)} placeholder="Ej. 12" />
+                <label className="text-sm font-medium">Código de Invitación</label>
+                <Input 
+                  value={joinCode} 
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())} 
+                  placeholder="Ej. A1B2C3D4" 
+                  className="font-mono tracking-widest text-center text-lg"
+                  maxLength={8}
+                />
               </div>
             </div>
             <DialogFooter>
-              <Button disabled={joinWorkspace.isPending} onClick={handleJoin}>
+              <Button disabled={joinWorkspace.isPending || !joinCode.trim()} onClick={handleJoin}>
                 {joinWorkspace.isPending ? "Uniéndose..." : "Unirse al Workspace"}
               </Button>
             </DialogFooter>

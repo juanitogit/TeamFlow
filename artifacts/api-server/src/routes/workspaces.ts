@@ -4,6 +4,7 @@ import { db, workspacesTable, workspaceMembersTable, usersTable } from "@workspa
 import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
+import crypto from "crypto";
 
 const router = Router();
 router.use(requireAuth);
@@ -24,12 +25,16 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
   }
 
   const { name, description, githubRepoUrl } = parse.data;
+  
+  // Generate a complex 8-character invite code
+  const inviteCode = crypto.randomBytes(4).toString("hex").toUpperCase();
 
   try {
     const [workspace] = await db.insert(workspacesTable).values({
       name,
       description,
       githubRepoUrl: githubRepoUrl || null,
+      inviteCode,
       createdBy: userId,
     }).returning();
 
@@ -66,39 +71,39 @@ router.get("/", async (req: AuthedRequest, res: Response) => {
   }
 });
 
-// Join a workspace (simplified: by ID for now, later could be by invite link)
-router.post("/:id/join", async (req: AuthedRequest, res: Response) => {
+// Join a workspace by invite code
+router.post("/join", async (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
-  const workspaceId = parseInt(req.params.id);
+  const inviteCode = req.body.inviteCode;
 
-  if (isNaN(workspaceId)) {
-    res.status(400).json({ error: "Invalid workspace ID" });
+  if (!inviteCode || typeof inviteCode !== "string") {
+    res.status(400).json({ error: "Invalid invite code" });
     return;
   }
 
   try {
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.inviteCode, inviteCode));
+    if (!workspace) {
+      res.status(404).json({ error: "Workspace not found or invalid code" });
+      return;
+    }
+
     const [existing] = await db.select()
       .from(workspaceMembersTable)
-      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+      .where(and(eq(workspaceMembersTable.workspaceId, workspace.id), eq(workspaceMembersTable.userId, userId)));
 
     if (existing) {
       res.status(400).json({ error: "Already a member of this workspace" });
       return;
     }
 
-    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
-    if (!workspace) {
-      res.status(404).json({ error: "Workspace not found" });
-      return;
-    }
-
     await db.insert(workspaceMembersTable).values({
-      workspaceId,
+      workspaceId: workspace.id,
       userId,
       role: "member",
     });
 
-    res.json({ success: true, message: "Joined workspace" });
+    res.json({ success: true, message: "Joined workspace", workspace });
   } catch (error) {
     res.status(500).json({ error: "Failed to join workspace" });
   }

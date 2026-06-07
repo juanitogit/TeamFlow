@@ -1,26 +1,29 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useWorkspaceMembers } from "@/hooks/use-workspaces";
+import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, Activity, CheckCircle2, AlertCircle } from "lucide-react";
+import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 export function Team() {
   const { user } = useAuth();
-  
+  const { toast } = useToast();
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
+  const { data: workspaces } = useWorkspaces();
 
   useEffect(() => {
     const id = localStorage.getItem("active_workspace_id");
-    if (id) {
-      setWorkspaceId(parseInt(id));
-    }
+    if (id) setWorkspaceId(parseInt(id));
   }, []);
 
   const { data: members, isLoading } = useWorkspaceMembers(workspaceId);
+  
+  const activeWorkspace = workspaces?.find((w: any) => w.workspaceId === workspaceId);
+  const inviteCode = activeWorkspace?.workspace?.inviteCode || "";
 
   if (isLoading) {
     return (
@@ -56,17 +59,17 @@ export function Team() {
           </h1>
           <p className="text-slate mt-1">Métricas de salud y productividad reales de tu workspace</p>
         </div>
-        {workspaceId && (
-          <div className="flex items-center gap-4 bg-slate-50 border px-4 py-2 rounded-lg">
+        {inviteCode && (
+          <div className="flex items-center gap-3 bg-white border px-4 py-3 rounded-lg shadow-sm">
             <div className="text-sm">
-              <span className="text-slate block text-xs uppercase font-bold">ID para Invitar:</span>
-              <span className="font-mono font-bold text-ink">{workspaceId}</span>
+              <span className="text-slate block text-[10px] uppercase font-bold tracking-wider">Código de Invitación</span>
+              <span className="font-mono font-bold text-lg text-primary tracking-[0.3em]">{inviteCode}</span>
             </div>
             <Button variant="outline" size="sm" onClick={() => {
-              navigator.clipboard.writeText(workspaceId.toString());
-              alert("ID copiado al portapapeles. ¡Pásaselo a tu equipo!");
+              navigator.clipboard.writeText(inviteCode);
+              toast({ title: "¡Código copiado al portapapeles!" });
             }}>
-              Copiar ID
+              <Copy className="h-4 w-4" />
             </Button>
           </div>
         )}

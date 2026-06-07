@@ -42,14 +42,15 @@ export function useCreateWorkspace() {
 export function useJoinWorkspace() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (workspaceId: number) => {
-      const res = await fetch(`${API_BASE}/${workspaceId}/join`, {
+    mutationFn: async (inviteCode: string) => {
+      const res = await fetch(`${API_BASE}/join`, {
         method: "POST",
         headers: getAuthHeader(),
+        body: JSON.stringify({ inviteCode: inviteCode.trim().toUpperCase() }),
       });
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "Failed to join workspace");
+        throw new Error(error.error || "Código inválido");
       }
       return res.json();
     },

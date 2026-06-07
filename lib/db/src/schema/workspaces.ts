@@ -9,6 +9,7 @@ export const workspacesTable = pgTable("workspaces", {
   name: text("name").notNull(),
   description: text("description"),
   githubRepoUrl: text("github_repo_url"),
+  inviteCode: text("invite_code").notNull().unique(),
   createdBy: integer("created_by").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
