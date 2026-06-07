@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
+import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, Home, ListTodo, Users, Map, LayoutDashboard } from "lucide-react";
@@ -6,6 +7,7 @@ import { Loader2, CheckCircle2, Home, ListTodo, Users, Map, LayoutDashboard } fr
 export function Layout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const [location] = useLocation();
+  const { data: workspaces } = useWorkspaces();
 
   if (isLoading) {
     return (
@@ -22,6 +24,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
   if (location === "/workspaces") {
     return <>{children}</>;
   }
+
+  const activeWorkspaceId = typeof window !== 'undefined' ? localStorage.getItem("active_workspace_id") : null;
+  const activeWorkspace = workspaces?.find((w: any) => w.workspaceId.toString() === activeWorkspaceId);
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
@@ -40,6 +45,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <CheckCircle2 className="h-6 w-6" />
               TeamFlow
             </Link>
+            {activeWorkspace && (
+              <div className="hidden md:flex items-center bg-slate-100 px-3 py-1 rounded-md text-sm font-medium text-slate-700 border">
+                {activeWorkspace.workspace.name}
+              </div>
+            )}
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive = location === item.href;
