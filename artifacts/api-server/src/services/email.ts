@@ -12,7 +12,9 @@ const transporter = nodemailer.createTransport({
 
 // Get the app URL for links and logo
 function getAppUrl(): string {
-  return process.env.APP_URL || "https://team-flow-seven.vercel.app";
+  if (process.env.APP_URL) return process.env.APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "https://team-flow-seven.vercel.app";
 }
 
 function emailLayout(content: string): string {
@@ -33,7 +35,9 @@ function emailLayout(content: string): string {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#6161ff 0%,#9450fd 100%);padding:32px 40px;text-align:center;">
-              <img src="${appUrl}/logo.png" alt="TeamFlow" width="48" height="48" style="display:inline-block;vertical-align:middle;filter:brightness(0) invert(1);" />
+              <div style="display:inline-block;vertical-align:middle;background-color:#ffffff;border-radius:50%;padding:8px;width:32px;height:32px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <img src="${appUrl}/logo.png" alt="TeamFlow Logo" width="32" height="32" style="display:block;margin:0 auto;" />
+              </div>
               <span style="display:inline-block;vertical-align:middle;margin-left:12px;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
             </td>
           </tr>
