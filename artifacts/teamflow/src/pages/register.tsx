@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { AuthNavbar } from "@/components/auth-navbar";
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -55,11 +56,13 @@ export function Register() {
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen flex items-center justify-center bg-cloud p-4"
-    >
+    <>
+      <AuthNavbar />
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="min-h-screen flex items-center justify-center bg-cloud p-4 pt-20"
+      >
       <Card className="w-full max-w-md card-monday">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-3xl font-light tracking-tight text-ink">Create an account</CardTitle>
@@ -149,6 +152,7 @@ export function Register() {
           </div>
         </CardFooter>
       </Card>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }
