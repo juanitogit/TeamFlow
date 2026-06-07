@@ -72,6 +72,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <img src="/logo.png" alt="Logo" className="h-8 object-contain dark:invert" />
+                <span className="hidden sm:inline-block font-bold text-xl text-primary tracking-tight">TeamFlow</span>
               </Link>
             </div>
             <nav className="hidden md:flex items-center gap-1">
