@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+import fs from "node:fs";
+import path from "node:path";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -10,7 +12,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Get the app URL for links and logo
+// Get the app URL for links
 function getAppUrl(): string {
   if (process.env.APP_URL) return process.env.APP_URL;
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
@@ -36,7 +38,7 @@ function emailLayout(content: string): string {
           <tr>
             <td style="background:linear-gradient(135deg,#6161ff 0%,#9450fd 100%);padding:32px 40px;text-align:center;">
               <div style="display:inline-block;vertical-align:middle;background-color:#ffffff;border-radius:50%;padding:8px;width:32px;height:32px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                <img src="${appUrl}/logo.png" alt="TeamFlow Logo" width="32" height="32" style="display:block;margin:0 auto;" />
+                <img src="cid:logo" alt="TeamFlow Logo" width="32" height="32" style="display:block;margin:0 auto;" />
               </div>
               <span style="display:inline-block;vertical-align:middle;margin-left:12px;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
             </td>
@@ -250,7 +252,6 @@ export function memberRemovedEmail(userName: string, workspaceName: string): { s
 }
 
 // ─── Main Send Function ─────────────────────────────────────
-
 export async function sendEmail(to: string, subject: string, body: string, html?: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log("\n=======================================================");
@@ -261,13 +262,38 @@ export async function sendEmail(to: string, subject: string, body: string, html?
     return true;
   }
 
+  let attachments: any[] = [];
+  let processedHtml = html;
+
+  try {
+    const logoPath = path.resolve(__dirname, "../../teamflow/public/logo.png");
+    if (fs.existsSync(logoPath)) {
+      attachments.push({
+        filename: "logo.png",
+        path: logoPath,
+        cid: "logo",
+      });
+    } else {
+      console.warn(`[Email] Logo no encontrado en la ruta local: ${logoPath}. Usando URL pública.`);
+      if (processedHtml) {
+        processedHtml = processedHtml.replace("cid:logo", `${getAppUrl()}/logo.png`);
+      }
+    }
+  } catch (err) {
+    console.error("[Email] Error al procesar el adjunto del logo:", err);
+    if (processedHtml) {
+      processedHtml = processedHtml.replace("cid:logo", `${getAppUrl()}/logo.png`);
+    }
+  }
+
   try {
     const info = await transporter.sendMail({
       from: `"TeamFlow" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text: body,
-      html: html || undefined,
+      html: processedHtml || undefined,
+      attachments,
     });
     console.log(`[Email] Correo enviado a ${to}. ID: ${info.messageId}`);
     return true;
