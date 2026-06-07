@@ -5,6 +5,8 @@ import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 
+import { sendEmail } from "../services/email";
+
 const router = Router();
 router.use(requireAuth);
 
@@ -56,6 +58,16 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
       status: "pendiente",
       dueDate: dueDate ? new Date(dueDate) : null,
     }).returning();
+
+    // Notify user via email
+    const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, assignedTo));
+    if (userRecord && userRecord.email) {
+      await sendEmail(
+        userRecord.email,
+        "Nueva Tarea Asignada",
+        `Hola ${userRecord.name},\n\nSe te ha asignado una nueva tarea: "${title}".\nFecha límite: ${dueDate ? new Date(dueDate).toLocaleString() : 'Sin fecha límite'}\n\nRevisa la plataforma para más detalles.\n\nSaludos,\nEl equipo de TeamFlow`
+      );
+    }
 
     res.status(201).json(task);
   } catch (error) {

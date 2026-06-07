@@ -70,6 +70,15 @@ router.post("/register", async (req: Request, res: Response) => {
   }).returning();
   const token = await createSession(user.id);
   const { passwordHash: _, ...safeUser } = user;
+
+  // Send welcome email
+  const { sendEmail } = require("../services/email");
+  await sendEmail(
+    user.email,
+    "¡Bienvenido a TeamFlow!",
+    `Hola ${user.name},\n\nGracias por registrarte en TeamFlow.\nYa puedes crear o unirte a un workspace y empezar a medir tu rendimiento.\n\nSaludos,\nEl equipo de TeamFlow`
+  );
+
   res.status(201).json({ user: safeUser, token });
 });
 

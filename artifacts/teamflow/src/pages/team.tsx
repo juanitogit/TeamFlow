@@ -41,7 +41,25 @@ export function Team() {
   const activeWorkspace = workspaces?.find((w: any) => w.workspaceId === workspaceId);
   const inviteCode = activeWorkspace?.workspace?.inviteCode || "";
   const myRole = activeWorkspace?.role;
-  const isLeader = myRole === "leader" || myRole === "co-leader";
+  const isLeaderOrCoLeader = myRole === "leader" || myRole === "co-leader";
+  const isMainLeader = myRole === "leader";
+
+  const roleMutation = useMutation({
+    mutationFn: async ({ memberId, role }: { memberId: number, role: string }) => {
+      const res = await fetch(`/api/workspaces/${workspaceId}/members/${memberId}/role`, { 
+        method: "PATCH", 
+        headers: getAuthHeader(),
+        body: JSON.stringify({ role })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: () => { 
+      toast({ title: "Rol actualizado" }); 
+      queryClient.invalidateQueries({ queryKey: ["workspace_members"] }); 
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
 
   const removeMutation = useMutation({
     mutationFn: async (memberId: number) => {
@@ -116,13 +134,30 @@ export function Team() {
                       <span className="text-xs text-slate">{member.id === user?.id ? "(Tú)" : ""}</span>
                     </div>
                   </div>
-                  <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider ${
-                    member.role === 'leader' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
-                    member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
-                    'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}>
-                    {member.role === 'leader' ? 'Líder' : member.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
-                  </Badge>
+                  {isMainLeader && member.id !== user?.id ? (
+                    <Select defaultValue={member.role} onValueChange={(val) => roleMutation.mutate({ memberId: member.id, role: val })}>
+                      <SelectTrigger className={`h-6 text-[10px] uppercase font-bold tracking-wider ${
+                        member.role === 'leader' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                        member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                        'bg-slate-50 text-slate-700 border-slate-200'
+                      }`}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="leader">Líder</SelectItem>
+                        <SelectItem value="co-leader">Co-líder</SelectItem>
+                        <SelectItem value="member">Miembro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider ${
+                      member.role === 'leader' ? 'bg-amber-50 text-amber-700 border-amber-200' : 
+                      member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                      'bg-slate-50 text-slate-700 border-slate-200'
+                    }`}>
+                      {member.role === 'leader' ? 'Líder' : member.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
@@ -152,7 +187,7 @@ export function Team() {
                 </div>
 
                 {/* Leader actions */}
-                {isLeader && member.id !== user?.id && (
+                {isLeaderOrCoLeader && member.id !== user?.id && (
                   <div className="flex gap-2 pt-3 border-t border-mist">
                     <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
                       setAssignTo(member.id);

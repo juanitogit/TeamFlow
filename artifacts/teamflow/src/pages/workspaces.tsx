@@ -24,7 +24,7 @@ export function Workspaces() {
   
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [githubRepoUrl, setGithubRepoUrl] = useState("");
+  const [githubRepos, setGithubRepos] = useState<string[]>([""]);
   const [joinCode, setJoinCode] = useState("");
 
   const handleSelectWorkspace = (workspaceId: number, workspaceRole: string) => {
@@ -35,14 +35,15 @@ export function Workspaces() {
 
   const handleCreate = async () => {
     if (!name) return;
+    const validRepos = githubRepos.filter(r => r.trim() !== "");
     createWorkspace.mutate(
-      { name, description, githubRepoUrl },
+      { name, description, githubRepos: validRepos.length > 0 ? validRepos : undefined },
       {
         onSuccess: (newWorkspace) => {
           setIsCreateOpen(false);
           setName("");
           setDescription("");
-          setGithubRepoUrl("");
+          setGithubRepos([""]);
           handleSelectWorkspace(newWorkspace.id, "leader");
           toast({ title: "¡Workspace creado!", description: `Código de invitación: ${newWorkspace.inviteCode}` });
         },
@@ -162,8 +163,29 @@ export function Workspaces() {
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="¿Para qué es este espacio?" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">URL del Repositorio de GitHub (Opcional)</label>
-                <Input value={githubRepoUrl} onChange={(e) => setGithubRepoUrl(e.target.value)} placeholder="https://github.com/org/repo" />
+                <label className="text-sm font-medium">Repositorios de GitHub (Opcional)</label>
+                {githubRepos.map((repo, i) => (
+                  <div key={i} className="flex gap-2">
+                    <Input 
+                      value={repo} 
+                      onChange={(e) => {
+                        const newRepos = [...githubRepos];
+                        newRepos[i] = e.target.value;
+                        setGithubRepos(newRepos);
+                      }} 
+                      placeholder="https://github.com/org/repo" 
+                    />
+                    {i === githubRepos.length - 1 ? (
+                      <Button variant="outline" size="icon" onClick={() => setGithubRepos([...githubRepos, ""])}>
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="icon" onClick={() => setGithubRepos(githubRepos.filter((_, idx) => idx !== i))}>
+                        <span className="text-red-500 font-bold">X</span>
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
             <DialogFooter>

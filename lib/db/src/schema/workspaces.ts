@@ -8,7 +8,8 @@ export const workspacesTable = pgTable("workspaces", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  githubRepoUrl: text("github_repo_url"),
+  githubRepoUrl: text("github_repo_url"), // Deprecated, keeping for backwards compatibility
+  githubRepos: text("github_repos").default("[]"), // Stored as JSON string
   inviteCode: text("invite_code").notNull().unique(),
   createdBy: integer("created_by").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

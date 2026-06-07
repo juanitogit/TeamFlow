@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
+import { sendEmail } from "../services/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -12,7 +13,7 @@ router.use(requireAuth);
 const createWorkspaceSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  githubRepoUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  githubRepos: z.array(z.string().url("Must be a valid URL")).optional(),
 });
 
 // Create a new workspace
@@ -24,7 +25,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     return;
   }
 
-  const { name, description, githubRepoUrl } = parse.data;
+  const { name, description, githubRepos } = parse.data;
   
   // Generate a complex 8-character invite code
   const inviteCode = crypto.randomBytes(4).toString("hex").toUpperCase();
@@ -33,7 +34,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     const [workspace] = await db.insert(workspacesTable).values({
       name,
       description,
-      githubRepoUrl: githubRepoUrl || null,
+      githubRepos: JSON.stringify(githubRepos || []),
       inviteCode,
       createdBy: userId,
     }).returning();
@@ -102,6 +103,16 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
       userId,
       role: "member",
     });
+
+    // Notify user via email (mock)
+    const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    if (userRecord && userRecord.email) {
+      await sendEmail(
+        userRecord.email,
+        "¡Bienvenido al Workspace!",
+        `Hola ${userRecord.name},\n\nTe has unido exitosamente al workspace "${workspace.name}".\n\nSaludos,\nEl equipo de TeamFlow`
+      );
+    }
 
     res.json({ success: true, message: "Joined workspace", workspace });
   } catch (error) {
@@ -188,6 +199,53 @@ router.delete("/:id/members/:memberId", async (req: AuthedRequest, res: Response
     res.json({ success: true, message: "Miembro eliminado" });
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar miembro" });
+  }
+});
+
+// Change member role (leader only)
+router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+  const memberId = parseInt(req.params.memberId);
+  const { role } = req.body;
+
+  if (!["leader", "co-leader", "member"].includes(role)) {
+    res.status(400).json({ error: "Rol inválido" });
+    return;
+  }
+
+  try {
+    // Check requester is leader
+    const [myMembership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!myMembership || myMembership.role !== "leader") {
+      res.status(403).json({ error: "Solo el líder principal puede cambiar roles" });
+      return;
+    }
+
+    if (memberId === userId && role !== "leader") {
+      res.status(400).json({ error: "No puedes degradar tu propio rol. Debes transferir el liderazgo a otro." });
+      return;
+    }
+
+    await db.update(workspaceMembersTable)
+      .set({ role })
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, memberId)));
+
+    // Notify user via email
+    const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, memberId));
+    if (userRecord && userRecord.email) {
+      await sendEmail(
+        userRecord.email,
+        "Tu rol ha cambiado",
+        `Hola ${userRecord.name},\n\nTu rol en el workspace ha sido actualizado a: ${role}.\n\nSaludos,\nEl equipo de TeamFlow`
+      );
+    }
+
+    res.json({ success: true, message: "Rol actualizado" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar rol" });
   }
 });
 
