@@ -193,8 +193,21 @@ router.delete("/:id/members/:memberId", async (req: AuthedRequest, res: Response
       return;
     }
 
+    // Get member info before deleting
+    const [removedUser] = await db.select().from(usersTable).where(eq(usersTable.id, memberId));
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
+
     await db.delete(workspaceMembersTable)
       .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, memberId)));
+
+    // Notify removed member via email
+    if (removedUser && removedUser.email) {
+      await sendEmail(
+        removedUser.email,
+        "Has sido removido de un workspace",
+        `Hola ${removedUser.name},\n\nTe informamos que has sido removido del workspace "${workspace?.name || 'desconocido'}".\n\nSi crees que esto fue un error, contacta al líder del equipo.\n\nSaludos,\nEl equipo de TeamFlow`
+      );
+    }
 
     res.json({ success: true, message: "Miembro eliminado" });
   } catch (error) {

@@ -142,6 +142,17 @@ router.post("/:id/complete", async (req: AuthedRequest, res: Response) => {
       performanceScore: (await db.select().from(usersTable).where(eq(usersTable.id, userId)))[0].performanceScore + 5,
     }).where(eq(usersTable.id, userId));
 
+    // Notify the leader who assigned this task
+    const [assignee] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    const [assigner] = await db.select().from(usersTable).where(eq(usersTable.id, task.assignedBy));
+    if (assigner && assigner.email) {
+      await sendEmail(
+        assigner.email,
+        "Tarea Completada",
+        `Hola ${assigner.name},\n\n${assignee?.name || 'Un miembro'} ha completado la tarea: "${task.title}".\n${commitSha ? `Commit SHA: ${commitSha}` : ''}\n\nRevisa la plataforma para validar.\n\nSaludos,\nEl equipo de TeamFlow`
+      );
+    }
+
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: "Error al completar tarea" });
