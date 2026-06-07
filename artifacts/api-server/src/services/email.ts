@@ -36,7 +36,7 @@ function emailLayout(content: string): string {
           
           <!-- Header -->
           <tr>
-            <td style="background:linear-gradient(135deg,#6161ff 0%,#9450fd 100%);padding:32px 40px;text-align:center;">
+            <td style="background:linear-gradient(135deg,#2f72ce 0%,#4b8eeb 100%);padding:32px 40px;text-align:center;">
               <table cellpadding="0" cellspacing="0" style="display:inline-block;vertical-align:middle;margin-right:12px;">
                 <tr>
                   <td align="center" valign="middle" bgcolor="#ffffff" style="width:40px;height:40px;border-radius:50%;background-color:#ffffff;text-align:center;vertical-align:middle;">
@@ -65,7 +65,7 @@ function emailLayout(content: string): string {
                       Este correo fue enviado automáticamente por TeamFlow.
                     </p>
                     <p style="margin:0;font-size:13px;color:#808080;">
-                      <a href="${appUrl}" style="color:#6161ff;text-decoration:none;font-weight:500;">Ir a la plataforma</a>
+                      <a href="${appUrl}" style="color:#2f72ce;text-decoration:none;font-weight:500;">Ir a la plataforma</a>
                     </p>
                   </td>
                 </tr>
@@ -86,14 +86,14 @@ function emailLayout(content: string): string {
 </html>`;
 }
 
-function badge(text: string, color: string = "#6161ff"): string {
+function badge(text: string, color: string = "#2f72ce"): string {
   return `<span style="display:inline-block;padding:4px 14px;background-color:${color}15;color:${color};border-radius:160px;font-size:13px;font-weight:600;border:1px solid ${color}30;">${text}</span>`;
 }
 
 function button(text: string, url: string): string {
   return `<table cellpadding="0" cellspacing="0" style="margin:28px 0 8px;">
     <tr>
-      <td style="background-color:#6161ff;border-radius:160px;padding:14px 32px;">
+      <td style="background-color:#2f72ce;border-radius:160px;padding:14px 32px;">
         <a href="${url}" style="color:#ffffff;text-decoration:none;font-size:16px;font-weight:500;display:inline-block;">${text}</a>
       </td>
     </tr>
@@ -113,8 +113,8 @@ export function welcomeEmail(userName: string, isGitHub: boolean = false): { sub
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
       <tr>
-        <td style="background-color:#e7ecff;border-radius:16px;padding:20px 24px;">
-          <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#6161ff;">¿Qué puedes hacer ahora?</p>
+        <td style="background-color:#e7f1ff;border-radius:16px;padding:20px 24px;">
+          <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#2f72ce;">¿Qué puedes hacer ahora?</p>
           <table cellpadding="0" cellspacing="0">
             <tr><td style="padding:4px 0;font-size:14px;color:#535768;">✦ Crear o unirte a un workspace de equipo</td></tr>
             <tr><td style="padding:4px 0;font-size:14px;color:#535768;">✦ Conectar tus repositorios de GitHub</td></tr>
@@ -158,7 +158,7 @@ export function joinedWorkspaceEmail(userName: string, workspaceName: string): {
 export function taskAssignedEmail(userName: string, taskTitle: string, taskType: string, dueDate?: string): { subject: string; html: string } {
   const appUrl = getAppUrl();
   const typeLabels: Record<string, string> = { programacion: "Programación", documentacion: "Documentación", investigacion: "Investigación" };
-  const typeColors: Record<string, string> = { programacion: "#6161ff", documentacion: "#9450fd", investigacion: "#3ac9ff" };
+  const typeColors: Record<string, string> = { programacion: "#2f72ce", documentacion: "#4b8eeb", investigacion: "#3ac9ff" };
 
   const content = `
     <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Nueva tarea asignada</h1>
@@ -172,7 +172,7 @@ export function taskAssignedEmail(userName: string, taskTitle: string, taskType:
           <p style="margin:0 0 12px;font-size:20px;font-weight:600;color:#333333;">${taskTitle}</p>
           <table cellpadding="0" cellspacing="0">
             <tr>
-              <td style="padding-right:12px;">${badge(typeLabels[taskType] || taskType, typeColors[taskType] || "#6161ff")}</td>
+              <td style="padding-right:12px;">${badge(typeLabels[taskType] || taskType, typeColors[taskType] || "#2f72ce")}</td>
               ${dueDate ? `<td>${badge("📅 " + new Date(dueDate).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }), "#e98dfe")}</td>` : ""}
             </tr>
           </table>
@@ -211,7 +211,7 @@ export function taskCompletedEmail(leaderName: string, memberName: string, taskT
 export function roleChangedEmail(userName: string, newRole: string, workspaceName: string): { subject: string; html: string } {
   const appUrl = getAppUrl();
   const roleLabels: Record<string, string> = { leader: "Líder", "co-leader": "Co-Líder", member: "Miembro" };
-  const roleColors: Record<string, string> = { leader: "#6161ff", "co-leader": "#9450fd", member: "#3ac9ff" };
+  const roleColors: Record<string, string> = { leader: "#2f72ce", "co-leader": "#4b8eeb", member: "#3ac9ff" };
 
   const content = `
     <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Tu rol ha cambiado</h1>
@@ -221,9 +221,9 @@ export function roleChangedEmail(userName: string, newRole: string, workspaceNam
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
       <tr>
-        <td style="text-align:center;padding:24px;background-color:#e7ecff;border-radius:16px;">
+        <td style="text-align:center;padding:24px;background-color:#e7f1ff;border-radius:16px;">
           <p style="margin:0 0 12px;font-size:14px;color:#535768;">Tu nuevo rol es:</p>
-          <p style="margin:0;font-size:32px;font-weight:600;color:${roleColors[newRole] || "#6161ff"};">${roleLabels[newRole] || newRole}</p>
+          <p style="margin:0;font-size:32px;font-weight:600;color:${roleColors[newRole] || "#2f72ce"};">${roleLabels[newRole] || newRole}</p>
         </td>
       </tr>
     </table>
