@@ -24,7 +24,7 @@ export function AuthNavbar() {
           <img
             src="/teamflow-logo.png"
             alt="TeamFlow"
-            className="h-10 w-auto object-contain mix-blend-multiply"
+            className="h-8 w-auto object-contain mix-blend-multiply"
           />
         </Link>
 
