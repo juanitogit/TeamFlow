@@ -18,33 +18,23 @@ export function AuthNavbar() {
         borderBottom: "1px solid rgba(0, 0, 0, 0.08)",
       }}
     >
-      <div className="max-w-[1024px] mx-auto flex items-center justify-between h-12 px-5">
+      <div className="max-w-[1024px] mx-auto flex items-center justify-between h-16 px-5">
         {/* Logo */}
         <Link href="/login" className="flex items-center gap-2.5 no-underline">
           <img
             src="/teamflow-logo.png"
             alt="TeamFlow"
-            className="h-7 w-auto object-contain"
+            className="h-10 w-auto object-contain mix-blend-multiply"
           />
-          <span
-            style={{
-              fontSize: "17px",
-              fontWeight: 600,
-              letterSpacing: "-0.02em",
-              color: "#1d1d1f",
-            }}
-          >
-            TeamFlow
-          </span>
         </Link>
 
         {/* Center Links */}
         <div className="hidden md:flex items-center gap-0">
           {[
-            { label: "Producto", href: "#" },
-            { label: "Equipos", href: "#" },
+            { label: "Funciones", href: "#" },
+            { label: "Soluciones", href: "#" },
+            { label: "Recursos", href: "#" },
             { label: "Precios", href: "#" },
-            { label: "Soporte", href: "#" },
           ].map((item) => (
             <a
               key={item.label}
