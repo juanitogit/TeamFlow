@@ -2,26 +2,18 @@
 import { Router, Request, Response } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { createHash } from "crypto";
-import { sessions } from "./auth";
+import { createSession } from "./auth";
 import { logger } from "../lib/logger";
 
 const router = Router();
 
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID ?? "";
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET ?? "";
-const DEV_DOMAIN = process.env.REPLIT_DEV_DOMAIN ?? "";
 
 function getCallbackUrl(req: Request): string {
   const proto = req.headers["x-forwarded-proto"] ?? "https";
-  const host = req.headers["x-forwarded-host"] ?? DEV_DOMAIN;
+  const host = req.headers["x-forwarded-host"] ?? req.headers.host ?? "localhost";
   return `${proto}://${host}/api/auth/github/callback`;
-}
-
-function makeToken(userId: number): string {
-  return createHash("sha256")
-    .update(`${userId}:${process.env.SESSION_SECRET}:${Date.now()}`)
-    .digest("hex");
 }
 
 router.get("/github", (req: Request, res: Response) => {
@@ -134,8 +126,7 @@ router.get("/github/callback", async (req: Request, res: Response) => {
       user = newUser;
     }
 
-    const token = makeToken(user.id);
-    sessions.set(token, user.id);
+    const token = await createSession(user.id);
 
     res.redirect(`/login?token=${token}&github=1`);
   } catch (err) {

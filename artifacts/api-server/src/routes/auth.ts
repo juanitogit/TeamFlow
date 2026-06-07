@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Router, Request, Response } from "express";
-import { db, usersTable } from "@workspace/db";
+import { db, usersTable, sessionsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { createHash } from "crypto";
 import { LoginBody, RegisterBody } from "@workspace/api-zod";
@@ -15,7 +15,21 @@ function makeToken(userId: number): string {
   return createHash("sha256").update(`${userId}:${process.env.SESSION_SECRET}:${Date.now()}`).digest("hex");
 }
 
-const sessions = new Map<string, number>();
+// DB-based session helpers (serverless-safe)
+async function createSession(userId: number): Promise<string> {
+  const token = makeToken(userId);
+  await db.insert(sessionsTable).values({ token, userId });
+  return token;
+}
+
+async function getUserIdFromToken(token: string): Promise<number | null> {
+  const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.token, token));
+  return session?.userId ?? null;
+}
+
+async function deleteSession(token: string): Promise<void> {
+  await db.delete(sessionsTable).where(eq(sessionsTable.token, token));
+}
 
 router.post("/login", async (req: Request, res: Response) => {
   const parse = LoginBody.safeParse(req.body);
@@ -29,8 +43,7 @@ router.post("/login", async (req: Request, res: Response) => {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
-  const token = makeToken(user.id);
-  sessions.set(token, user.id);
+  const token = await createSession(user.id);
   const { passwordHash: _, ...safeUser } = user;
   res.json({ user: safeUser, token });
 });
@@ -55,8 +68,7 @@ router.post("/register", async (req: Request, res: Response) => {
     healthPoints: 100,
     performanceScore: 100,
   }).returning();
-  const token = makeToken(user.id);
-  sessions.set(token, user.id);
+  const token = await createSession(user.id);
   const { passwordHash: _, ...safeUser } = user;
   res.status(201).json({ user: safeUser, token });
 });
@@ -68,7 +80,7 @@ router.get("/me", async (req: Request, res: Response) => {
     return;
   }
   const token = auth.slice(7);
-  const userId = sessions.get(token);
+  const userId = await getUserIdFromToken(token);
   if (!userId) {
     res.status(401).json({ error: "Invalid token" });
     return;
@@ -85,10 +97,10 @@ router.get("/me", async (req: Request, res: Response) => {
 router.post("/logout", async (req: Request, res: Response) => {
   const auth = req.headers.authorization;
   if (auth?.startsWith("Bearer ")) {
-    sessions.delete(auth.slice(7));
+    await deleteSession(auth.slice(7));
   }
   res.json({ ok: true });
 });
 
-export { sessions };
+export { createSession, getUserIdFromToken, deleteSession };
 export default router;
