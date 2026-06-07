@@ -30,7 +30,7 @@ export function Workspaces() {
   const handleSelectWorkspace = (workspaceId: number, workspaceRole: string) => {
     localStorage.setItem("active_workspace_id", workspaceId.toString());
     localStorage.setItem("active_workspace_role", workspaceRole);
-    setLocation("/");
+    setLocation("/dashboard");
   };
 
   const handleCreate = async () => {

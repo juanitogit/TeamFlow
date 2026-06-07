@@ -145,7 +145,7 @@ export function Team() {
           <p className="text-slate mt-1 text-sm">Gestiona los miembros de tu workspace</p>
         </div>
         {inviteCode && (
-          <div className="flex items-center gap-3 bg-white border px-4 py-3 rounded-lg shadow-sm">
+          <div className="flex items-center gap-3 bg-card border px-4 py-3 rounded-lg shadow-sm">
             <div className="text-sm">
               <span className="text-slate block text-[10px] uppercase font-bold tracking-wider">Código de Invitación</span>
               <span className="font-mono font-bold text-lg text-primary tracking-[0.3em]">{inviteCode}</span>
@@ -158,7 +158,7 @@ export function Team() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-white rounded-xl shadow-sm border">Selecciona un workspace para ver a tu equipo.</div>
+        <div className="text-center py-12 text-slate bg-card rounded-xl shadow-sm border">Selecciona un workspace para ver a tu equipo.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (

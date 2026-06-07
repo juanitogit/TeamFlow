@@ -6,6 +6,7 @@ import NotFound from "@/pages/not-found";
 import { Layout } from "@/components/layout";
 
 // Pages
+import { Landing } from "@/pages/landing";
 import { Dashboard } from "@/pages/dashboard";
 import { Login } from "@/pages/login";
 import { Register } from "@/pages/register";
@@ -35,7 +36,8 @@ function Router() {
       <Route path="/workspaces" component={Workspaces} />
       <Route path="/contributions/new" component={NewContribution} />
       <Route path="/contributions/review" component={ReviewContributions} />
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Landing} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/projects" component={Projects} />
       <Route path="/projects/:id" component={ProjectDetail} />
       <Route path="/tasks" component={Tasks} />

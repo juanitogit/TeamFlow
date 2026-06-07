@@ -87,7 +87,7 @@ export function ReviewContributions() {
               <CardHeader className="bg-slate-50 pb-4 border-b">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full overflow-hidden bg-white border shadow-sm">
+                    <div className="h-10 w-10 rounded-full overflow-hidden bg-card border shadow-sm">
                       {contrib.user.avatarUrl ? (
                         <img src={contrib.user.avatarUrl} alt={contrib.user.name} className="h-full w-full object-cover" />
                       ) : (

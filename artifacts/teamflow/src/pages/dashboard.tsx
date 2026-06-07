@@ -91,9 +91,6 @@ export function Dashboard() {
                 {activeWorkspace.workspace.name}
               </span>
             )}
-            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-md text-xs font-bold uppercase tracking-wider border border-primary/20">
-              Rol: {workspaceRole}
-            </span>
           </div>
         </div>
         <div className="flex gap-3">

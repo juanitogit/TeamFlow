@@ -158,7 +158,7 @@ export function Roadmap() {
             <div key={col.id} className="bg-cloud rounded-2xl p-4 min-h-[500px]">
               <div className="flex items-center justify-between mb-4 px-2">
                 <h3 className="font-medium text-ink uppercase tracking-wider text-sm">{col.label}</h3>
-                <Badge variant="secondary" className="bg-white">{colItems.length}</Badge>
+                <Badge variant="secondary" className="bg-card">{colItems.length}</Badge>
               </div>
               <div className="space-y-3">
                 {colItems.map(item => (

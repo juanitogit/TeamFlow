@@ -31,7 +31,7 @@ export function Login() {
     if (token) {
       setToken(token);
       window.history.replaceState({}, "", "/login");
-      setLocation("/");
+      setLocation("/dashboard");
       return;
     }
 
@@ -55,7 +55,7 @@ export function Login() {
       {
         onSuccess: (res) => {
           setToken(res.token);
-          setLocation("/");
+          setLocation("/dashboard");
         },
         onError: () => {
           toast({
@@ -79,10 +79,11 @@ export function Login() {
       className="min-h-screen flex items-center justify-center bg-cloud p-4"
     >
       <Card className="w-full max-w-md card-monday">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-3xl font-light tracking-tight text-ink">Welcome back</CardTitle>
+        <CardHeader className="space-y-2 text-center flex flex-col items-center">
+          <img src="/logo.png" alt="TeamFlow Logo" className="h-16 w-auto mb-2 dark:invert" />
+          <CardTitle className="text-3xl font-light tracking-tight text-ink">Bienvenido</CardTitle>
           <CardDescription className="text-slate">
-            Sign in to your TeamFlow account
+            Inicia sesión en tu cuenta
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
