@@ -37,7 +37,7 @@ export function Workspaces() {
     if (!name) return;
     const validRepos = githubRepos.filter(r => r.trim() !== "");
     createWorkspace.mutate(
-      { name, description, githubRepos: validRepos.length > 0 ? validRepos : undefined },
+      { name, description, githubRepos: validRepos.length > 0 ? validRepos : undefined } as any,
       {
         onSuccess: (newWorkspace) => {
           setIsCreateOpen(false);

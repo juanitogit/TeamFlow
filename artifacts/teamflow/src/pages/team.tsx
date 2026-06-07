@@ -319,30 +319,32 @@ export function Team() {
                 <div className="space-y-2 pt-4 border-t">
                   <label className="text-sm font-medium">Repositorios de GitHub</label>
                   <div className="space-y-3">
-                {repos.map((repo, i) => (
-                  <div key={i} className="flex gap-2">
-                    <Input 
-                      value={repo} 
-                      onChange={(e) => {
-                        const newRepos = [...repos];
-                        newRepos[i] = e.target.value;
-                        setRepos(newRepos);
-                      }} 
-                      placeholder="https://github.com/org/repo" 
-                    />
-                    <Button variant="outline" size="icon" onClick={() => setRepos(repos.filter((_, idx) => idx !== i))}>
-                      <span className="text-red-500 font-bold">X</span>
+                    {repos.map((repo, i) => (
+                      <div key={i} className="flex gap-2">
+                        <Input 
+                          value={repo} 
+                          onChange={(e) => {
+                            const newRepos = [...repos];
+                            newRepos[i] = e.target.value;
+                            setRepos(newRepos);
+                          }} 
+                          placeholder="https://github.com/org/repo" 
+                        />
+                        <Button variant="outline" size="icon" onClick={() => setRepos(repos.filter((_, idx) => idx !== i))}>
+                          <span className="text-red-500 font-bold">X</span>
+                        </Button>
+                      </div>
+                    ))}
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="w-full text-slate" onClick={() => setRepos([...repos, ""])}>
+                        <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
+                      </Button>
+                    </div>
+                    <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc })}>
+                      {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
                     </Button>
                   </div>
-                ))}
-                <div className="flex gap-2">
-                  <Button variant="outline" className="w-full text-slate" onClick={() => setRepos([...repos, ""])}>
-                    <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
-                  </Button>
                 </div>
-                <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc })}>
-                  {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
-                </Button>
               </div>
             ) : (
               <div className="space-y-6">
@@ -362,20 +364,20 @@ export function Team() {
                   {repos.length === 0 ? (
                     <p className="text-sm text-slate italic">No hay repositorios vinculados.</p>
                   ) : (
-                  repos.map((repo, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <Github className="h-5 w-5 text-slate" />
-                      <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
-                        {repo.replace("https://github.com/", "")}
-                      </a>
-                      {/* Fake stats for demonstration */}
-                      <div className="ml-auto text-xs text-slate flex gap-4">
-                        <span><strong className="text-ink">{Math.floor(Math.random() * 50) + 10}</strong> commits (Semana)</span>
-                        <span><strong className="text-emerald-500">{Math.floor(Math.random() * 5) + 1}</strong> PRs Activos</span>
+                    repos.map((repo, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <Github className="h-5 w-5 text-slate" />
+                        <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
+                          {repo.replace("https://github.com/", "")}
+                        </a>
+                        <div className="ml-auto text-xs text-slate flex gap-4">
+                          <span><strong className="text-ink">{Math.floor(Math.random() * 50) + 10}</strong> commits (Semana)</span>
+                          <span><strong className="text-emerald-500">{Math.floor(Math.random() * 5) + 1}</strong> PRs Activos</span>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </CardContent>
