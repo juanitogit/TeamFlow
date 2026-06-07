@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, CheckCircle2, AlertCircle, Clock, Heart, TrendingUp, BarChart3, Plus } from "lucide-react";
+import { Activity, CheckCircle2, AlertCircle, Clock, Heart, TrendingUp, BarChart3, Plus, Briefcase } from "lucide-react";
 import { format } from "date-fns";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -86,8 +86,9 @@ export function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
           <div className="flex items-center gap-3 mt-2">
             {activeWorkspace && (
-              <span className="text-lg font-semibold text-slate dark:text-slate-300">
-                🏢 {activeWorkspace.workspace.name}
+              <span className="flex items-center gap-2 text-lg font-semibold text-slate dark:text-slate-300">
+                <Briefcase className="h-5 w-5 text-primary" />
+                {activeWorkspace.workspace.name}
               </span>
             )}
             <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-md text-xs font-bold uppercase tracking-wider border border-primary/20">
