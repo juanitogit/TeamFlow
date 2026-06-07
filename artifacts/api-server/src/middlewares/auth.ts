@@ -2,7 +2,7 @@
 import { Request, Response, NextFunction } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
-import { sessions } from "../routes/auth";
+import { getUserIdFromToken } from "../routes/auth";
 
 export interface AuthedRequest extends Request {
   userId?: number;
@@ -16,7 +16,7 @@ export async function requireAuth(req: AuthedRequest, res: Response, next: NextF
     return;
   }
   const token = auth.slice(7);
-  const userId = sessions.get(token);
+  const userId = await getUserIdFromToken(token);
   if (!userId) {
     res.status(401).json({ error: "Invalid token" });
     return;
