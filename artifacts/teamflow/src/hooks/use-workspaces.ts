@@ -73,3 +73,18 @@ export function useContributions(workspaceId: number | null) {
     enabled: !!workspaceId,
   });
 }
+
+export function useWorkspaceMembers(workspaceId: number | null) {
+  return useQuery({
+    queryKey: ["workspace_members", workspaceId],
+    queryFn: async () => {
+      if (!workspaceId) return [];
+      const res = await fetch(`/api/workspaces/${workspaceId}/members`, {
+        headers: getAuthHeader(),
+      });
+      if (!res.ok) throw new Error("Failed to fetch members");
+      return res.json();
+    },
+    enabled: !!workspaceId,
+  });
+}

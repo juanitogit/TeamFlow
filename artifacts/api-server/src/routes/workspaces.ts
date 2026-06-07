@@ -104,4 +104,56 @@ router.post("/:id/join", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Get workspace members with performance stats
+router.get("/:id/members", async (req: AuthedRequest, res: Response) => {
+  const workspaceId = parseInt(req.params.id);
+  const userId = req.userId!;
+
+  try {
+    // Check if requester is a member
+    const [membership] = await db.select()
+      .from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership) {
+      res.status(403).json({ error: "Not a member" });
+      return;
+    }
+
+    const members = await db.select({
+      id: usersTable.id,
+      name: usersTable.name,
+      avatarUrl: usersTable.avatarUrl,
+      performanceScore: usersTable.performanceScore,
+      healthPoints: usersTable.healthPoints,
+      role: workspaceMembersTable.role,
+      joinedAt: workspaceMembersTable.joinedAt
+    })
+    .from(workspaceMembersTable)
+    .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
+    .where(eq(workspaceMembersTable.workspaceId, workspaceId));
+
+    // Also get contributions count for each member in this workspace
+    const { contributionsTable } = require("@workspace/db");
+    const contributions = await db.select()
+      .from(contributionsTable)
+      .where(eq(contributionsTable.workspaceId, workspaceId));
+
+    const result = members.map(m => {
+      const userContribs = contributions.filter((c: any) => c.userId === m.id);
+      const approved = userContribs.filter((c: any) => c.status === "approved").length;
+      const pending = userContribs.filter((c: any) => c.status === "pending").length;
+      const rejected = userContribs.filter((c: any) => c.status === "rejected").length;
+      return {
+        ...m,
+        contributions: { approved, pending, rejected, total: userContribs.length }
+      };
+    });
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch members" });
+  }
+});
+
 export default router;
