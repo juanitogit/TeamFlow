@@ -37,10 +37,14 @@ function emailLayout(content: string): string {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#6161ff 0%,#9450fd 100%);padding:32px 40px;text-align:center;">
-              <div style="display:inline-block;vertical-align:middle;background-color:#ffffff;border-radius:50%;padding:8px;width:32px;height:32px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-                <img src="cid:logo" alt="TeamFlow Logo" width="32" height="32" style="display:block;margin:0 auto;" />
-              </div>
-              <span style="display:inline-block;vertical-align:middle;margin-left:12px;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
+              <table cellpadding="0" cellspacing="0" style="display:inline-block;vertical-align:middle;margin-right:12px;">
+                <tr>
+                  <td align="center" valign="middle" bgcolor="#ffffff" style="width:40px;height:40px;border-radius:50%;background-color:#ffffff;text-align:center;vertical-align:middle;">
+                    <img src="cid:logo" alt="TeamFlow Logo" width="28" height="28" style="display:block;margin:0 auto;border:0;outline:none;" />
+                  </td>
+                </tr>
+              </table>
+              <span style="display:inline-block;vertical-align:middle;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
             </td>
           </tr>
 
