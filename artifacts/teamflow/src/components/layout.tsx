@@ -28,6 +28,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const activeWorkspaceId = typeof window !== 'undefined' ? localStorage.getItem("active_workspace_id") : null;
   const activeWorkspace = workspaces?.find((w: any) => w.workspaceId.toString() === activeWorkspaceId);
 
+  // If workspaces are loaded and the active one is missing (user expelled/left)
+  if (workspaces !== undefined && activeWorkspaceId && !activeWorkspace && typeof window !== 'undefined') {
+    localStorage.removeItem("active_workspace_id");
+    localStorage.removeItem("active_workspace_role");
+    window.location.href = "/workspaces";
+    return null;
+  }
+
   const navItems = [
     { href: "/", label: "Dashboard", icon: Home },
     { href: "/tasks", label: "Tareas", icon: ListTodo },
