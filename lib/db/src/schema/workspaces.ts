@@ -11,6 +11,7 @@ export const workspacesTable = pgTable("workspaces", {
   githubRepoUrl: text("github_repo_url"), // Deprecated, keeping for backwards compatibility
   githubRepos: text("github_repos").default("[]"), // Stored as JSON string
   inviteCode: text("invite_code").notNull().unique(),
+  inviteCodeExpiresAt: timestamp("invite_code_expires_at", { withTimezone: true }),
   createdBy: integer("created_by").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

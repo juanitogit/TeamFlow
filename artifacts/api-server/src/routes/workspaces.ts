@@ -10,6 +10,15 @@ import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail }
 const router = Router();
 router.use(requireAuth);
 
+const INVITE_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+function generateInviteCode() {
+  return {
+    code: crypto.randomBytes(4).toString("hex").toUpperCase(),
+    expiresAt: new Date(Date.now() + INVITE_CODE_TTL_MS),
+  };
+}
+
 const createWorkspaceSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
@@ -27,15 +36,16 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
 
   const { name, description, githubRepos } = parse.data;
   
-  // Generate a complex 8-character invite code
-  const inviteCode = crypto.randomBytes(4).toString("hex").toUpperCase();
+  // Generate invite code with 5-minute expiry
+  const invite = generateInviteCode();
 
   try {
     const [workspace] = await db.insert(workspacesTable).values({
       name,
       description,
       githubRepos: JSON.stringify(githubRepos || []),
-      inviteCode,
+      inviteCode: invite.code,
+      inviteCodeExpiresAt: invite.expiresAt,
       createdBy: userId,
     }).returning();
 
@@ -85,7 +95,13 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
   try {
     const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.inviteCode, inviteCode));
     if (!workspace) {
-      res.status(404).json({ error: "Workspace not found or invalid code" });
+      res.status(404).json({ error: "Código de invitación inválido o no encontrado" });
+      return;
+    }
+
+    // Check if invite code has expired
+    if (workspace.inviteCodeExpiresAt && new Date(workspace.inviteCodeExpiresAt) < new Date()) {
+      res.status(410).json({ error: "El código de invitación ha expirado. Solicita uno nuevo al líder del equipo." });
       return;
     }
 
@@ -117,6 +133,64 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Get current invite code + expiry for a workspace
+router.get("/:id/invite", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+
+  try {
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden ver el código de invitación" });
+      return;
+    }
+
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
+    if (!workspace) { res.status(404).json({ error: "Workspace no encontrado" }); return; }
+
+    const isExpired = workspace.inviteCodeExpiresAt && new Date(workspace.inviteCodeExpiresAt) < new Date();
+
+    res.json({
+      inviteCode: workspace.inviteCode,
+      expiresAt: workspace.inviteCodeExpiresAt,
+      isExpired: !!isExpired,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener código" });
+  }
+});
+
+// Regenerate invite code (leader/co-leader only)
+router.post("/:id/invite/regenerate", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+
+  try {
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden regenerar el código" });
+      return;
+    }
+
+    const invite = generateInviteCode();
+    const [updated] = await db.update(workspacesTable)
+      .set({ inviteCode: invite.code, inviteCodeExpiresAt: invite.expiresAt })
+      .where(eq(workspacesTable.id, workspaceId))
+      .returning();
+
+    res.json({
+      inviteCode: updated.inviteCode,
+      expiresAt: updated.inviteCodeExpiresAt,
+      isExpired: false,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al regenerar código" });
+  }
+});
 // Get workspace members with performance stats
 router.get("/:id/members", async (req: AuthedRequest, res: Response) => {
   const workspaceId = parseInt(req.params.id);

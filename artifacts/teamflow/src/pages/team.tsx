@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy, Trash2, ClipboardList, Settings, Plus, Github } from "lucide-react";
+import { Users, Target, Activity, CheckCircle2, AlertCircle, Copy, Trash2, ClipboardList, Settings, Plus, Github, RefreshCw, Timer } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,55 @@ export function Team() {
   const myRole = activeWorkspace?.role;
   const isLeaderOrCoLeader = myRole === "leader" || myRole === "co-leader";
   const isMainLeader = myRole === "leader";
+
+  // Invite code with expiry
+  const [inviteData, setInviteData] = useState<{ inviteCode: string; expiresAt: string | null; isExpired: boolean } | null>(null);
+  const [countdown, setCountdown] = useState("");
+  const [regenerating, setRegenerating] = useState(false);
+
+  // Fetch invite code
+  const fetchInvite = async () => {
+    if (!workspaceId || !isLeaderOrCoLeader) return;
+    try {
+      const res = await fetch(`/api/workspaces/${workspaceId}/invite`, { headers: getAuthHeader() });
+      if (res.ok) setInviteData(await res.json());
+    } catch {}
+  };
+
+  useEffect(() => { fetchInvite(); }, [workspaceId, isLeaderOrCoLeader]);
+
+  // Countdown timer
+  useEffect(() => {
+    if (!inviteData?.expiresAt) { setCountdown(""); return; }
+    const tick = () => {
+      const diff = new Date(inviteData.expiresAt!).getTime() - Date.now();
+      if (diff <= 0) {
+        setCountdown("Expirado");
+        setInviteData(prev => prev ? { ...prev, isExpired: true } : null);
+        return;
+      }
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setCountdown(`${mins}:${secs.toString().padStart(2, "0")}`);
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [inviteData?.expiresAt]);
+
+  const handleRegenerate = async () => {
+    if (!workspaceId) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { method: "POST", headers: getAuthHeader() });
+      if (res.ok) {
+        const data = await res.json();
+        setInviteData(data);
+        toast({ title: "Nuevo código generado" });
+      }
+    } catch {}
+    setRegenerating(false);
+  };
 
   // Repos & config logic
   const [editingRepos, setEditingRepos] = useState(false);
@@ -144,15 +193,29 @@ export function Team() {
           </h1>
           <p className="text-slate mt-1 text-sm">Gestiona los miembros de tu workspace</p>
         </div>
-        {inviteCode && (
+        {isLeaderOrCoLeader && inviteData && (
           <div className="flex items-center gap-3 bg-card border px-4 py-3 rounded-lg shadow-sm">
             <div className="text-sm">
               <span className="text-slate block text-[10px] uppercase font-bold tracking-wider">Código de Invitación</span>
-              <span className="font-mono font-bold text-lg text-primary tracking-[0.3em]">{inviteCode}</span>
+              <span className={`font-mono font-bold text-lg tracking-[0.3em] ${inviteData.isExpired ? 'text-red-400 line-through' : 'text-primary'}`}>{inviteData.inviteCode}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(inviteCode); toast({ title: "¡Código copiado!" }); }}>
-              <Copy className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-1">
+              {!inviteData.isExpired && (
+                <div className="flex items-center gap-1 text-xs text-slate bg-cloud px-2 py-1 rounded-full">
+                  <Timer className="h-3 w-3" />
+                  <span className="font-mono font-medium">{countdown}</span>
+                </div>
+              )}
+              {inviteData.isExpired && (
+                <span className="text-xs text-red-400 font-medium">Expirado</span>
+              )}
+              <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={regenerating}>
+                <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
+              </Button>
+            </div>
           </div>
         )}
       </div>
