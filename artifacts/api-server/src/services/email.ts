@@ -1,6 +1,4 @@
 import nodemailer from "nodemailer";
-import fs from "node:fs";
-import path from "node:path";
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -37,26 +35,7 @@ function emailLayout(content: string): string {
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#2f72ce 0%,#4b8eeb 100%);padding:32px 40px;text-align:center;">
-              <table cellpadding="0" cellspacing="0" style="display:inline-block;vertical-align:middle;margin-right:12px;">
-                <tr>
-                  <td style="padding:0;margin:0;">
-                    <div style="background-color:#ffffff;width:40px;height:40px;border-radius:50%;text-align:center;">
-                      <!--[if mso]>
-                      <table cellpadding="0" cellspacing="0" border="0" style="width:40px;height:40px;">
-                        <tr>
-                          <td align="center" valign="middle" bgcolor="#ffffff" style="border-radius:20px;height:40px;width:40px;">
-                      <![endif]-->
-                      <img src="cid:logo" alt="TeamFlow Logo" width="24" height="24" style="margin-top:8px;vertical-align:middle;border:0;outline:none;display:inline-block;" />
-                      <!--[if mso]>
-                          </td>
-                        </tr>
-                      </table>
-                      <![endif]-->
-                    </div>
-                  </td>
-                </tr>
-              </table>
-              <span style="display:inline-block;vertical-align:middle;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
+              <span style="font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;">TeamFlow</span>
             </td>
           </tr>
 
@@ -278,38 +257,13 @@ export async function sendEmail(to: string, subject: string, body: string, html?
     return true;
   }
 
-  let attachments: any[] = [];
-  let processedHtml = html;
-
-  try {
-    const logoPath = path.resolve(__dirname, "../../teamflow/public/teamflow-logo.png");
-    if (fs.existsSync(logoPath)) {
-      attachments.push({
-        filename: "logo.png",
-        path: logoPath,
-        cid: "logo",
-      });
-    } else {
-      console.warn(`[Email] Logo no encontrado en la ruta local: ${logoPath}. Usando URL pública.`);
-      if (processedHtml) {
-        processedHtml = processedHtml.replace("cid:logo", `${getAppUrl()}/logo.png`);
-      }
-    }
-  } catch (err) {
-    console.error("[Email] Error al procesar el adjunto del logo:", err);
-    if (processedHtml) {
-      processedHtml = processedHtml.replace("cid:logo", `${getAppUrl()}/logo.png`);
-    }
-  }
-
   try {
     const info = await transporter.sendMail({
       from: `"TeamFlow" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text: body,
-      html: processedHtml || undefined,
-      attachments,
+      html: html || undefined,
     });
     console.log(`[Email] Correo enviado a ${to}. ID: ${info.messageId}`);
     return true;
