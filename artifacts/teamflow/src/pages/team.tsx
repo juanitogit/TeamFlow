@@ -262,7 +262,7 @@ export function Team() {
                     onChange={(e) => setGithubInviteUsername(e.target.value)}
                   />
                   <p className="text-xs text-slate-500">
-                    El usuario debe estar previamente registrado en TeamFlow con su cuenta de GitHub. Se enviará una invitación a su correo con validez de 1 día.
+                    Se enviará un correo con la invitación (expira en 1 día). Si el usuario no está registrado en TeamFlow, debe tener su correo de GitHub como público para poder recibirla.
                   </p>
                 </div>
                 <Button 

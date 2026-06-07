@@ -163,14 +163,41 @@ router.post("/:id/invite-github", async (req: AuthedRequest, res: Response) => {
     const [targetUser] = await db.select().from(usersTable)
       .where(eq(usersTable.githubUsername, githubUsername.toLowerCase()));
 
+    let targetEmail = targetUser?.email;
+    let targetName = targetUser?.name || githubUsername;
+
+    // If user is not in DB, try to fetch their public email from GitHub
     if (!targetUser) {
-      res.status(404).json({ error: "El usuario de GitHub no está registrado en TeamFlow" });
+      try {
+        const ghRes = await fetch(`https://api.github.com/users/${githubUsername}`);
+        if (!ghRes.ok) {
+          res.status(404).json({ error: "El usuario de GitHub no existe" });
+          return;
+        }
+        const ghData = await ghRes.json();
+        
+        if (!ghData.email) {
+          res.status(400).json({ error: "El usuario no está registrado en TeamFlow y su email de GitHub es privado. No es posible enviarle una invitación." });
+          return;
+        }
+        
+        targetEmail = ghData.email;
+        targetName = ghData.name || githubUsername;
+      } catch (err) {
+        res.status(500).json({ error: "Error de red al consultar GitHub API" });
+        return;
+      }
+    }
+
+    if (!targetEmail) {
+      res.status(400).json({ error: "El usuario no tiene un email configurado ni público" });
       return;
     }
 
-    // Generate signed token
+    // Generate signed token. We use githubUsername for verification instead of ID
+    // since the user might not be registered yet.
     const exp = Date.now() + 24 * 60 * 60 * 1000; // 1 day
-    const payload = { workspaceId, targetUserId: targetUser.id, exp };
+    const payload = { workspaceId, githubUsername: githubUsername.toLowerCase(), exp };
     const data = Buffer.from(JSON.stringify(payload)).toString("base64");
     const signature = crypto.createHmac("sha256", process.env.SESSION_SECRET || "default_secret").update(data).digest("hex");
     const token = `${data}.${signature}`;
@@ -178,13 +205,9 @@ router.post("/:id/invite-github", async (req: AuthedRequest, res: Response) => {
     const appUrl = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:5173");
     const inviteUrl = `${appUrl}/workspaces?accept_github_invite=${token}`;
 
-    if (targetUser.email) {
-      const emailData = githubInviteEmail(targetUser.name, workspace.name, inviteUrl);
-      await sendEmail(targetUser.email, emailData.subject, "Invitación", emailData.html);
-      res.json({ success: true, message: "Invitación enviada por correo" });
-    } else {
-      res.status(400).json({ error: "El usuario no tiene un email configurado" });
-    }
+    const emailData = githubInviteEmail(targetName, workspace.name, inviteUrl);
+    await sendEmail(targetEmail, emailData.subject, "Invitación", emailData.html);
+    res.json({ success: true, message: "Invitación enviada por correo exitosamente" });
   } catch (error) {
     res.status(500).json({ error: "Error al enviar invitación" });
   }
@@ -219,8 +242,10 @@ router.post("/accept-github-invite", async (req: AuthedRequest, res: Response) =
       return;
     }
 
-    if (payload.targetUserId !== userId) {
-      res.status(403).json({ error: "Esta invitación no es para ti" });
+    const [currentUser] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+    
+    if (!currentUser.githubUsername || currentUser.githubUsername.toLowerCase() !== payload.githubUsername) {
+      res.status(403).json({ error: `Esta invitación es para el usuario de GitHub '${payload.githubUsername}'. Asegúrate de tener este usuario vinculado a tu perfil.` });
       return;
     }
 
