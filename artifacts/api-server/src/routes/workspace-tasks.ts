@@ -5,7 +5,7 @@ import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 
-import { sendEmail } from "../services/email";
+import { sendEmail, taskAssignedEmail, taskCompletedEmail } from "../services/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -62,11 +62,8 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     // Notify user via email
     const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, assignedTo));
     if (userRecord && userRecord.email) {
-      await sendEmail(
-        userRecord.email,
-        "Nueva Tarea Asignada",
-        `Hola ${userRecord.name},\n\nSe te ha asignado una nueva tarea: "${title}".\nFecha límite: ${dueDate ? new Date(dueDate).toLocaleString() : 'Sin fecha límite'}\n\nRevisa la plataforma para más detalles.\n\nSaludos,\nEl equipo de TeamFlow`
-      );
+      const emailData = taskAssignedEmail(userRecord.name, title, type, dueDate);
+      await sendEmail(userRecord.email, emailData.subject, `Nueva tarea: ${title}`, emailData.html);
     }
 
     res.status(201).json(task);
@@ -146,11 +143,8 @@ router.post("/:id/complete", async (req: AuthedRequest, res: Response) => {
     const [assignee] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     const [assigner] = await db.select().from(usersTable).where(eq(usersTable.id, task.assignedBy));
     if (assigner && assigner.email) {
-      await sendEmail(
-        assigner.email,
-        "Tarea Completada",
-        `Hola ${assigner.name},\n\n${assignee?.name || 'Un miembro'} ha completado la tarea: "${task.title}".\n${commitSha ? `Commit SHA: ${commitSha}` : ''}\n\nRevisa la plataforma para validar.\n\nSaludos,\nEl equipo de TeamFlow`
-      );
+      const emailData = taskCompletedEmail(assigner.name, assignee?.name || 'Un miembro', task.title, commitSha);
+      await sendEmail(assigner.email, emailData.subject, `${assignee?.name} completó la tarea ${task.title}`, emailData.html);
     }
 
     res.json(updated);

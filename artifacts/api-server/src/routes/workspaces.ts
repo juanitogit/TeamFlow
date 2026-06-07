@@ -5,7 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
-import { sendEmail } from "../services/email";
+import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail } from "../services/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -104,14 +104,11 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
       role: "member",
     });
 
-    // Notify user via email (mock)
+    // Notify user via email
     const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (userRecord && userRecord.email) {
-      await sendEmail(
-        userRecord.email,
-        "¡Bienvenido al Workspace!",
-        `Hola ${userRecord.name},\n\nTe has unido exitosamente al workspace "${workspace.name}".\n\nSaludos,\nEl equipo de TeamFlow`
-      );
+      const emailData = joinedWorkspaceEmail(userRecord.name, workspace.name);
+      await sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html);
     }
 
     res.json({ success: true, message: "Joined workspace", workspace });
@@ -202,11 +199,8 @@ router.delete("/:id/members/:memberId", async (req: AuthedRequest, res: Response
 
     // Notify removed member via email
     if (removedUser && removedUser.email) {
-      await sendEmail(
-        removedUser.email,
-        "Has sido removido de un workspace",
-        `Hola ${removedUser.name},\n\nTe informamos que has sido removido del workspace "${workspace?.name || 'desconocido'}".\n\nSi crees que esto fue un error, contacta al líder del equipo.\n\nSaludos,\nEl equipo de TeamFlow`
-      );
+      const emailData = memberRemovedEmail(removedUser.name, workspace?.name || 'desconocido');
+      await sendEmail(removedUser.email, emailData.subject, `Fuiste removido del workspace ${workspace?.name}`, emailData.html);
     }
 
     res.json({ success: true, message: "Miembro eliminado" });
@@ -248,12 +242,10 @@ router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Resp
 
     // Notify user via email
     const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, memberId));
+    const [ws] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
     if (userRecord && userRecord.email) {
-      await sendEmail(
-        userRecord.email,
-        "Tu rol ha cambiado",
-        `Hola ${userRecord.name},\n\nTu rol en el workspace ha sido actualizado a: ${role}.\n\nSaludos,\nEl equipo de TeamFlow`
-      );
+      const emailData = roleChangedEmail(userRecord.name, role, ws?.name || 'Workspace');
+      await sendEmail(userRecord.email, emailData.subject, `Tu rol cambió a ${role}`, emailData.html);
     }
 
     res.json({ success: true, message: "Rol actualizado" });
