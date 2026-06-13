@@ -461,7 +461,8 @@ export function Team() {
                 </Button>
               </div>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </>
         )}
       </div>
 
