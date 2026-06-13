@@ -529,9 +529,9 @@ router.patch("/:id/members/:memberId/score", async (req: AuthedRequest, res: Res
       return;
     }
 
-    await db.update(workspaceMembersTable)
+    await db.update(usersTable)
       .set({ performanceScore: score })
-      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, memberId)));
+      .where(eq(usersTable.id, memberId));
 
     res.json({ success: true, message: "Score actualizado" });
   } catch (error) {
@@ -605,7 +605,7 @@ router.get("/:id/reports/csv", async (req: AuthedRequest, res: Response) => {
     const members = await db.select({
       name: usersTable.name,
       role: workspaceMembersTable.role,
-      performanceScore: workspaceMembersTable.performanceScore,
+      performanceScore: usersTable.performanceScore,
       healthPoints: usersTable.healthPoints
     })
       .from(workspaceMembersTable)
