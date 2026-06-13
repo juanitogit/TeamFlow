@@ -128,17 +128,21 @@ export function Workspaces() {
 
   return (
     <div className="min-h-screen bg-cloud p-4 md:p-8 flex flex-col items-center">
-      <div className="w-full max-w-4xl flex justify-between items-center mb-12">
+      <div className="w-full max-w-4xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-            {user?.name?.charAt(0).toUpperCase()}
+          <div className="h-12 w-12 shrink-0 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold overflow-hidden shadow-sm">
+            {user?.avatarUrl ? (
+              <img src={user?.avatarUrl} alt={user?.name} className="h-full w-full object-cover" />
+            ) : (
+              user?.name?.charAt(0).toUpperCase()
+            )}
           </div>
           <div>
-            <h2 className="font-semibold text-ink leading-tight">Bienvenido, {user?.name}</h2>
+            <h2 className="font-semibold text-ink leading-tight text-lg">Bienvenido, {user?.name}</h2>
             <p className="text-sm text-slate">Selecciona un Espacio de Trabajo para continuar</p>
           </div>
         </div>
-        <Button variant="ghost" onClick={logout} className="text-slate hover:text-red-500">
+        <Button variant="ghost" onClick={logout} className="text-slate hover:text-red-500 self-end sm:self-auto">
           <LogOut className="h-4 w-4 mr-2" /> Cerrar sesión
         </Button>
       </div>
