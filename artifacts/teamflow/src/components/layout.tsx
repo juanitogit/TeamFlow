@@ -11,7 +11,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const { user, isLoading, logout } = useAuth();
   const [location] = useLocation();
   const { data: workspaces } = useWorkspaces();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -107,50 +106,40 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-          </div>
-        </div>
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t bg-card p-4 space-y-2">
-            {navItems.map((item) => {
-              const isActive = location === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-                  }`}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <div className="pt-4 border-t mt-4 flex flex-col gap-2">
-              {activeWorkspace && (
-                <Button variant="outline" className="w-full justify-center" onClick={() => {
-                  localStorage.removeItem("active_workspace_id");
-                  localStorage.removeItem("active_workspace_role");
-                  window.location.href = "/workspaces";
-                }}>
-                  Cambiar Workspace
-                </Button>
-              )}
-              <Button variant="destructive" className="w-full justify-center" onClick={logout}>
-                Cerrar Sesión
+            <div className="md:hidden flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-full" onClick={logout}>
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
           </div>
-        )}
+        </div>
       </header>
-      <main className="flex-1 w-full max-w-[1200px] mx-auto p-4 md:p-8">
+      
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-snow/90 backdrop-blur-md border-t border-mist pb-safe">
+        <div className="flex justify-around items-center h-16 px-2">
+          {navItems.map((item) => {
+            const isActive = location === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+                  isActive
+                    ? "text-primary"
+                    : "text-slate-400 hover:text-slate-900"
+                }`}
+              >
+                <motion.div whileTap={{ scale: 0.9 }}>
+                  <item.icon className={`h-5 w-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+                </motion.div>
+                <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''}`}>{item.label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+      <main className="flex-1 w-full max-w-[1200px] mx-auto p-4 pb-24 md:p-8 md:pb-8">
         {children}
       </main>
     </div>

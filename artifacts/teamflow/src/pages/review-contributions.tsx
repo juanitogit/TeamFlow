@@ -103,7 +103,7 @@ export function ReviewContributions() {
                       </CardDescription>
                     </div>
                   </div>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 uppercase tracking-widest text-[10px]">
+                  <Badge variant="outline" className="bg-slate-50 text-slate-700 border-slate-200 uppercase tracking-widest text-[10px]">
                     Pendiente
                   </Badge>
                 </div>

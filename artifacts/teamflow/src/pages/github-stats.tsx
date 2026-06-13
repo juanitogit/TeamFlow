@@ -206,7 +206,7 @@ export function GithubStats() {
               </div>
             </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-amber-50 rounded-[24px] p-6 transition-all border border-amber-100/50">
+            <motion.div whileHover={{ y: -4 }} className="bg-slate-50 rounded-[24px] p-6 transition-all border border-slate-200/50">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Top Contribuyente</span>
                 <div className="bg-snow p-2 rounded-full shadow-sm">

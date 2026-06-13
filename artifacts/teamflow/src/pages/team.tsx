@@ -347,7 +347,7 @@ export function Team() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
-              <div className="bg-snow border border-mist rounded-3xl-3 shadow-sm overflow-hidden h-full flex flex-col">
+              <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col">
                 <div className="p-6 border-b border-mist/50">
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex items-center gap-4 overflow-hidden flex-1">
@@ -399,7 +399,7 @@ export function Team() {
                         <span className="text-xs font-medium text-slate flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-emerald-500" /> Puntos de Salud</span>
                         <span className={`text-sm font-bold ${member.healthPoints >= 70 ? 'text-emerald-500' : member.healthPoints >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{member.healthPoints}</span>
                       </div>
-                      <Progress value={member.healthPoints} className={`h-2 rounded-full ${member.healthPoints >= 70 ? 'bg-emerald-100 [&>div]:bg-emerald-500' : member.healthPoints >= 40 ? 'bg-amber-100 [&>div]:bg-amber-500' : 'bg-red-100 [&>div]:bg-red-500'}`} />
+                      <Progress value={member.healthPoints} className={`h-2 rounded-full ${member.healthPoints >= 70 ? 'bg-emerald-100 [&>div]:bg-emerald-500' : member.healthPoints >= 40 ? 'bg-slate-200 [&>div]:bg-slate-500' : 'bg-red-100 [&>div]:bg-red-500'}`} />
                     </div>
                   </div>
                   
@@ -408,7 +408,7 @@ export function Team() {
                       <div className="text-[10px] text-slate uppercase tracking-wider font-semibold">Aprobados</div>
                       <div className="text-xl font-bold text-emerald-500">{member.contributions?.approved || 0}</div>
                     </div>
-                    <div className="bg-amber-50/50 p-2 rounded-[12px]">
+                    <div className="bg-slate-50/50 p-2 rounded-[12px]">
                       <div className="text-[10px] text-slate uppercase tracking-wider font-semibold">Pendientes</div>
                       <div className="text-xl font-bold text-amber-500">{member.contributions?.pending || 0}</div>
                     </div>

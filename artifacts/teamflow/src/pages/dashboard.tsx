@@ -1,9 +1,11 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { useGetPerformanceDashboard, getGetPerformanceDashboardQueryKey } from "@workspace/api-client-react";
 import { useContributions, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +19,20 @@ export function Dashboard() {
   const [_, setLocation] = useLocation();
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
   const [workspaceRole, setWorkspaceRole] = useState<string>("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (containerRef.current) {
+      gsap.from(".gsap-fade-up", {
+        y: 40,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power3.out",
+        clearProps: "all"
+      });
+    }
+  }, { scope: containerRef });
 
   useEffect(() => {
     if (!authLoading) {
@@ -80,7 +96,7 @@ export function Dashboard() {
   const approvedContributions = contributions?.filter((c: any) => c.status === "approved").length || 0;
 
   return (
-    <div className="space-y-8 pb-8">
+    <div ref={containerRef} className="space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
@@ -112,7 +128,7 @@ export function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Puntos de Salud</span>
             <div className="bg-snow p-2 rounded-full shadow-sm">
@@ -126,7 +142,7 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Score de Rendimiento</span>
             <div className="bg-snow p-2 rounded-full shadow-sm">
@@ -140,7 +156,7 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
             <div className="bg-snow p-2 rounded-full shadow-sm">
@@ -153,7 +169,7 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="bg-amber-50 rounded-[24px] p-6 transition-all border border-amber-100/50">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
             <div className="bg-snow p-2 rounded-full shadow-sm">
@@ -167,8 +183,8 @@ export function Dashboard() {
         </motion.div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-7">
-        <div className="md:col-span-4 bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm">
           <div className="flex flex-col mb-6">
             <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
               <BarChart3 className="mr-3 h-6 w-6 text-primary" />
@@ -227,7 +243,7 @@ export function Dashboard() {
                       <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider rounded-full ${
                         contrib.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                         contrib.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 
-                        'bg-amber-50 text-amber-700 border-amber-200'
+                        'bg-slate-50 text-slate-700 border-slate-200'
                       }`}>
                         {contrib.status === 'approved' ? 'Aprobado' : contrib.status === 'rejected' ? 'Rechazado' : 'Pendiente'}
                       </Badge>
