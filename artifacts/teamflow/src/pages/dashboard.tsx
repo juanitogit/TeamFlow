@@ -97,12 +97,12 @@ export function Dashboard() {
 
   return (
     <div ref={containerRef} className="space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
-      <div className="flex flex-col items-center justify-center text-center gap-4 mb-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
-          <div className="flex items-center justify-center gap-3 mt-3">
+          <div className="flex items-center gap-3 mt-2">
             {activeWorkspace && (
-              <span className="flex items-center justify-center gap-2.5 text-xl font-semibold text-slate dark:text-slate-300">
+              <span className="flex items-center gap-2.5 text-xl font-semibold text-slate dark:text-slate-300">
                 {activeWorkspace.workspace.imageUrl ? (
                   <div className="h-10 w-10 rounded-full overflow-hidden border border-mist shadow-sm flex items-center justify-center bg-white">
                     <img src={activeWorkspace.workspace.imageUrl} alt="Workspace Logo" className="h-full w-full object-cover" />
@@ -115,7 +115,7 @@ export function Dashboard() {
             )}
           </div>
         </div>
-        <div className="flex gap-3 mt-2">
+        <div className="flex gap-3">
           <Button onClick={() => setLocation("/contributions/new")} className="btn-pill bg-primary hover:bg-primary/90 text-snow shadow-xl-2 px-6">
             <Plus className="h-4 w-4 mr-2" />
             Registrar Aporte
@@ -133,64 +133,60 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="bg-snow rounded-[32px] border border-mist shadow-sm relative overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 lg:divide-x divide-mist">
-          
-          <div className="p-8 hover:bg-mist/10 transition-colors">
-            <div className="flex flex-row items-center justify-between pb-4">
-              <span className="text-sm font-medium text-slate">Puntos de Salud</span>
-              <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
-                <Heart className="h-4 w-4 text-emerald-500" />
-              </div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-emerald-500">{dashboard.healthPoints}</div>
-              <p className="text-xs text-slate mt-2 leading-relaxed">Mide la constancia y calidad de tus aportes recientes.</p>
-              <Progress value={dashboard.healthPoints} className="h-2 mt-4 bg-emerald-100 [&>div]:bg-emerald-500 rounded-full" />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Puntos de Salud</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <Heart className="h-4 w-4 text-emerald-500" />
             </div>
           </div>
+          <div>
+            <div className="text-4xl font-bold text-emerald-500">{dashboard.healthPoints}</div>
+            <p className="text-xs text-slate mt-1 leading-tight">Mide la constancia y calidad de tus aportes recientes.</p>
+            <Progress value={dashboard.healthPoints} className="h-2 mt-4 bg-emerald-100 [&>div]:bg-emerald-500 rounded-full" />
+          </div>
+        </motion.div>
 
-          <div className="p-8 hover:bg-mist/10 transition-colors">
-            <div className="flex flex-row items-center justify-between pb-4">
-              <span className="text-sm font-medium text-slate">Score Rendimiento</span>
-              <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary">{Math.round(dashboard.performanceScore)}%</div>
-              <p className="text-xs text-slate mt-2 leading-relaxed">Evaluación global de tu desempeño y tareas completadas.</p>
-              <Progress value={dashboard.performanceScore} className="h-2 mt-4 bg-primary/10 [&>div]:bg-primary rounded-full" />
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Score de Rendimiento</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <TrendingUp className="h-4 w-4 text-primary" />
             </div>
           </div>
+          <div>
+            <div className="text-4xl font-bold text-primary">{Math.round(dashboard.performanceScore)}%</div>
+            <p className="text-xs text-slate mt-1 leading-tight">Evaluación global de tu desempeño y tareas completadas.</p>
+            <Progress value={dashboard.performanceScore} className="h-2 mt-4 bg-primary/10 [&>div]:bg-primary rounded-full" />
+          </div>
+        </motion.div>
 
-          <div className="p-8 hover:bg-mist/10 transition-colors">
-            <div className="flex flex-row items-center justify-between pb-4">
-              <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
-              <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
-                <CheckCircle2 className="h-4 w-4 text-[#fe81e4]" />
-              </div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-ink mt-2">{approvedContributions}</div>
-              <p className="text-xs text-slate mt-2">Validados por líderes</p>
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <CheckCircle2 className="h-4 w-4 text-[#fe81e4]" />
             </div>
           </div>
+          <div>
+            <div className="text-4xl font-bold text-ink mt-2">{approvedContributions}</div>
+            <p className="text-xs text-slate mt-1">Validados por líderes</p>
+          </div>
+        </motion.div>
 
-          <div className="p-8 hover:bg-mist/10 transition-colors">
-            <div className="flex flex-row items-center justify-between pb-4">
-              <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
-              <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
-                <AlertCircle className="h-4 w-4 text-[#fda900]" />
-              </div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-ink mt-2">{pendingContributions}</div>
-              <p className="text-xs text-slate mt-2">Esperando revisión</p>
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <AlertCircle className="h-4 w-4 text-[#fda900]" />
             </div>
           </div>
-
-        </div>
+          <div>
+            <div className="text-4xl font-bold text-ink mt-2">{pendingContributions}</div>
+            <p className="text-xs text-slate mt-1">Esperando revisión</p>
+          </div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

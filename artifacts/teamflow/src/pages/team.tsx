@@ -677,41 +677,40 @@ export function Team() {
 
       {/* Workspace Config (Repos) */}
       {isMainLeader && workspaceId && activeWorkspace && (
-        <Card className="mt-12 border-mist bg-snow rounded-[32px] overflow-hidden shadow-sm">
-          <CardHeader className="bg-white/50 border-b border-mist/50 p-6 md:px-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Card className="mt-12 border-mist">
+          <CardHeader>
+            <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-xl font-bold flex items-center gap-2.5 text-ink"><Settings className="h-6 w-6 text-primary" /> Configuración del Workspace</CardTitle>
-                <CardDescription className="text-slate mt-1 text-sm">Gestiona los repositorios de GitHub vinculados a este espacio.</CardDescription>
+                <CardTitle className="text-lg flex items-center gap-2"><Settings className="h-5 w-5 text-slate" /> Configuración del Workspace</CardTitle>
+                <CardDescription>Gestiona los repositorios de GitHub vinculados a este espacio.</CardDescription>
               </div>
-              <Button variant={editingRepos ? "outline" : "default"} className={editingRepos ? "bg-white" : "bg-primary text-white rounded-full px-6 shadow-sm"} onClick={() => setEditingRepos(!editingRepos)}>
+              <Button variant="outline" onClick={() => setEditingRepos(!editingRepos)}>
                 {editingRepos ? "Cancelar" : "Editar Configuración"}
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="p-6 md:p-8">
+          <CardContent>
             {editingRepos ? (
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate">Nombre del Workspace</label>
-                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="bg-white rounded-xl shadow-sm border-mist" />
+                  <label className="text-sm font-medium">Nombre del Workspace</label>
+                  <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate">Descripción</label>
-                  <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} className="bg-white rounded-xl shadow-sm border-mist" />
+                  <label className="text-sm font-medium">Descripción</label>
+                  <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate">Logo del Workspace (Opcional)</label>
+                  <label className="text-sm font-medium">Logo del Workspace (Opcional)</label>
                   <div className="flex items-center gap-4">
                     {editImageUrl && (
-                      <div className="h-16 w-16 rounded-xl overflow-hidden border border-mist shrink-0 shadow-sm">
+                      <div className="h-12 w-12 rounded-lg overflow-hidden border border-mist shrink-0">
                         <img src={editImageUrl} alt="Preview" className="h-full w-full object-cover" />
                       </div>
                     )}
                     <Input 
                       type="file" 
                       accept="image/*"
-                      className="bg-white rounded-xl shadow-sm border-mist file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
@@ -726,11 +725,11 @@ export function Team() {
                   </div>
                 </div>
                 
-                <div className="space-y-4 pt-6 border-t border-mist/50">
-                  <label className="text-sm font-medium text-slate block">Repositorios de GitHub</label>
+                <div className="space-y-2 pt-4 border-t">
+                  <label className="text-sm font-medium">Repositorios de GitHub</label>
                   <div className="space-y-3">
                     {repos.map((repo, i) => (
-                      <div key={i} className="flex gap-3">
+                      <div key={i} className="flex gap-2">
                         <Input 
                           value={repo} 
                           onChange={(e) => {
@@ -739,67 +738,53 @@ export function Team() {
                             setRepos(newRepos);
                           }} 
                           placeholder="https://github.com/org/repo" 
-                          className="bg-white rounded-xl shadow-sm border-mist"
                         />
-                        <Button variant="outline" className="rounded-xl border-red-200 bg-red-50 hover:bg-red-100 hover:text-red-600 text-red-500" onClick={() => setRepos(repos.filter((_, idx) => idx !== i))}>
-                          X
+                        <Button variant="outline" size="icon" onClick={() => setRepos(repos.filter((_, idx) => idx !== i))}>
+                          <span className="text-red-500 font-bold">X</span>
                         </Button>
                       </div>
                     ))}
-                    <div className="flex gap-2 pt-2">
-                      <Button variant="outline" className="w-full text-slate border-dashed border-2 rounded-xl h-12 bg-transparent hover:bg-slate-50" onClick={() => setRepos([...repos, ""])}>
+                    <div className="flex gap-2">
+                      <Button variant="outline" className="w-full text-slate" onClick={() => setRepos([...repos, ""])}>
                         <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
                       </Button>
                     </div>
-                    <div className="pt-4 flex justify-end">
-                      <Button className="rounded-full px-8 shadow-sm bg-primary text-white hover:bg-primary/90" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc, imageUrl: editImageUrl })}>
-                        {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
-                      </Button>
-                    </div>
+                    <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc, imageUrl: editImageUrl })}>
+                      {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
+                    </Button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="space-y-8">
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <h4 className="text-sm font-medium text-slate mb-1">Nombre</h4>
-                    <p className="text-ink font-semibold text-lg">{activeWorkspace.workspace.name}</p>
+                    <p className="text-ink font-semibold">{activeWorkspace.workspace.name}</p>
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-slate mb-1">Descripción</h4>
-                    <p className="text-ink">{activeWorkspace.workspace.description || "Sin descripción"}</p>
+                    <p className="text-ink text-sm">{activeWorkspace.workspace.description || "Sin descripción"}</p>
                   </div>
                 </div>
                 
-                <div className="space-y-4 pt-6 border-t border-mist">
+                <div className="space-y-3 pt-4 border-t border-mist">
                   <h4 className="text-sm font-medium text-slate">Repositorios</h4>
                   {repos.length === 0 ? (
-                    <div className="bg-white rounded-xl border border-dashed border-mist p-8 text-center">
-                      <Github className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                      <p className="text-sm text-slate">No hay repositorios vinculados a este workspace.</p>
-                    </div>
+                    <p className="text-sm text-slate italic">No hay repositorios vinculados.</p>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {repos.map((repo, i) => (
-                        <div key={i} className="flex flex-col gap-3 p-5 bg-white rounded-2xl border border-mist shadow-sm hover:border-primary/30 transition-colors">
-                          <div className="flex items-center gap-2 text-ink">
-                            <Github className="h-5 w-5" />
-                            <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm font-medium hover:text-primary transition-colors truncate" title={repo}>
-                              {repo.replace("https://github.com/", "")}
-                            </a>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs mt-auto">
-                            <span className="bg-primary/5 text-primary px-2.5 py-1 rounded-full font-medium">
-                              <strong>{Math.floor(Math.random() * 50) + 10}</strong> commits (Semana)
-                            </span>
-                            <span className="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full font-medium">
-                              <strong>{Math.floor(Math.random() * 5) + 1}</strong> PRs Activos
-                            </span>
-                          </div>
+                    repos.map((repo, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                        <Github className="h-5 w-5 text-slate" />
+                        <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
+                          {repo.replace("https://github.com/", "")}
+                        </a>
+                        <div className="ml-auto text-xs text-slate flex gap-4">
+                          <span><strong className="text-ink">{Math.floor(Math.random() * 50) + 10}</strong> commits (Semana)</span>
+                          <span><strong className="text-emerald-500">{Math.floor(Math.random() * 5) + 1}</strong> PRs Activos</span>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))
                   )}
                 </div>
               </div>

@@ -106,29 +106,27 @@ export function Tasks() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-      <div className="flex flex-col gap-6 items-center text-center">
-        <div className="flex flex-col items-center">
-          <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
-            <ListTodo className="h-8 w-8 text-primary" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
+            <ListTodo className="h-7 w-7 text-primary" />
             Mis Tareas
           </h1>
-          <p className="text-slate mt-2 text-sm max-w-md">Gestiona el trabajo que te han asignado en este workspace</p>
+          <p className="text-slate mt-1 text-sm">Gestiona el trabajo que te han asignado en este workspace</p>
         </div>
         
-        <div className="w-full">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full bg-white shadow-sm h-12 text-base rounded-2xl border-mist justify-center text-center gap-2">
-              <SelectValue placeholder="Filtrar por estado" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todas las Tareas</SelectItem>
-              <SelectItem value="pendiente">Pendientes</SelectItem>
-              <SelectItem value="en_progreso">En Progreso</SelectItem>
-              <SelectItem value="en_revision">En Revisión</SelectItem>
-              <SelectItem value="completada">Completadas</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-[180px] bg-card shadow-sm">
+            <SelectValue placeholder="Filtrar por estado" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todas</SelectItem>
+            <SelectItem value="pendiente">Pendientes</SelectItem>
+            <SelectItem value="en_progreso">En Progreso</SelectItem>
+            <SelectItem value="en_revision">En Revisión</SelectItem>
+            <SelectItem value="completada">Completadas</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {!workspaceId ? (
