@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Plus, Users, FolderKanban, LogOut, Copy } from "lucide-react";
+import { Plus, Users, FolderKanban, LogOut, Copy, Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -179,27 +179,13 @@ export function Workspaces() {
                   {membership.workspace.description || "Sin descripción."}
                 </p>
               </div>
-              <div className="p-4 border-t border-mist bg-cloud/50 flex justify-between items-center relative z-10">
+              <div className="p-4 border-t border-mist bg-cloud/50 flex justify-between items-center relative z-10 group-hover:bg-primary/5 transition-colors">
                 <div className="text-xs text-slate font-medium flex items-center">
-                  <Users className="h-3.5 w-3.5 mr-1.5 opacity-70" />
-                  ID: {membership.workspaceId}
+                  <Calendar className="h-3.5 w-3.5 mr-1.5 opacity-70" />
+                  Unido: {new Date(membership.joinedAt).toLocaleDateString()}
                 </div>
-                <div className="flex items-center gap-2">
-                  {membership.role === "leader" && (
-                    <Button variant="ghost" size="sm" className="h-8 text-xs hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/20" onClick={(e) => {
-                      e.stopPropagation();
-                      navigator.clipboard.writeText(membership.workspace.inviteCode);
-                      toast({ title: "¡Invitación copiada!" });
-                    }}>
-                      <Copy className="h-3 w-3 mr-1.5" /> Código
-                    </Button>
-                  )}
-                  <Button size="sm" className="h-8 text-xs rounded-lg shadow-sm" onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectWorkspace(membership.workspaceId, membership.role);
-                  }}>
-                    Entrar
-                  </Button>
+                <div className="flex items-center gap-1 text-primary font-medium text-[11px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+                  Ingresar <ArrowRight className="h-3.5 w-3.5" />
                 </div>
               </div>
             </div>

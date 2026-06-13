@@ -102,13 +102,13 @@ export function Dashboard() {
           <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
           <div className="flex items-center gap-3 mt-2">
             {activeWorkspace && (
-              <span className="flex items-center gap-2 text-lg font-semibold text-slate dark:text-slate-300">
+              <span className="flex items-center gap-2.5 text-xl font-semibold text-slate dark:text-slate-300">
                 {activeWorkspace.workspace.imageUrl ? (
-                  <div className="h-6 w-6 rounded-full overflow-hidden border border-mist shadow-sm">
+                  <div className="h-10 w-10 rounded-full overflow-hidden border border-mist shadow-sm flex items-center justify-center bg-white">
                     <img src={activeWorkspace.workspace.imageUrl} alt="Workspace Logo" className="h-full w-full object-cover" />
                   </div>
                 ) : (
-                  <Briefcase className="h-5 w-5 text-primary" />
+                  <Briefcase className="h-6 w-6 text-primary" />
                 )}
                 {activeWorkspace.workspace.name}
               </span>

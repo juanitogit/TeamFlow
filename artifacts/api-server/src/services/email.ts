@@ -268,6 +268,53 @@ export function githubInviteEmail(userName: string, workspaceName: string, invit
 }
 
 // ─── Main Send Function ─────────────────────────────────────
+export function contributionSubmittedEmail(userName: string, workspaceName: string, message: string): { subject: string; html: string } {
+  const appUrl = getAppUrl();
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Nuevo Aporte Registrado</h1>
+    <p style="margin:0 0 24px;font-size:16px;color:#535768;line-height:1.6;">
+      Hola, <strong style="color:#333333;">${userName}</strong> ha registrado un nuevo aporte en el workspace <strong>"${workspaceName}"</strong>:
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="background-color:#ffffff;border:1px solid #d0d4e4;border-radius:16px;padding:24px;">
+          <p style="margin:0;font-size:16px;color:#333333;">${message}</p>
+        </td>
+      </tr>
+    </table>
+
+    ${button("Revisar Aporte", appUrl + "/dashboard")}
+  `;
+  return { subject: `Nuevo aporte de ${userName} en "${workspaceName}"`, html: emailLayout(content) };
+}
+
+export function contributionReviewedEmail(userName: string, workspaceName: string, status: string, message: string): { subject: string; html: string } {
+  const appUrl = getAppUrl();
+  const isApproved = status === 'approved';
+  const color = isApproved ? '#bcfe90' : '#fcd0f8';
+  const label = isApproved ? 'Aprobado' : 'Rechazado';
+  
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Aporte Revisado</h1>
+    <p style="margin:0 0 24px;font-size:16px;color:#535768;line-height:1.6;">
+      Hola <strong style="color:#333333;">${userName}</strong>, tu aporte en <strong>"${workspaceName}"</strong> ha sido revisado.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="text-align:center;padding:20px 24px;background-color:${color}30;border:1px solid ${color}60;border-radius:16px;">
+          <p style="margin:0;font-size:20px;font-weight:600;color:#333333;">Estado: ${label}</p>
+          <p style="margin:12px 0 0;font-size:16px;color:#535768;">${message}</p>
+        </td>
+      </tr>
+    </table>
+
+    ${button("Ver mis Aportes", appUrl + "/dashboard")}
+  `;
+  return { subject: `Tu aporte fue ${label.toLowerCase()} en "${workspaceName}"`, html: emailLayout(content) };
+}
+
 export async function sendEmail(to: string, subject: string, body: string, html?: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log("\n=======================================================");

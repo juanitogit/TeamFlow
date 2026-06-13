@@ -1,9 +1,10 @@
 // @ts-nocheck
 import { Router, Request, Response } from "express";
-import { db, contributionsTable, workspaceMembersTable, usersTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { db, contributionsTable, workspaceMembersTable, usersTable, workspacesTable } from "@workspace/db";
+import { eq, and, desc, inArray } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
+import { sendEmail, contributionSubmittedEmail, contributionReviewedEmail } from "../services/email";
 
 const router = Router();
 router.use(requireAuth);
@@ -47,6 +48,32 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
       evidenceUrls: evidenceUrls || [],
       status: "pending",
     }).returning();
+
+    try {
+      const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+      const [wsInfo] = await db.select({ name: workspacesTable.name }).from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
+      
+      const leaders = await db.select({ email: usersTable.email })
+        .from(workspaceMembersTable)
+        .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
+        .where(
+          and(
+            eq(workspaceMembersTable.workspaceId, workspaceId),
+            inArray(workspaceMembersTable.role, ["leader", "co-leader"])
+          )
+        );
+        
+      if (user && wsInfo && leaders.length > 0) {
+        const emailData = contributionSubmittedEmail(user.name, wsInfo.name, commitMessage);
+        for (const leader of leaders) {
+          if (leader.email) {
+            await sendEmail(leader.email, emailData.subject, emailData.subject, emailData.html);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to send contribution email", e);
+    }
 
     res.status(201).json(contribution);
   } catch (error) {
@@ -150,6 +177,21 @@ router.post("/:id/review", async (req: AuthedRequest, res: Response) => {
           .set({ performanceScore: user.performanceScore + 10 }) // Simple +10 points
           .where(eq(usersTable.id, user.id));
       }
+    }
+    try {
+      const [user] = await db.select().from(usersTable).where(eq(usersTable.id, contribution.userId));
+      const [wsInfo] = await db.select({ name: workspacesTable.name }).from(workspacesTable).where(eq(workspacesTable.id, contribution.workspaceId));
+      if (user && user.email && wsInfo) {
+        const emailData = contributionReviewedEmail(
+          user.name, 
+          wsInfo.name, 
+          parse.data.status, 
+          parse.data.reviewComment || "No se dejó comentario adicional."
+        );
+        await sendEmail(user.email, emailData.subject, emailData.subject, emailData.html);
+      }
+    } catch (e) {
+      console.error("Failed to send review email", e);
     }
 
     res.json(updated);
