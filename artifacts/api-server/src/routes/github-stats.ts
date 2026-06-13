@@ -8,7 +8,7 @@ const router = Router();
 router.use(requireAuth);
 
 // Fetch commits from a GitHub repo using the GitHub API
-async function fetchGithubCommits(repoUrl: string, since?: string, until?: string): Promise<any[]> {
+export async function fetchGithubCommits(repoUrl: string, since?: string, until?: string): Promise<any[]> {
   // Extract owner/repo from URL like https://github.com/owner/repo
   const match = repoUrl.replace(/\.git$/, "").match(/github\.com\/([^\/]+)\/([^\/]+)/);
   if (!match) return [];

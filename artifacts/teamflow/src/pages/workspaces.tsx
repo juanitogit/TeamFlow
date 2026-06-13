@@ -11,7 +11,7 @@ import { useWorkspaces, useCreateWorkspace, useJoinWorkspace } from "@/hooks/use
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
+import { LogoLoader } from "@/components/logo-loader";
 function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
 }
@@ -123,7 +123,7 @@ export function Workspaces() {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Cargando espacios de trabajo...</div>;
+    return <LogoLoader text="Cargando espacios de trabajo..." />;
   }
 
   return (
@@ -161,7 +161,7 @@ export function Workspaces() {
                     <FolderKanban className="h-6 w-6 text-primary drop-shadow-sm" />
                   </div>
                   <span className={`text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
-                    membership.role === 'leader' ? 'bg-gradient-to-r from-primary to-[#fe81e4] text-white shadow-md' :
+                    membership.role === 'leader' ? 'bg-gradient-to-r from-[#8b5cf6] to-[#4f46e5] text-white shadow-md' :
                     membership.role === 'co-leader' ? 'bg-primary/10 text-primary border border-primary/20' :
                     'bg-slate-100 text-slate-600 border border-slate-200'
                   }`}>

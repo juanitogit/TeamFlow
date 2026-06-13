@@ -7,6 +7,9 @@ import { z } from "zod";
 import crypto from "crypto";
 import ExcelJS from "exceljs";
 import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail, githubInviteEmail } from "../services/email";
+import { fetchGithubCommits } from "./github-stats";
+import path from "path";
+import fs from "fs";
 
 const router = Router();
 router.use(requireAuth);
@@ -607,6 +610,7 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
 
     const members = await db.select({
       name: usersTable.name,
+      githubUsername: usersTable.githubUsername,
       role: workspaceMembersTable.role,
       performanceScore: usersTable.performanceScore,
       healthPoints: usersTable.healthPoints
@@ -641,19 +645,53 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
     sheet.getCell("B5").value = leaders || "No asignado";
 
     // Table Headers
-    sheet.getRow(7).values = ["Nombre del Miembro", "Rol en el Equipo", "Score de Rendimiento (%)", "Puntos de Salud"];
+    sheet.getRow(7).values = ["Nombre del Miembro", "Rol en el Equipo", "Score de Rendimiento (%)", "Puntos de Salud", "Commits en GitHub"];
     sheet.getRow(7).font = { bold: true, color: { argb: "FFFFFFFF" } };
     sheet.getRow(7).alignment = { horizontal: "center" };
     
-    const headerColors = ["FF2563EB", "FF3B82F6", "FF10B981", "FF14B8A6"]; // Blues & Emeralds
+    const headerColors = ["FF2563EB", "FF3B82F6", "FF10B981", "FF14B8A6", "FF6366F1"]; // Blues & Emeralds & Indigo
     sheet.getRow(7).eachCell((cell, colNumber) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: headerColors[colNumber - 1] || "FF2563EB" } };
       cell.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
     });
 
+    // Fetch GitHub Commits
+    let repos: string[] = [];
+    try { repos = JSON.parse(workspace?.githubRepos || "[]"); } catch { repos = []; }
+    
+    let allCommits: any[] = [];
+    for (const r of repos) {
+      if (r) {
+        const repoCommits = await fetchGithubCommits(r);
+        allCommits = allCommits.concat(repoCommits);
+      }
+    }
+
+    // Role translations
+    const roleEs: Record<string, string> = {
+      "leader": "Líder",
+      "co-leader": "Co-líder",
+      "member": "Miembro"
+    };
+
+    let totalTeamCommits = 0;
+    let topContributorName = "Nadie";
+    let topContributorCommits = -1;
+
     // Table Data
     members.forEach((m, index) => {
-      const row = sheet.addRow([m.name, m.role, m.performanceScore, m.healthPoints]);
+      // Find user commits
+      let userCommitsCount = 0;
+      if (m.githubUsername) {
+        userCommitsCount = allCommits.filter(c => c?.author?.login?.toLowerCase() === m.githubUsername?.toLowerCase()).length;
+      }
+      totalTeamCommits += userCommitsCount;
+      if (userCommitsCount > topContributorCommits) {
+        topContributorCommits = userCommitsCount;
+        topContributorName = m.name;
+      }
+
+      const row = sheet.addRow([m.name, roleEs[m.role] || "Miembro", m.performanceScore, m.healthPoints, userCommitsCount]);
       row.alignment = { horizontal: "center" };
       row.eachCell((cell) => {
         cell.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
@@ -671,10 +709,11 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
     sheet.getColumn(2).width = 20;
     sheet.getColumn(3).width = 25;
     sheet.getColumn(4).width = 20;
+    sheet.getColumn(5).width = 20;
 
     // Team Performance Summary
     const summaryRow = sheet.rowCount + 3;
-    sheet.mergeCells(`A${summaryRow}:D${summaryRow}`);
+    sheet.mergeCells(`A${summaryRow}:E${summaryRow}`);
     const summaryTitle = sheet.getCell(`A${summaryRow}`);
     summaryTitle.value = "Resumen Global del Equipo";
     summaryTitle.font = { size: 14, bold: true };
@@ -688,6 +727,31 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
     sheet.getCell(`A${summaryRow + 2}`).value = "Promedio Salud:";
     sheet.getCell(`B${summaryRow + 2}`).value = avgHealth.toFixed(1);
     sheet.getCell(`B${summaryRow + 2}`).font = { bold: true, color: { argb: "FF10B981" } };
+
+    sheet.getCell(`D${summaryRow + 1}`).value = "Total Commits:";
+    sheet.getCell(`E${summaryRow + 1}`).value = totalTeamCommits;
+    sheet.getCell(`E${summaryRow + 1}`).font = { bold: true, color: { argb: "FF6366F1" } };
+
+    sheet.getCell(`D${summaryRow + 2}`).value = "Top Contribuyente:";
+    sheet.getCell(`E${summaryRow + 2}`).value = topContributorName;
+    sheet.getCell(`E${summaryRow + 2}`).font = { bold: true, color: { argb: "FF6366F1" } };
+
+    // Try to add TeamFlow logo
+    try {
+      const logoPath = path.resolve(process.cwd(), "../../teamflow/public/logo.png");
+      if (fs.existsSync(logoPath)) {
+        const logoId = workbook.addImage({
+          filename: logoPath,
+          extension: "png",
+        });
+        sheet.addImage(logoId, {
+          tl: { col: 0, row: 0 },
+          ext: { width: 40, height: 40 },
+        });
+      }
+    } catch (e) {
+      console.log("Could not add logo", e);
+    }
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", `attachment; filename=TeamFlow_Reporte_${workspaceId}.xlsx`);
