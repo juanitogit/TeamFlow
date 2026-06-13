@@ -321,9 +321,9 @@ export function Team() {
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
-  const handleExportCsv = async () => {
+  const handleExportExcel = async () => {
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/reports/csv`, {
+      const res = await fetch(`/api/workspaces/${workspaceId}/reports/excel`, {
         headers: getAuthHeader()
       });
       if (!res.ok) throw new Error("Error al obtener datos");
@@ -332,7 +332,7 @@ export function Team() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `teamflow_report_${workspaceId}.csv`;
+      a.download = `TeamFlow_Reporte_${workspaceId}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -435,7 +435,7 @@ export function Team() {
         )}
       </div>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex flex-wrap justify-end gap-3">
         <Button onClick={() => setManualLogOpen(true)} className="bg-primary text-white hover:bg-primary/90 rounded-full shadow-sm gap-2">
           <BookOpen className="h-4 w-4" />
           Registrar Trabajo
@@ -446,7 +446,7 @@ export function Team() {
               <ScrollText className="h-4 w-4" />
               Historial
             </Button>
-            <Button onClick={handleExportCsv} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
+            <Button onClick={handleExportExcel} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
               <Download className="h-4 w-4" />
               Exportar
             </Button>

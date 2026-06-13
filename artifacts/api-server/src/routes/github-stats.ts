@@ -170,13 +170,14 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
       commitsByAuthor[login].repos[repoName] = (commitsByAuthor[login].repos[repoName] || 0) + 1;
     }
 
-    // Convert to sorted array, KEEPING ONLY those who are members of this workspace (memberId !== null)
     const authors = Object.values(commitsByAuthor)
       .filter(a => a.memberId !== null)
       .sort((a, b) => b.commits - a.commits);
 
+    const teamTotalCommits = authors.reduce((acc, a) => acc + a.commits, 0);
+
     res.json({
-      totalCommits: allCommits.length,
+      totalCommits: teamTotalCommits,
       period,
       since,
       until,

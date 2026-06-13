@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import { requireAuth, AuthedRequest } from "../middlewares/auth";
 import { z } from "zod";
 import crypto from "crypto";
+import ExcelJS from "exceljs";
 import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail, githubInviteEmail } from "../services/email";
 
 const router = Router();
@@ -589,8 +590,8 @@ router.get("/:id/audit", async (req: AuthedRequest, res: Response) => {
   }
 });
 
-// Download CSV report
-router.get("/:id/reports/csv", async (req: AuthedRequest, res: Response) => {
+// Download Excel report
+router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const workspaceId = parseInt(req.params.id);
 
@@ -602,6 +603,8 @@ router.get("/:id/reports/csv", async (req: AuthedRequest, res: Response) => {
       return res.status(403).json({ error: "Solo líderes" });
     }
 
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
+
     const members = await db.select({
       name: usersTable.name,
       role: workspaceMembersTable.role,
@@ -612,16 +615,88 @@ router.get("/:id/reports/csv", async (req: AuthedRequest, res: Response) => {
       .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
       .where(eq(workspaceMembersTable.workspaceId, workspaceId));
 
-    let csvContent = "Nombre,Rol,Score_Rendimiento,Puntos_Salud\n";
-    for (const m of members) {
-      csvContent += `"${m.name}","${m.role}",${m.performanceScore},${m.healthPoints}\n`;
-    }
+    const leaders = members.filter(m => m.role === "leader" || m.role === "co-leader").map(m => m.name).join(", ");
+    const avgScore = members.reduce((acc, m) => acc + m.performanceScore, 0) / (members.length || 1);
+    const avgHealth = members.reduce((acc, m) => acc + m.healthPoints, 0) / (members.length || 1);
 
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", `attachment; filename=teamflow_report_${workspaceId}.csv`);
-    res.send(csvContent);
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "TeamFlow App";
+    const sheet = workbook.addWorksheet("Rendimiento del Equipo");
+
+    // Title / Branding
+    sheet.mergeCells("A1:D2");
+    const titleCell = sheet.getCell("A1");
+    titleCell.value = "TeamFlow - Reporte de Rendimiento";
+    titleCell.font = { size: 16, bold: true, color: { argb: "FFFFFFFF" } };
+    titleCell.alignment = { vertical: "middle", horizontal: "center" };
+    titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF0F172A" } }; // Slate 900
+
+    // Workspace info
+    sheet.getCell("A4").value = "Workspace:";
+    sheet.getCell("A4").font = { bold: true };
+    sheet.getCell("B4").value = workspace?.name || `Workspace #${workspaceId}`;
+
+    sheet.getCell("A5").value = "Líder(es):";
+    sheet.getCell("A5").font = { bold: true };
+    sheet.getCell("B5").value = leaders || "No asignado";
+
+    // Table Headers
+    sheet.getRow(7).values = ["Nombre del Miembro", "Rol en el Equipo", "Score de Rendimiento (%)", "Puntos de Salud"];
+    sheet.getRow(7).font = { bold: true, color: { argb: "FFFFFFFF" } };
+    sheet.getRow(7).alignment = { horizontal: "center" };
+    
+    const headerColors = ["FF2563EB", "FF3B82F6", "FF10B981", "FF14B8A6"]; // Blues & Emeralds
+    sheet.getRow(7).eachCell((cell, colNumber) => {
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: headerColors[colNumber - 1] || "FF2563EB" } };
+      cell.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+    });
+
+    // Table Data
+    members.forEach((m, index) => {
+      const row = sheet.addRow([m.name, m.role, m.performanceScore, m.healthPoints]);
+      row.alignment = { horizontal: "center" };
+      row.eachCell((cell) => {
+        cell.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+      });
+      // Alternate row colors
+      if (index % 2 === 0) {
+        row.eachCell((cell) => {
+          cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } }; // Slate 50
+        });
+      }
+    });
+
+    // Adjust column widths
+    sheet.getColumn(1).width = 30;
+    sheet.getColumn(2).width = 20;
+    sheet.getColumn(3).width = 25;
+    sheet.getColumn(4).width = 20;
+
+    // Team Performance Summary
+    const summaryRow = sheet.rowCount + 3;
+    sheet.mergeCells(`A${summaryRow}:D${summaryRow}`);
+    const summaryTitle = sheet.getCell(`A${summaryRow}`);
+    summaryTitle.value = "Resumen Global del Equipo";
+    summaryTitle.font = { size: 14, bold: true };
+    summaryTitle.alignment = { horizontal: "center" };
+    summaryTitle.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } }; // Slate 200
+
+    sheet.getCell(`A${summaryRow + 1}`).value = "Promedio Rendimiento:";
+    sheet.getCell(`B${summaryRow + 1}`).value = `${avgScore.toFixed(1)}%`;
+    sheet.getCell(`B${summaryRow + 1}`).font = { bold: true, color: { argb: "FF2563EB" } };
+
+    sheet.getCell(`A${summaryRow + 2}`).value = "Promedio Salud:";
+    sheet.getCell(`B${summaryRow + 2}`).value = avgHealth.toFixed(1);
+    sheet.getCell(`B${summaryRow + 2}`).font = { bold: true, color: { argb: "FF10B981" } };
+
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename=TeamFlow_Reporte_${workspaceId}.xlsx`);
+    
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (error) {
-    res.status(500).json({ error: "Error generando reporte" });
+    console.error("Excel Generation Error:", error);
+    res.status(500).json({ error: "Error generando reporte Excel" });
   }
 });
 
