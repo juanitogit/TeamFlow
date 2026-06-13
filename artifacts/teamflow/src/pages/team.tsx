@@ -506,7 +506,7 @@ export function Team() {
                 }`}
               >
                 <div 
-                  className={`absolute inset-0 z-0 ${member.role === 'member' ? 'opacity-20' : 'opacity-100'}`}
+                  className="absolute inset-0 z-0 opacity-100"
                   style={{
                     backgroundImage: `url(${member.role === 'leader' ? '/bg-leader.png' : member.role === 'co-leader' ? '/bg-coleader.png' : '/bg-member.png'})`,
                     backgroundSize: '100% 100%',
