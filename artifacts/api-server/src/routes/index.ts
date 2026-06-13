@@ -13,6 +13,9 @@ import workspacesRouter from "./workspaces";
 import contributionsRouter from "./contributions";
 import workspaceTasksRouter from "./workspace-tasks";
 import githubStatsRouter from "./github-stats";
+import sprintsRouter from "./sprints";
+import manualLogsRouter from "./manual-logs";
+import suggestionsRouter from "./suggestions";
 
 const router: IRouter = Router();
 
@@ -28,6 +31,9 @@ router.use("/github", githubRouter);
 router.use("/workspaces", workspacesRouter);
 router.use("/contributions", contributionsRouter);
 router.use("/workspace-tasks", workspaceTasksRouter);
-router.use("/workspaces", githubStatsRouter);
+router.use("/github-stats", githubStatsRouter);
+router.use("/sprints", sprintsRouter);
+router.use("/manual-logs", manualLogsRouter);
+router.use("/suggestions", suggestionsRouter);
 
 export default router;

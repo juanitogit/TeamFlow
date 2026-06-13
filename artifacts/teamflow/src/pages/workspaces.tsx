@@ -145,17 +145,18 @@ export function Workspaces() {
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6">
         {workspaces?.map((membership: any) => (
-          <motion.div key={membership.workspaceId} whileHover={{ y: -4 }}>
-            <Card 
-              className="h-full cursor-pointer hover:shadow-lg transition-all card-monday flex flex-col"
+          <motion.div key={membership.workspaceId} whileHover={{ y: -6 }}>
+            <div 
+              className="h-full cursor-pointer hover:shadow-xl transition-all flex flex-col bg-snow rounded-[24px] border border-mist overflow-hidden relative group"
               onClick={() => handleSelectWorkspace(membership.workspaceId, membership.role)}
             >
-              <CardHeader>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="p-6 flex-1 relative z-10">
                 <div className="flex justify-between items-start">
-                  <div className="bg-primary/10 p-2 rounded-lg">
+                  <div className="bg-sky/20 p-3 rounded-[16px]">
                     <FolderKanban className="h-6 w-6 text-primary" />
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${
                     membership.role === 'leader' ? 'bg-amber-100 text-amber-700' :
                     membership.role === 'co-leader' ? 'bg-blue-100 text-blue-700' :
                     'bg-slate-100 text-slate-600'
@@ -163,39 +164,38 @@ export function Workspaces() {
                     {membership.role === 'leader' ? 'Líder' : membership.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
                   </span>
                 </div>
-                <CardTitle className="mt-4">{membership.workspace.name}</CardTitle>
-                <CardDescription className="line-clamp-2">
+                <h3 className="mt-6 text-xl font-semibold text-ink tracking-tight">{membership.workspace.name}</h3>
+                <p className="mt-2 text-slate text-sm line-clamp-2">
                   {membership.workspace.description || "Sin descripción."}
-                </CardDescription>
-              </CardHeader>
-              <div className="flex-1"></div>
-              <CardFooter className="pt-4 border-t border-slate-100 flex justify-between items-center">
+                </p>
+              </div>
+              <div className="p-4 border-t border-mist bg-cloud/50 flex justify-between items-center relative z-10">
                 <div className="text-xs text-slate">
-                  Código: <span className="font-mono font-bold text-ink tracking-wider">{membership.workspace.inviteCode}</span>
+                  Código: <span className="font-mono font-bold text-ink tracking-wider bg-snow px-2 py-1 rounded-md">{membership.workspace.inviteCode}</span>
                 </div>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={(e) => {
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-snow hover:shadow-sm" onClick={(e) => {
                   e.stopPropagation();
                   navigator.clipboard.writeText(membership.workspace.inviteCode);
                   toast({ title: "¡Código copiado!" });
                 }}>
-                  <Copy className="h-3 w-3" />
+                  <Copy className="h-4 w-4 text-slate" />
                 </Button>
-              </CardFooter>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         ))}
 
         {/* Create Workspace */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <motion.div whileHover={{ y: -4 }} className="h-full">
-              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate-50 transition-all flex flex-col items-center justify-center p-8">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Plus className="h-6 w-6 text-primary" />
+            <motion.div whileHover={{ y: -6 }} className="h-full">
+              <div className="h-full cursor-pointer border-dashed border-2 border-mist bg-snow/50 hover:bg-snow hover:shadow-md transition-all flex flex-col items-center justify-center p-8 rounded-[24px]">
+                <div className="h-16 w-16 rounded-[16px] bg-mint/20 flex items-center justify-center mb-6">
+                  <Plus className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-medium text-ink">Crear Workspace</h3>
+                <h3 className="text-xl font-semibold text-ink tracking-tight">Crear Workspace</h3>
                 <p className="text-sm text-center text-slate mt-2">Empieza un nuevo proyecto como Líder</p>
-              </Card>
+              </div>
             </motion.div>
           </DialogTrigger>
           <DialogContent>
@@ -239,7 +239,7 @@ export function Workspaces() {
               </div>
             </div>
             <DialogFooter>
-              <Button disabled={createWorkspace.isPending} onClick={handleCreate}>
+              <Button disabled={createWorkspace.isPending} onClick={handleCreate} className="btn-pill">
                 {createWorkspace.isPending ? "Creando..." : "Crear Workspace"}
               </Button>
             </DialogFooter>
@@ -249,14 +249,14 @@ export function Workspaces() {
         {/* Join Workspace */}
         <Dialog open={isJoinOpen} onOpenChange={setIsJoinOpen}>
           <DialogTrigger asChild>
-            <motion.div whileHover={{ y: -4 }} className="h-full">
-              <Card className="h-full cursor-pointer border-dashed border-2 bg-transparent hover:bg-slate-50 transition-all flex flex-col items-center justify-center p-8">
-                <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                  <Users className="h-6 w-6 text-slate" />
+            <motion.div whileHover={{ y: -6 }} className="h-full">
+              <div className="h-full cursor-pointer border-dashed border-2 border-mist bg-snow/50 hover:bg-snow hover:shadow-md transition-all flex flex-col items-center justify-center p-8 rounded-[24px]">
+                <div className="h-16 w-16 rounded-[16px] bg-sky/20 flex items-center justify-center mb-6">
+                  <Users className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="font-medium text-ink">Unirse a un Workspace</h3>
+                <h3 className="text-xl font-semibold text-ink tracking-tight">Unirse a Workspace</h3>
                 <p className="text-sm text-center text-slate mt-2">Ingresa el código de invitación</p>
-              </Card>
+              </div>
             </motion.div>
           </DialogTrigger>
           <DialogContent>
@@ -277,7 +277,7 @@ export function Workspaces() {
               </div>
             </div>
             <DialogFooter>
-              <Button disabled={joinWorkspace.isPending || !joinCode.trim()} onClick={handleJoin}>
+              <Button disabled={joinWorkspace.isPending || !joinCode.trim()} onClick={handleJoin} className="btn-pill">
                 {joinWorkspace.isPending ? "Uniéndose..." : "Unirse al Workspace"}
               </Button>
             </DialogFooter>

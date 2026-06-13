@@ -9,6 +9,7 @@ export const wsTaskStatusEnum = pgEnum("ws_task_status", ["pendiente", "en_progr
 export const workspaceTasksTable = pgTable("workspace_tasks", {
   id: serial("id").primaryKey(),
   workspaceId: integer("workspace_id").notNull().references(() => workspacesTable.id, { onDelete: "cascade" }),
+  sprintId: integer("sprint_id"),
   assignedTo: integer("assigned_to").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   assignedBy: integer("assigned_by").notNull().references(() => usersTable.id),
   title: text("title").notNull(),

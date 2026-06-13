@@ -10,3 +10,6 @@ export * from "./workspaces";
 export * from "./workspace_members";
 export * from "./contributions";
 export * from "./workspace_tasks";
+export * from "./sprints";
+export * from "./manual_logs";
+export * from "./suggestions";

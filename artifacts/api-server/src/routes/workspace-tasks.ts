@@ -20,6 +20,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     description: z.string().optional(),
     type: z.enum(["programacion", "documentacion", "investigacion"]),
     dueDate: z.string().optional(),
+    sprintId: z.number().optional(),
   }).safeParse(req.body);
 
   if (!parse.success) {
@@ -27,7 +28,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     return;
   }
 
-  const { workspaceId, assignedTo, title, description, type, dueDate } = parse.data;
+  const { workspaceId, assignedTo, title, description, type, dueDate, sprintId } = parse.data;
 
   try {
     // Check assigner is leader/co-leader
@@ -57,6 +58,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
       type,
       status: "pendiente",
       dueDate: dueDate ? new Date(dueDate) : null,
+      sprintId: sprintId || null,
     }).returning();
 
     // Notify user via email
@@ -94,6 +96,7 @@ router.get("/workspace/:workspaceId", async (req: AuthedRequest, res: Response) 
       status: workspaceTasksTable.status,
       commitSha: workspaceTasksTable.commitSha,
       dueDate: workspaceTasksTable.dueDate,
+      sprintId: workspaceTasksTable.sprintId,
       completedAt: workspaceTasksTable.completedAt,
       createdAt: workspaceTasksTable.createdAt,
       assignedTo: {

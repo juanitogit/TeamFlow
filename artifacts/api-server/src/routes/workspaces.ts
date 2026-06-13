@@ -508,4 +508,121 @@ router.patch("/:id", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Update member score manually
+router.patch("/:id/members/:memberId/score", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+  const memberId = parseInt(req.params.memberId);
+  const { score } = req.body;
+
+  if (typeof score !== 'number' || score < 0 || score > 100) {
+    res.status(400).json({ error: "El score debe ser un número entre 0 y 100" });
+    return;
+  }
+
+  try {
+    const [myMembership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!myMembership || (myMembership.role !== "leader" && myMembership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden modificar el score" });
+      return;
+    }
+
+    await db.update(workspaceMembersTable)
+      .set({ performanceScore: score })
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, memberId)));
+
+    res.json({ success: true, message: "Score actualizado" });
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar score" });
+  }
+});
+
+// Get workspace audit log
+router.get("/:id/audit", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+
+  try {
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      return res.status(403).json({ error: "Solo líderes" });
+    }
+
+    // Get all members of the workspace
+    const members = await db.select({ id: usersTable.id, name: usersTable.name, email: usersTable.email })
+      .from(workspaceMembersTable)
+      .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
+      .where(eq(workspaceMembersTable.workspaceId, workspaceId));
+
+    if (!members.length) return res.json([]);
+
+    const memberIds = members.map(m => m.id);
+
+    // Import activity log table here since it's not imported at the top
+    const { activityLogTable } = await import("@workspace/db");
+    const { inArray, desc } = await import("drizzle-orm");
+
+    const logs = await db.select({
+      id: activityLogTable.id,
+      action: activityLogTable.action,
+      entityType: activityLogTable.entityType,
+      entityTitle: activityLogTable.entityTitle,
+      createdAt: activityLogTable.createdAt,
+      user: {
+        id: usersTable.id,
+        name: usersTable.name
+      }
+    })
+      .from(activityLogTable)
+      .innerJoin(usersTable, eq(activityLogTable.userId, usersTable.id))
+      .where(inArray(activityLogTable.userId, memberIds))
+      .orderBy(desc(activityLogTable.createdAt))
+      .limit(100);
+
+    res.json(logs);
+  } catch (error) {
+    res.status(500).json({ error: "Error" });
+  }
+});
+
+// Download CSV report
+router.get("/:id/reports/csv", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const workspaceId = parseInt(req.params.id);
+
+  try {
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      return res.status(403).json({ error: "Solo líderes" });
+    }
+
+    const members = await db.select({
+      name: usersTable.name,
+      role: workspaceMembersTable.role,
+      performanceScore: workspaceMembersTable.performanceScore,
+      healthPoints: usersTable.healthPoints
+    })
+      .from(workspaceMembersTable)
+      .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
+      .where(eq(workspaceMembersTable.workspaceId, workspaceId));
+
+    let csvContent = "Nombre,Rol,Score_Rendimiento,Puntos_Salud\n";
+    for (const m of members) {
+      csvContent += `"${m.name}","${m.role}",${m.performanceScore},${m.healthPoints}\n`;
+    }
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", `attachment; filename=teamflow_report_${workspaceId}.csv`);
+    res.send(csvContent);
+  } catch (error) {
+    res.status(500).json({ error: "Error generando reporte" });
+  }
+});
+
 export default router;

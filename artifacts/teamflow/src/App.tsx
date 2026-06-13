@@ -19,6 +19,7 @@ import { Workspaces } from "@/pages/workspaces";
 import { NewContribution } from "@/pages/new-contribution";
 import { ReviewContributions } from "@/pages/review-contributions";
 import { GithubStats } from "@/pages/github-stats";
+import { Sprints } from "@/pages/sprints";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ function Router() {
       <Route path="/projects/:id" component={ProjectDetail} />
       <Route path="/tasks" component={Tasks} />
       <Route path="/team" component={Team} />
+      <Route path="/sprints" component={Sprints} />
       <Route path="/github-stats" component={GithubStats} />
       <Route path="/roadmap" component={Roadmap} />
       <Route component={NotFound} />
