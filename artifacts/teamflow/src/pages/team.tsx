@@ -51,6 +51,9 @@ export function Team() {
   const [inviteData, setInviteData] = useState<{ inviteCode: string; expiresAt: string | null; isExpired: boolean } | null>(null);
   const [countdown, setCountdown] = useState("");
   const [regenerating, setRegenerating] = useState(false);
+  const [generateInviteOpen, setGenerateInviteOpen] = useState(false);
+  const [inviteExpirationHours, setInviteExpirationHours] = useState("24");
+  const [customExpiration, setCustomExpiration] = useState("");
 
   // Fetch invite code
   const fetchInvite = async () => {
@@ -141,12 +144,22 @@ export function Team() {
   const handleRegenerate = async () => {
     if (!workspaceId) return;
     setRegenerating(true);
+    let hours = parseInt(inviteExpirationHours);
+    if (hours === 0 && customExpiration) {
+        hours = parseInt(customExpiration);
+    }
+    
     try {
-      const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { method: "POST", headers: getAuthHeader() });
+      const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { 
+        method: "POST", 
+        headers: getAuthHeader(),
+        body: JSON.stringify({ expiresInHours: isNaN(hours) || hours <= 0 ? 24 : hours })
+      });
       if (res.ok) {
         const data = await res.json();
         setInviteData(data);
         toast({ title: "Nuevo código generado" });
+        setGenerateInviteOpen(false);
       }
     } catch {}
     setRegenerating(false);
@@ -229,12 +242,62 @@ export function Team() {
               {inviteData.isExpired && (
                 <span className="text-xs text-red-400 font-medium">Expirado</span>
               )}
-              <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
+              <Button variant="outline" size="sm" title="Copiar código" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={handleRegenerate} disabled={regenerating}>
-                <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
+              <Button variant="outline" size="sm" title="Copiar enlace directo" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/workspaces?join_code=${inviteData.inviteCode}`); toast({ title: "Enlace copiado" }); }} disabled={inviteData.isExpired}>
+                <ClipboardList className="h-4 w-4 text-primary" />
               </Button>
+              <Dialog open={generateInviteOpen} onOpenChange={setGenerateInviteOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" title="Generar nuevo">
+                    <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Generar nuevo código de invitación</DialogTitle>
+                    <DialogDescription>
+                      Selecciona la vigencia para el nuevo código y enlace de invitación.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <Label>Vigencia</Label>
+                      <Select value={inviteExpirationHours} onValueChange={setInviteExpirationHours}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona la vigencia" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 hora</SelectItem>
+                          <SelectItem value="10">10 horas</SelectItem>
+                          <SelectItem value="24">1 día</SelectItem>
+                          <SelectItem value="720">30 días</SelectItem>
+                          <SelectItem value="0">Personalizado...</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {inviteExpirationHours === "0" && (
+                      <div className="space-y-2">
+                        <Label>Horas personalizadas</Label>
+                        <Input 
+                          type="number"
+                          placeholder="Ej: 48 (para 2 días)" 
+                          value={customExpiration}
+                          onChange={(e) => setCustomExpiration(e.target.value)}
+                        />
+                      </div>
+                    )}
+                    <Button 
+                      className="w-full" 
+                      onClick={handleRegenerate}
+                      disabled={regenerating || (inviteExpirationHours === "0" && (!customExpiration || parseInt(customExpiration) <= 0))}
+                    >
+                      {regenerating ? "Generando..." : "Generar Invitación"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         )}

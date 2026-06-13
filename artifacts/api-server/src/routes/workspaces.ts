@@ -10,12 +10,10 @@ import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail, 
 const router = Router();
 router.use(requireAuth);
 
-const INVITE_CODE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-function generateInviteCode() {
+function generateInviteCode(expiresInHours: number = 24) {
   return {
     code: crypto.randomBytes(4).toString("hex").toUpperCase(),
-    expiresAt: new Date(Date.now() + INVITE_CODE_TTL_MS),
+    expiresAt: new Date(Date.now() + expiresInHours * 60 * 60 * 1000),
   };
 }
 
@@ -36,8 +34,8 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
 
   const { name, description, githubRepos } = parse.data;
   
-  // Generate invite code with 5-minute expiry
-  const invite = generateInviteCode();
+  // Generate invite code with 24-hour expiry by default
+  const invite = generateInviteCode(24);
 
   try {
     const [workspace] = await db.insert(workspacesTable).values({
@@ -202,7 +200,7 @@ router.post("/:id/invite-github", async (req: AuthedRequest, res: Response) => {
     const signature = crypto.createHmac("sha256", process.env.SESSION_SECRET || "default_secret").update(data).digest("hex");
     const token = `${data}.${signature}`;
 
-    const appUrl = process.env.APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:5173");
+    const appUrl = process.env.APP_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:5173"));
     const inviteUrl = `${appUrl}/workspaces?accept_github_invite=${token}`;
 
     const emailData = githubInviteEmail(targetName, workspace.name, inviteUrl);
@@ -326,7 +324,8 @@ router.post("/:id/invite/regenerate", async (req: AuthedRequest, res: Response) 
       return;
     }
 
-    const invite = generateInviteCode();
+    const expiresInHours = typeof req.body.expiresInHours === 'number' ? req.body.expiresInHours : 24;
+    const invite = generateInviteCode(expiresInHours);
     const [updated] = await db.update(workspacesTable)
       .set({ inviteCode: invite.code, inviteCodeExpiresAt: invite.expiresAt })
       .where(eq(workspacesTable.id, workspaceId))

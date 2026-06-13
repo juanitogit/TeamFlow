@@ -2,8 +2,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, ListTodo, Users, Menu, X, Github } from "lucide-react";
+import { Loader2, Home, ListTodo, Users, Menu, X, Github, LogOut, ArrowLeftRight } from "lucide-react";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { LogoLoader } from "@/components/ui/logo-loader";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -47,31 +48,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
-        <div className="container max-w-[1200px] mx-auto flex h-16 items-center justify-between px-4">
+    <div className="min-h-screen bg-background flex flex-col font-sans text-ink">
+      <header className="sticky top-0 z-50 w-full bg-snow/80 backdrop-blur-md border-b border-mist shadow-sm">
+        <div className="container max-w-[1200px] mx-auto flex h-20 items-center justify-between px-4">
           <div className="flex items-center gap-4 md:gap-8">
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
-                <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
-                <span className="font-bold text-xl text-primary tracking-tight">TeamFlow</span>
+                <img src="/logo.png" alt="Logo" className="h-10 object-contain drop-shadow-sm" />
+                <span className="font-bold text-2xl text-primary tracking-tight">TeamFlow</span>
               </Link>
             </div>
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-2">
               {navItems.map((item) => {
                 const isActive = location === item.href;
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-primary/10 text-primary"
-                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                    }`}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
+                  <Link key={item.href} href={item.href}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                        isActive
+                          ? "bg-primary/10 text-primary shadow-sm"
+                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                      }`}
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </motion.div>
                   </Link>
                 );
               })}
@@ -79,21 +82,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             {activeWorkspace && (
-              <Button variant="ghost" size="sm" className="hidden sm:flex text-xs text-slate-500 hover:text-slate-900" onClick={() => {
+              <Button variant="ghost" size="sm" className="hidden sm:flex text-sm font-medium text-slate-500 hover:text-primary hover:bg-primary/5 rounded-full px-4 transition-all" onClick={() => {
                 localStorage.removeItem("active_workspace_id");
                 localStorage.removeItem("active_workspace_role");
                 window.location.href = "/workspaces";
               }}>
+                <ArrowLeftRight className="h-4 w-4 mr-2" />
                 Cambiar Workspace
               </Button>
             )}
-            <div className="h-6 w-px bg-slate-200 hidden sm:block mx-1"></div>
+            <div className="h-8 w-px bg-slate-200 hidden sm:block mx-1"></div>
             <div className="flex items-center gap-2 cursor-default" title={user.name}>
-              <div className="h-8 w-8 shrink-0 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                {user.name.charAt(0).toUpperCase()}
+              <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-tr from-primary to-[#fe81e4] p-[2px] shadow-sm">
+                <div className="h-full w-full rounded-full bg-snow flex items-center justify-center text-primary font-bold text-sm">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="hidden sm:flex text-xs" onClick={logout}>
+            <Button variant="outline" size="sm" className="hidden sm:flex text-sm rounded-full border-mist hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all px-4" onClick={logout}>
+              <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>

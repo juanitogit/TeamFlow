@@ -75,6 +75,12 @@ export function Workspaces() {
     if (token) {
       acceptGithubInviteMutation.mutate(token);
     }
+    const jCode = searchParams.get("join_code");
+    if (jCode) {
+      setJoinCode(jCode);
+      setIsJoinOpen(true);
+      window.history.replaceState({}, document.title, "/workspaces");
+    }
   }, []);
 
   const handleCreate = async () => {
