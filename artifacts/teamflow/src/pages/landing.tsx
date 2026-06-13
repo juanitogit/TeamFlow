@@ -34,7 +34,7 @@ export function Landing() {
               </Button>
             </Link>
             <Link href="/login">
-              <Button className="btn-pill bg-primary hover:bg-primary/90 text-snow px-6 py-5 shadow-sm">
+              <Button className="btn-pill bg-primary hover:bg-primary/90 text-white px-6 py-5 shadow-sm">
                 Ingresar <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
@@ -70,7 +70,7 @@ export function Landing() {
             className="flex flex-col sm:flex-row justify-center gap-4"
           >
             <Link href="/login">
-              <Button className="btn-pill bg-primary hover:bg-primary/90 text-snow text-lg px-8 py-6 shadow-xl-2">
+              <Button className="btn-pill bg-primary hover:bg-primary/90 text-white text-lg px-8 py-6 shadow-xl-2">
                 Empezar gratis
               </Button>
             </Link>
@@ -138,7 +138,7 @@ export function Landing() {
         <section className="py-32 bg-primary px-4 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "conic-gradient(from 270deg, #8181ff 15%, #33dbdb 40%, #33d58e 55%, #ffd633 65%, #fc527d 85%, #8181ff 100%)" }}></div>
           <div className="container max-w-[800px] mx-auto text-center relative z-10">
-            <h2 className="text-4xl md:text-5xl font-light text-snow mb-8 tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-light text-white mb-8 tracking-tight">
               ¿Listo para potenciar a tu equipo?
             </h2>
             <Link href="/login">

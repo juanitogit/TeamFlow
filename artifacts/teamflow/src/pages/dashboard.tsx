@@ -116,7 +116,7 @@ export function Dashboard() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button onClick={() => setLocation("/contributions/new")} className="btn-pill bg-primary hover:bg-primary/90 text-snow shadow-xl-2 px-6">
+          <Button onClick={() => setLocation("/contributions/new")} className="btn-pill bg-primary hover:bg-primary/90 text-white shadow-xl-2 px-6">
             <Plus className="h-4 w-4 mr-2" />
             Registrar Aporte
           </Button>
