@@ -498,11 +498,14 @@ export function Team() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
-              <div className={`rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col ${
-                member.role === 'leader' ? 'bg-gradient-to-br from-violet-100/80 to-indigo-100/80 border-2 border-indigo-300 shadow-md transform scale-[1.02]' :
-                member.role === 'co-leader' ? 'bg-blue-50 border-2 border-blue-200 shadow-sm' :
-                'bg-snow border border-mist'
-              }`}>
+              <div 
+                className="rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col bg-snow border border-mist transition-transform transform hover:scale-[1.02]"
+                style={{
+                  backgroundImage: `url(${member.role === 'leader' ? '/bg-leader.png' : member.role === 'co-leader' ? '/bg-coleader.png' : '/bg-member.png'})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              >
                 <div className={`p-6 border-b ${
                   member.role === 'leader' ? 'border-indigo-100/50' :
                   member.role === 'co-leader' ? 'border-blue-100' :
