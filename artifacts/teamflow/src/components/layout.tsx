@@ -48,7 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-cloud flex flex-col font-sans text-ink">
-      <header className="sticky top-0 z-50 w-full bg-snow/80 backdrop-blur-md border-b border-mist shadow-sm">
+      <header className="sticky top-0 z-50 w-full bg-snow border-b border-mist shadow-sm">
         <div className="container max-w-[1200px] mx-auto flex h-20 items-center justify-between px-4">
           <div className="flex items-center gap-4 md:gap-8">
             <div className="flex items-center gap-3">
@@ -116,7 +116,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </header>
       
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-snow/90 backdrop-blur-md border-t border-mist pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-snow border-t border-mist pb-safe">
         <div className="flex justify-around items-center h-16 px-2">
           {navItems.map((item) => {
             const isActive = location === item.href;

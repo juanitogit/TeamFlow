@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -58,10 +59,16 @@ export function Register() {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen flex items-center justify-center bg-cloud p-4"
+      className="min-h-screen flex items-center justify-center bg-cloud p-4 relative"
     >
+      <Link href="/">
+        <Button variant="ghost" className="absolute top-4 left-4 md:top-8 md:left-8 text-slate-500 hover:text-ink hover:bg-white/50 rounded-full">
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Volver al inicio
+        </Button>
+      </Link>
       <Card className="w-full max-w-md card-monday">
-        <CardHeader className="space-y-1 text-center">
+        <CardHeader className="space-y-2 text-center flex flex-col items-center">
           <CardTitle className="text-3xl font-light tracking-tight text-ink">Create an account</CardTitle>
           <CardDescription className="text-slate">
             Enter your details to get started
