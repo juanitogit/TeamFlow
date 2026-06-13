@@ -4,7 +4,7 @@ import { useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FolderKanban, Plus, Clock, Users } from "lucide-react";
+import { Timer, Plus, Clock, Users, FolderKanban } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -86,7 +86,7 @@ export function Sprints() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <FolderKanban className="h-7 w-7 text-primary" />
+            <Timer className="h-7 w-7 text-primary" />
             Sprints y Ciclos
           </h1>
           <p className="text-slate mt-1 text-sm">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
@@ -101,11 +101,11 @@ export function Sprints() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-snow rounded-[24px] border border-mist">Selecciona un workspace arriba.</div>
+        <div className="text-center py-12 text-slate bg-white rounded-[24px] border border-mist">Selecciona un workspace arriba.</div>
       ) : (
         <div className="space-y-6">
           {sprints?.length === 0 ? (
-            <div className="py-16 flex flex-col items-center text-center bg-snow rounded-[24px] border border-dashed border-mist">
+            <div className="py-16 flex flex-col items-center text-center bg-white rounded-[24px] border border-dashed border-mist">
               <FolderKanban className="h-12 w-12 text-slate-300 mb-4" />
               <h3 className="text-lg font-medium text-ink">Sin Sprints</h3>
               <p className="text-slate mt-1 text-sm">No hay ciclos de trabajo creados.</p>
@@ -118,7 +118,7 @@ export function Sprints() {
                 const progress = sprintTasks.length ? Math.round((completedCount / sprintTasks.length) * 100) : 0;
                 
                 return (
-                  <Card key={sprint.id} className="rounded-[24px] border-mist bg-snow shadow-sm overflow-hidden flex flex-col">
+                  <Card key={sprint.id} className="rounded-[24px] border-mist bg-white shadow-sm overflow-hidden flex flex-col">
                     <CardHeader className="pb-3 border-b border-mist/50 bg-white">
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg text-ink font-semibold">{sprint.name}</CardTitle>

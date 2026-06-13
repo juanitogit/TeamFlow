@@ -183,7 +183,7 @@ export function GithubStats() {
             <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Total Commits</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
+                <div className="bg-white p-2 rounded-full shadow-sm">
                   <GitCommit className="h-4 w-4 text-primary" />
                 </div>
               </div>
@@ -196,7 +196,7 @@ export function GithubStats() {
             <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Contribuyentes</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
+                <div className="bg-white p-2 rounded-full shadow-sm">
                   <Users className="h-4 w-4 text-emerald-500" />
                 </div>
               </div>
@@ -209,7 +209,7 @@ export function GithubStats() {
             <motion.div whileHover={{ y: -4 }} className="bg-slate-50 rounded-[24px] p-6 transition-all border border-slate-200/50">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Top Contribuyente</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
+                <div className="bg-white p-2 rounded-full shadow-sm">
                   <TrendingUp className="h-4 w-4 text-[#fda900]" />
                 </div>
               </div>
@@ -222,7 +222,7 @@ export function GithubStats() {
             <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Repositorios</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
+                <div className="bg-white p-2 rounded-full shadow-sm">
                   <BarChart3 className="h-4 w-4 text-[#fe81e4]" />
                 </div>
               </div>
@@ -236,7 +236,7 @@ export function GithubStats() {
           {/* Chart */}
           {/* Chart */}
           {chartData.length > 0 && (
-            <div className="bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+            <div className="bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
               <div className="flex flex-col mb-6">
                 <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
                   <BarChart3 className="mr-3 h-6 w-6 text-primary" />
@@ -283,7 +283,7 @@ export function GithubStats() {
 
           {/* Ranking table */}
           {data?.authors?.length > 0 && (
-            <div className="bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+            <div className="bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
               <div className="flex flex-col mb-6">
                 <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
                   <Users className="mr-3 h-6 w-6 text-primary" />

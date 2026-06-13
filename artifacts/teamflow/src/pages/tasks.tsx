@@ -130,11 +130,11 @@ export function Tasks() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-snow rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>
+        <div className="text-center py-12 text-slate bg-white rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>
       ) : (
         <div className="space-y-4">
           {filteredTasks.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center bg-snow rounded-[24px] border border-dashed border-mist shadow-sm">
+            <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
               <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
               <h3 className="text-xl font-semibold text-ink">¡Estás al día!</h3>
               <p className="text-slate mt-2">No hay tareas para el filtro seleccionado.</p>

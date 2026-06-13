@@ -121,7 +121,7 @@ export function Dashboard() {
             Registrar Aporte
           </Button>
           {(workspaceRole === "leader" || workspaceRole === "co-leader") && (
-            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="btn-pill relative px-6 border-mist hover:bg-snow shadow-sm">
+            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="btn-pill relative px-6 border-mist hover:bg-white shadow-sm">
               Revisar Aportes
               {pendingContributions > 0 && (
                 <span className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold shadow-md">
@@ -134,10 +134,10 @@ export function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Puntos de Salud</span>
-            <div className="bg-snow p-2 rounded-full shadow-sm">
+            <div className="bg-white p-2 rounded-full shadow-sm">
               <Heart className="h-4 w-4 text-emerald-500" />
             </div>
           </div>
@@ -148,10 +148,10 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Score de Rendimiento</span>
-            <div className="bg-snow p-2 rounded-full shadow-sm">
+            <div className="bg-white p-2 rounded-full shadow-sm">
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
           </div>
@@ -162,10 +162,10 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
-            <div className="bg-snow p-2 rounded-full shadow-sm">
+            <div className="bg-white p-2 rounded-full shadow-sm">
               <CheckCircle2 className="h-4 w-4 text-[#fe81e4]" />
             </div>
           </div>
@@ -175,10 +175,10 @@ export function Dashboard() {
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
+        <motion.div whileHover={{ y: -4 }} className="gsap-fade-up bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm relative overflow-hidden">
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
-            <div className="bg-snow p-2 rounded-full shadow-sm">
+            <div className="bg-white p-2 rounded-full shadow-sm">
               <AlertCircle className="h-4 w-4 text-[#fda900]" />
             </div>
           </div>
@@ -190,7 +190,7 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="gsap-fade-up bg-snow rounded-[24px] p-6 transition-all border border-mist shadow-sm">
+        <div className="gsap-fade-up bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm">
           <div className="flex flex-col mb-6">
             <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
               <BarChart3 className="mr-3 h-6 w-6 text-primary" />
@@ -221,7 +221,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="md:col-span-3 bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+        <div className="md:col-span-3 bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
           <div className="flex flex-col mb-6">
             <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
               <Activity className="mr-3 h-6 w-6 text-primary" />
