@@ -91,67 +91,67 @@ export function GithubStats() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-          <Github className="h-7 w-7 text-primary" />
-          Estadísticas de GitHub
-        </h1>
-        <p className="text-slate-500 mt-1 text-sm">Compara los commits de cada integrante en los repositorios del workspace</p>
+      <div className="flex flex-col items-center justify-center text-center gap-4 mb-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-ink flex items-center justify-center gap-3">
+            <Github className="h-8 w-8 text-primary" />
+            Estadísticas de GitHub
+          </h1>
+          <p className="text-slate-500 mt-2 text-sm max-w-md">Compara los commits de cada integrante en los repositorios del workspace</p>
+        </div>
       </div>
 
       {/* Filters */}
-      <Card className="card-monday border-none">
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 sm:flex sm:flex-row gap-3 items-end">
-            {/* Repo selector */}
-            <div className="w-full sm:flex-1">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Repositorio</label>
-              <Select value={selectedRepo} onValueChange={setSelectedRepo}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue placeholder="Selecciona un repo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los Repositorios</SelectItem>
-                  {repos.map((r: string) => (
-                    <SelectItem key={r} value={r}>{r.replace("https://github.com/", "")}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Period selector */}
-            <div className="w-full sm:w-[200px]">
-              <label className="text-xs font-medium text-slate-500 mb-1 block">Período</label>
-              <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="bg-white shadow-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">Hoy</SelectItem>
-                  <SelectItem value="week">Última Semana</SelectItem>
-                  <SelectItem value="month">Último Mes</SelectItem>
-                  <SelectItem value="year">Último Año</SelectItem>
-                  <SelectItem value="custom">Fechas Personalizadas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Custom date range */}
-            {period === "custom" && (
-              <>
-                <div className="min-w-[150px]">
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Desde</label>
-                  <Input type="date" value={customSince} onChange={e => setCustomSince(e.target.value)} className="bg-white shadow-sm" />
-                </div>
-                <div className="min-w-[150px]">
-                  <label className="text-xs font-medium text-slate-500 mb-1 block">Hasta</label>
-                  <Input type="date" value={customUntil} onChange={e => setCustomUntil(e.target.value)} className="bg-white shadow-sm" />
-                </div>
-              </>
-            )}
+      <div className="bg-snow rounded-[24px] p-6 border border-mist shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:flex-row gap-4 items-end justify-center w-full max-w-3xl mx-auto">
+          {/* Repo selector */}
+          <div className="w-full lg:flex-1">
+            <label className="text-xs font-medium text-slate-500 mb-1.5 block px-1 text-center lg:text-left">Repositorio</label>
+            <Select value={selectedRepo} onValueChange={setSelectedRepo}>
+              <SelectTrigger className="w-full bg-white shadow-sm h-12 text-base rounded-2xl border-mist justify-center text-center gap-2">
+                <SelectValue placeholder="Selecciona un repo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los Repositorios</SelectItem>
+                {repos.map((r: string) => (
+                  <SelectItem key={r} value={r}>{r.replace("https://github.com/", "")}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Period selector */}
+          <div className="w-full lg:flex-1">
+            <label className="text-xs font-medium text-slate-500 mb-1.5 block px-1 text-center lg:text-left">Período</label>
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-full bg-white shadow-sm h-12 text-base rounded-2xl border-mist justify-center text-center gap-2">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="day">Hoy</SelectItem>
+                <SelectItem value="week">Última Semana</SelectItem>
+                <SelectItem value="month">Último Mes</SelectItem>
+                <SelectItem value="year">Último Año</SelectItem>
+                <SelectItem value="custom">Fechas Personalizadas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Custom date range */}
+          {period === "custom" && (
+            <>
+              <div className="w-full lg:w-[160px]">
+                <label className="text-xs font-medium text-slate-500 mb-1.5 block px-1 text-center lg:text-left">Desde</label>
+                <Input type="date" value={customSince} onChange={e => setCustomSince(e.target.value)} className="bg-white shadow-sm h-12 rounded-2xl border-mist" />
+              </div>
+              <div className="w-full lg:w-[160px]">
+                <label className="text-xs font-medium text-slate-500 mb-1.5 block px-1 text-center lg:text-left">Hasta</label>
+                <Input type="date" value={customUntil} onChange={e => setCustomUntil(e.target.value)} className="bg-white shadow-sm h-12 rounded-2xl border-mist" />
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {repos.length === 0 ? (
         <Card className="card-monday border-none">
@@ -178,59 +178,63 @@ export function GithubStats() {
         </Card>
       ) : (
         <>
-          {/* Summary cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
-              <div className="flex flex-row items-center justify-between pb-2">
-                <span className="text-sm font-medium text-slate">Total Commits</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
-                  <GitCommit className="h-4 w-4 text-primary" />
+          {/* Summary cards unified */}
+          <div className="bg-snow rounded-[32px] border border-mist shadow-sm relative overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 lg:divide-x divide-mist">
+              
+              <div className="p-8 hover:bg-mist/10 transition-colors">
+                <div className="flex flex-row items-center justify-between pb-4">
+                  <span className="text-sm font-medium text-slate">Total Commits</span>
+                  <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
+                    <GitCommit className="h-4 w-4 text-primary" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-ink mt-2">{data?.totalCommits || 0}</div>
+                  <p className="text-xs text-slate mt-2">{PERIOD_LABELS[period] || period}</p>
                 </div>
               </div>
-              <div>
-                <div className="text-4xl font-bold text-ink mt-2">{data?.totalCommits || 0}</div>
-                <p className="text-xs text-slate mt-1">{PERIOD_LABELS[period] || period}</p>
-              </div>
-            </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
-              <div className="flex flex-row items-center justify-between pb-2">
-                <span className="text-sm font-medium text-slate">Contribuyentes</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
-                  <Users className="h-4 w-4 text-emerald-500" />
+              <div className="p-8 hover:bg-mist/10 transition-colors">
+                <div className="flex flex-row items-center justify-between pb-4">
+                  <span className="text-sm font-medium text-slate">Contribuyentes</span>
+                  <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
+                    <Users className="h-4 w-4 text-emerald-500" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-ink mt-2">{data?.authors?.length || 0}</div>
+                  <p className="text-xs text-slate mt-2">Autores activos</p>
                 </div>
               </div>
-              <div>
-                <div className="text-4xl font-bold text-ink mt-2">{data?.authors?.length || 0}</div>
-                <p className="text-xs text-slate mt-1">Autores activos</p>
-              </div>
-            </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-slate-50 rounded-[24px] p-6 transition-all border border-slate-200/50">
-              <div className="flex flex-row items-center justify-between pb-2">
-                <span className="text-sm font-medium text-slate">Top Contribuyente</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
-                  <TrendingUp className="h-4 w-4 text-[#fda900]" />
+              <div className="p-8 hover:bg-mist/10 transition-colors">
+                <div className="flex flex-row items-center justify-between pb-4">
+                  <span className="text-sm font-medium text-slate">Top Contribuyente</span>
+                  <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
+                    <TrendingUp className="h-4 w-4 text-[#fda900]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-ink truncate mt-4 leading-none">{data?.authors?.[0]?.name || "—"}</div>
+                  <p className="text-xs text-slate mt-2">{data?.authors?.[0]?.commits || 0} commits</p>
                 </div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-ink truncate mt-4 leading-none">{data?.authors?.[0]?.name || "—"}</div>
-                <p className="text-xs text-slate mt-2">{data?.authors?.[0]?.commits || 0} commits</p>
-              </div>
-            </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
-              <div className="flex flex-row items-center justify-between pb-2">
-                <span className="text-sm font-medium text-slate">Repositorios</span>
-                <div className="bg-snow p-2 rounded-full shadow-sm">
-                  <BarChart3 className="h-4 w-4 text-[#fe81e4]" />
+              <div className="p-8 hover:bg-mist/10 transition-colors">
+                <div className="flex flex-row items-center justify-between pb-4">
+                  <span className="text-sm font-medium text-slate">Repositorios</span>
+                  <div className="bg-white p-2.5 rounded-full shadow-sm border border-mist">
+                    <BarChart3 className="h-4 w-4 text-[#fe81e4]" />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-4xl font-bold text-ink mt-2">{data?.repos?.length || 0}</div>
+                  <p className="text-xs text-slate mt-2">Analizados</p>
                 </div>
               </div>
-              <div>
-                <div className="text-4xl font-bold text-ink mt-2">{data?.repos?.length || 0}</div>
-                <p className="text-xs text-slate mt-1">Analizados</p>
-              </div>
-            </motion.div>
+
+            </div>
           </div>
 
           {/* Chart */}

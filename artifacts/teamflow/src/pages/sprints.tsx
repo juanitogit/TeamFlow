@@ -83,17 +83,17 @@ export function Sprints() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <FolderKanban className="h-7 w-7 text-primary" />
+      <div className="flex flex-col items-center justify-center text-center gap-4">
+        <div className="flex flex-col items-center">
+          <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
+            <FolderKanban className="h-8 w-8 text-primary" />
             Sprints y Ciclos
           </h1>
-          <p className="text-slate mt-1 text-sm">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
+          <p className="text-slate mt-2 text-sm max-w-md">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
         </div>
         
         {isLeader && (
-          <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 text-white shadow-sm rounded-full">
+          <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 text-white shadow-sm rounded-full px-6 mt-2">
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Sprint
           </Button>
@@ -101,11 +101,11 @@ export function Sprints() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-snow rounded-[24px] border border-mist">Selecciona un workspace arriba.</div>
+        <div className="text-center py-12 text-slate bg-snow rounded-[32px] border border-mist shadow-sm">Selecciona un workspace arriba.</div>
       ) : (
         <div className="space-y-6">
           {sprints?.length === 0 ? (
-            <div className="py-16 flex flex-col items-center text-center bg-snow rounded-[24px] border border-dashed border-mist">
+            <div className="py-16 flex flex-col items-center text-center bg-snow rounded-[32px] border border-dashed border-mist shadow-sm">
               <FolderKanban className="h-12 w-12 text-slate-300 mb-4" />
               <h3 className="text-lg font-medium text-ink">Sin Sprints</h3>
               <p className="text-slate mt-1 text-sm">No hay ciclos de trabajo creados.</p>
