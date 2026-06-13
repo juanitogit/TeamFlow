@@ -227,30 +227,30 @@ export function Team() {
           <p className="text-slate mt-1 text-sm">Gestiona los miembros de tu workspace</p>
         </div>
         {isLeaderOrCoLeader && inviteData && (
-          <div className="flex items-center gap-3 bg-card border px-4 py-3 rounded-lg shadow-sm">
-            <div className="text-sm">
-              <span className="text-slate block text-[10px] uppercase font-bold tracking-wider">Código de Invitación</span>
-              <span className={`font-mono font-bold text-lg tracking-[0.3em] ${inviteData.isExpired ? 'text-red-400 line-through' : 'text-primary'}`}>{inviteData.inviteCode}</span>
+          <div className="flex flex-col sm:flex-row items-center gap-3 bg-snow border border-mist px-6 py-4 rounded-[24px] shadow-sm">
+            <div className="text-sm flex-1">
+              <span className="text-slate block text-[10px] uppercase font-bold tracking-wider mb-1">Código de Invitación</span>
+              <span className={`font-mono font-bold text-xl tracking-[0.2em] ${inviteData.isExpired ? 'text-red-400 line-through' : 'text-primary'}`}>{inviteData.inviteCode}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {!inviteData.isExpired && (
-                <div className="flex items-center gap-1 text-xs text-slate bg-cloud px-2 py-1 rounded-full">
-                  <Timer className="h-3 w-3" />
+                <div className="flex items-center gap-1 text-xs text-slate bg-cloud px-3 py-1.5 rounded-full">
+                  <Timer className="h-4 w-4" />
                   <span className="font-mono font-medium">{countdown}</span>
                 </div>
               )}
               {inviteData.isExpired && (
-                <span className="text-xs text-red-400 font-medium">Expirado</span>
+                <span className="text-xs text-red-500 font-medium bg-red-50 px-3 py-1.5 rounded-full">Expirado</span>
               )}
-              <Button variant="outline" size="sm" title="Copiar código" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
+              <Button variant="outline" size="sm" className="rounded-full hover:bg-slate-100 h-9 w-9 p-0" title="Copiar código" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
                 <Copy className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" title="Copiar enlace directo" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/workspaces?join_code=${inviteData.inviteCode}`); toast({ title: "Enlace copiado" }); }} disabled={inviteData.isExpired}>
+              <Button variant="outline" size="sm" className="rounded-full hover:bg-primary/5 h-9 w-9 p-0 border-primary/20" title="Copiar enlace directo" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/workspaces?join_code=${inviteData.inviteCode}`); toast({ title: "Enlace copiado" }); }} disabled={inviteData.isExpired}>
                 <ClipboardList className="h-4 w-4 text-primary" />
               </Button>
               <Dialog open={generateInviteOpen} onOpenChange={setGenerateInviteOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" title="Generar nuevo">
+                  <Button variant="outline" size="sm" className="rounded-full hover:bg-slate-100 h-9 w-9 p-0" title="Generar nuevo">
                     <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
                   </Button>
                 </DialogTrigger>
@@ -307,7 +307,7 @@ export function Team() {
         <div className="flex justify-end">
           <Dialog open={githubInviteOpen} onOpenChange={setGithubInviteOpen}>
             <DialogTrigger asChild>
-              <Button variant="default" className="gap-2">
+              <Button className="btn-pill bg-ink text-snow hover:bg-ink/80 shadow-sm gap-2">
                 <Github className="h-4 w-4" />
                 Invitar por GitHub
               </Button>
@@ -342,22 +342,23 @@ export function Team() {
       )}
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-card rounded-xl shadow-sm border">Selecciona un workspace para ver a tu equipo.</div>
+        <div className="text-center py-12 text-slate bg-snow rounded-[24px] shadow-sm border border-mist">Selecciona un workspace para ver a tu equipo.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (
-            <Card key={member.id} className="card-monday border-none">
-              <CardHeader className="pb-2 border-b border-mist">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <div className="h-11 w-11 shrink-0 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
-                      {member.avatarUrl ? <img src={member.avatarUrl} alt={member.name} className="h-full w-full object-cover" /> : member.name.charAt(0).toUpperCase()}
+            <motion.div key={member.id} whileHover={{ y: -4 }}>
+              <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col">
+                <div className="p-6 border-b border-mist/50">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4 overflow-hidden">
+                      <div className="h-12 w-12 shrink-0 rounded-[16px] overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
+                        {member.avatarUrl ? <img src={member.avatarUrl} alt={member.name} className="h-full w-full object-cover" /> : member.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-semibold text-ink tracking-tight truncate" title={member.name}>{member.name}</h3>
+                        <span className="text-xs text-slate">{member.id === user?.id ? "(Tú)" : ""}</span>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <CardTitle className="text-base font-medium text-ink truncate" title={member.name}>{member.name}</CardTitle>
-                      <span className="text-xs text-slate">{member.id === user?.id ? "(Tú)" : ""}</span>
-                    </div>
-                  </div>
                   {isMainLeader && member.id !== user?.id ? (
                     <Select defaultValue={member.role} onValueChange={(val) => roleMutation.mutate({ memberId: member.id, role: val })}>
                       <SelectTrigger className={`h-6 text-[10px] uppercase font-bold tracking-wider ${
@@ -383,51 +384,54 @@ export function Team() {
                     </Badge>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent className="p-5 space-y-4">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-medium text-slate flex items-center gap-1"><Target className="h-3 w-3" /> Score</span>
-                    <span className="text-sm font-bold text-ink">{member.performanceScore}%</span>
+                <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><Target className="h-3.5 w-3.5 text-primary" /> Score Rendimiento</span>
+                        <span className="text-sm font-bold text-ink">{member.performanceScore}%</span>
+                      </div>
+                      <Progress value={member.performanceScore} className="h-2 bg-primary/10 [&>div]:bg-primary rounded-full" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-emerald-500" /> Puntos de Salud</span>
+                        <span className={`text-sm font-bold ${member.healthPoints >= 70 ? 'text-emerald-500' : member.healthPoints >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{member.healthPoints}</span>
+                      </div>
+                      <Progress value={member.healthPoints} className={`h-2 rounded-full ${member.healthPoints >= 70 ? 'bg-emerald-100 [&>div]:bg-emerald-500' : member.healthPoints >= 40 ? 'bg-amber-100 [&>div]:bg-amber-500' : 'bg-red-100 [&>div]:bg-red-500'}`} />
+                    </div>
                   </div>
-                  <Progress value={member.performanceScore} className="h-1.5 [&>div]:bg-primary" />
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-medium text-slate flex items-center gap-1"><Activity className="h-3 w-3" /> Salud</span>
-                    <span className={`text-sm font-bold ${member.healthPoints >= 70 ? 'text-emerald-500' : member.healthPoints >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{member.healthPoints}</span>
+                  
+                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-mist/50 text-center">
+                    <div className="bg-emerald-50/50 p-2 rounded-[12px]">
+                      <div className="text-[10px] text-slate uppercase tracking-wider font-semibold">Aprobados</div>
+                      <div className="text-xl font-bold text-emerald-500">{member.contributions?.approved || 0}</div>
+                    </div>
+                    <div className="bg-amber-50/50 p-2 rounded-[12px]">
+                      <div className="text-[10px] text-slate uppercase tracking-wider font-semibold">Pendientes</div>
+                      <div className="text-xl font-bold text-amber-500">{member.contributions?.pending || 0}</div>
+                    </div>
                   </div>
-                  <Progress value={member.healthPoints} className={`h-1.5 ${member.healthPoints >= 70 ? '[&>div]:bg-emerald-500' : member.healthPoints >= 40 ? '[&>div]:bg-amber-500' : '[&>div]:bg-red-500'}`} />
-                </div>
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-mist text-center">
-                  <div>
-                    <div className="text-[10px] text-slate uppercase tracking-wider">Aprobados</div>
-                    <div className="text-lg font-bold text-emerald-500">{member.contributions?.approved || 0}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-slate uppercase tracking-wider">Pendientes</div>
-                    <div className="text-lg font-bold text-amber-500">{member.contributions?.pending || 0}</div>
-                  </div>
-                </div>
 
-                {/* Leader actions */}
-                {isLeaderOrCoLeader && member.id !== user?.id && (
-                  <div className="flex gap-2 pt-3 border-t border-mist">
-                    <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
-                      setAssignTo(member.id);
-                      setAssignToName(member.name);
-                      setAssignOpen(true);
-                    }}>
-                      <ClipboardList className="h-3 w-3 mr-1" /> Asignar Tarea
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-red-500 hover:bg-red-50 hover:text-red-700 text-xs"
-                      onClick={() => { if (confirm(`¿Eliminar a ${member.name} del equipo?`)) removeMutation.mutate(member.id); }}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  {/* Leader actions */}
+                  {isLeaderOrCoLeader && member.id !== user?.id && (
+                    <div className="flex gap-2 pt-4 border-t border-mist/50">
+                      <Button variant="outline" size="sm" className="flex-1 text-xs rounded-full hover:bg-slate-50 shadow-sm" onClick={() => {
+                        setAssignTo(member.id);
+                        setAssignToName(member.name);
+                        setAssignOpen(true);
+                      }}>
+                        <ClipboardList className="h-3 w-3 mr-1" /> Asignar Tarea
+                      </Button>
+                      <Button variant="outline" size="sm" className="text-red-500 hover:bg-red-50 hover:text-red-700 text-xs rounded-full shadow-sm"
+                        onClick={() => { if (confirm(`¿Eliminar a ${member.name} del equipo?`)) removeMutation.mutate(member.id); }}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           ))}
         </div>
       )}

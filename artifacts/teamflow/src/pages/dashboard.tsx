@@ -94,15 +94,15 @@ export function Dashboard() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button onClick={() => setLocation("/contributions/new")} className="shadow-lg">
+          <Button onClick={() => setLocation("/contributions/new")} className="btn-pill bg-primary hover:bg-primary/90 text-snow shadow-xl-2 px-6">
             <Plus className="h-4 w-4 mr-2" />
             Registrar Aporte
           </Button>
           {(workspaceRole === "leader" || workspaceRole === "co-leader") && (
-            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="relative">
+            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="btn-pill relative px-6 border-mist hover:bg-snow shadow-sm">
               Revisar Aportes
               {pendingContributions > 0 && (
-                <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold shadow-md">
                   {pendingContributions}
                 </span>
               )}
@@ -112,63 +112,71 @@ export function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="card-monday overflow-hidden border-t-4 border-t-green-500">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate">Puntos de Salud</CardTitle>
-            <Heart className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-500">{dashboard.healthPoints}</div>
+        <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Puntos de Salud</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <Heart className="h-4 w-4 text-emerald-500" />
+            </div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-emerald-500">{dashboard.healthPoints}</div>
             <p className="text-xs text-slate mt-1 leading-tight">Mide la constancia y calidad de tus aportes recientes.</p>
-            <Progress value={dashboard.healthPoints} className="h-2 mt-3 bg-green-100 [&>div]:bg-green-500" />
-          </CardContent>
-        </Card>
+            <Progress value={dashboard.healthPoints} className="h-2 mt-4 bg-emerald-100 [&>div]:bg-emerald-500 rounded-full" />
+          </div>
+        </motion.div>
 
-        <Card className="card-monday overflow-hidden border-t-4 border-t-primary">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate">Score de Rendimiento</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-primary">{Math.round(dashboard.performanceScore)}%</div>
+        <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Score de Rendimiento</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <TrendingUp className="h-4 w-4 text-primary" />
+            </div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-primary">{Math.round(dashboard.performanceScore)}%</div>
             <p className="text-xs text-slate mt-1 leading-tight">Evaluación global de tu desempeño y tareas completadas.</p>
-            <Progress value={dashboard.performanceScore} className="h-2 mt-3" />
-          </CardContent>
-        </Card>
+            <Progress value={dashboard.performanceScore} className="h-2 mt-4 bg-primary/10 [&>div]:bg-primary rounded-full" />
+          </div>
+        </motion.div>
 
-        <Card className="card-monday overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate">Aportes Aprobados</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-ink">{approvedContributions}</div>
+        <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <CheckCircle2 className="h-4 w-4 text-[#fe81e4]" />
+            </div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-ink mt-2">{approvedContributions}</div>
             <p className="text-xs text-slate mt-1">Validados por líderes</p>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
 
-        <Card className="card-monday overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium text-slate">Aportes Pendientes</CardTitle>
-            <AlertCircle className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-ink">{pendingContributions}</div>
+        <motion.div whileHover={{ y: -4 }} className="bg-amber-50 rounded-[24px] p-6 transition-all border border-amber-100/50">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
+            <div className="bg-snow p-2 rounded-full shadow-sm">
+              <AlertCircle className="h-4 w-4 text-[#fda900]" />
+            </div>
+          </div>
+          <div>
+            <div className="text-4xl font-bold text-ink mt-2">{pendingContributions}</div>
             <p className="text-xs text-slate mt-1">Esperando revisión</p>
-          </CardContent>
-        </Card>
+          </div>
+        </motion.div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-7">
-        <Card className="md:col-span-4 card-monday">
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <BarChart3 className="mr-2 h-5 w-5 text-primary" />
+        <div className="md:col-span-4 bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+          <div className="flex flex-col mb-6">
+            <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
+              <BarChart3 className="mr-3 h-6 w-6 text-primary" />
               Aportes de la Semana
-            </CardTitle>
-            <CardDescription>Volumen real de commits aportados</CardDescription>
-          </CardHeader>
-          <CardContent>
+            </h3>
+            <p className="text-slate mt-1">Volumen real de commits aportados</p>
+          </div>
+          <div>
             <div className="h-[250px] w-full mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -182,32 +190,32 @@ export function Dashboard() {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 20px -2px rgb(0 0 0 / 0.1)' }}
                   />
                   <Area type="monotone" dataKey="aportes" name="Aportes" stroke="#5046e6" strokeWidth={3} fillOpacity={1} fill="url(#colorAportes)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="md:col-span-3 card-monday">
-          <CardHeader>
-            <CardTitle className="flex items-center text-lg">
-              <Activity className="mr-2 h-5 w-5 text-primary" />
+        <div className="md:col-span-3 bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+          <div className="flex flex-col mb-6">
+            <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
+              <Activity className="mr-3 h-6 w-6 text-primary" />
               Aportes Recientes del Equipo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div>
             <div className="space-y-6">
               {contributions?.slice(0, 5).map((contrib: any) => (
-                <div key={contrib.id} className="flex items-start gap-4 group">
+                <div key={contrib.id} className="flex items-start gap-4 group hover:bg-slate-50 p-2 -mx-2 rounded-[16px] transition-colors">
                   <div className="relative">
-                    <div className="h-10 w-10 rounded-full overflow-hidden bg-slate-100 flex-shrink-0 border-2 border-white shadow-sm">
+                    <div className="h-10 w-10 rounded-[12px] overflow-hidden bg-slate-100 flex-shrink-0 border-2 border-white shadow-sm">
                       {contrib.user.avatarUrl ? (
                         <img src={contrib.user.avatarUrl} alt={contrib.user.name} className="h-full w-full object-cover" />
                       ) : (
-                        <div className="h-full w-full flex items-center justify-center text-sm font-medium text-slate-500">
+                        <div className="h-full w-full flex items-center justify-center text-sm font-bold text-primary bg-primary/10">
                           {contrib.user.name.charAt(0).toUpperCase()}
                         </div>
                       )}
@@ -216,8 +224,8 @@ export function Dashboard() {
                   <div className="flex flex-col space-y-1">
                     <div className="text-sm font-medium text-ink flex items-center gap-2">
                       <span>{contrib.user.name}</span>
-                      <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider ${
-                        contrib.status === 'approved' ? 'bg-green-50 text-green-700 border-green-200' : 
+                      <Badge variant="outline" className={`text-[10px] uppercase font-bold tracking-wider rounded-full ${
+                        contrib.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
                         contrib.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 
                         'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
@@ -229,7 +237,7 @@ export function Dashboard() {
                       <Clock className="mr-1 h-3 w-3" />
                       {format(new Date(contrib.createdAt), "dd MMM, HH:mm")}
                       <span className="mx-2">•</span>
-                      <span className="font-mono bg-slate/10 px-1 rounded">{contrib.commitSha.substring(0, 7)}</span>
+                      <span className="font-mono bg-cloud px-1.5 py-0.5 rounded-md text-slate-500">{contrib.commitSha.substring(0, 7)}</span>
                     </div>
                   </div>
                 </div>
@@ -241,8 +249,8 @@ export function Dashboard() {
                 </div>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

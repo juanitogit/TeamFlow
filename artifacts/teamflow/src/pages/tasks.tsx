@@ -101,23 +101,23 @@ export function Tasks() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-card rounded-xl shadow-sm border">Selecciona un workspace arriba.</div>
+        <div className="text-center py-12 text-slate bg-snow rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>
       ) : (
         <div className="space-y-4">
           {filteredTasks.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center bg-card rounded-xl border border-dashed border-mist shadow-sm">
-              <CheckCircle2 className="h-12 w-12 text-slate/30 mb-4" />
-              <h3 className="text-lg font-medium text-ink">¡Estás al día!</h3>
-              <p className="text-slate mt-1">No hay tareas para el filtro seleccionado.</p>
+            <div className="py-16 flex flex-col items-center justify-center text-center bg-snow rounded-[24px] border border-dashed border-mist shadow-sm">
+              <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
+              <h3 className="text-xl font-semibold text-ink">¡Estás al día!</h3>
+              <p className="text-slate mt-2">No hay tareas para el filtro seleccionado.</p>
             </div>
           ) : (
             filteredTasks.map((task: any) => {
               const daysLeft = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
               
               return (
-                <Card key={task.id} className="card-monday border-none">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <motion.div key={task.id} whileHover={{ y: -4 }}>
+                  <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden p-6 transition-all">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                       <div className="flex items-start gap-4 flex-1">
                         <Button 
                           variant="ghost" 
@@ -193,8 +193,8 @@ export function Tasks() {
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </motion.div>
               );
             })
           )}

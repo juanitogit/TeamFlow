@@ -179,65 +179,74 @@ export function GithubStats() {
       ) : (
         <>
           {/* Summary cards */}
-          <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-            <Card className="card-monday overflow-hidden border-t-4 border-t-primary">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-500">Total Commits</CardTitle>
-                <GitCommit className="h-4 w-4 text-primary" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-ink">{data?.totalCommits || 0}</div>
-                <p className="text-xs text-slate-400 mt-1">{PERIOD_LABELS[period] || period}</p>
-              </CardContent>
-            </Card>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
+              <div className="flex flex-row items-center justify-between pb-2">
+                <span className="text-sm font-medium text-slate">Total Commits</span>
+                <div className="bg-snow p-2 rounded-full shadow-sm">
+                  <GitCommit className="h-4 w-4 text-primary" />
+                </div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-ink mt-2">{data?.totalCommits || 0}</div>
+                <p className="text-xs text-slate mt-1">{PERIOD_LABELS[period] || period}</p>
+              </div>
+            </motion.div>
 
-            <Card className="card-monday overflow-hidden border-t-4 border-t-emerald-500">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-500">Contribuyentes</CardTitle>
-                <Users className="h-4 w-4 text-emerald-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-ink">{data?.authors?.length || 0}</div>
-                <p className="text-xs text-slate-400 mt-1">Autores activos</p>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
+              <div className="flex flex-row items-center justify-between pb-2">
+                <span className="text-sm font-medium text-slate">Contribuyentes</span>
+                <div className="bg-snow p-2 rounded-full shadow-sm">
+                  <Users className="h-4 w-4 text-emerald-500" />
+                </div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-ink mt-2">{data?.authors?.length || 0}</div>
+                <p className="text-xs text-slate mt-1">Autores activos</p>
+              </div>
+            </motion.div>
 
-            <Card className="card-monday overflow-hidden border-t-4 border-t-amber-500">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-500">Top Contribuyente</CardTitle>
-                <TrendingUp className="h-4 w-4 text-amber-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-lg font-bold text-ink truncate">{data?.authors?.[0]?.name || "—"}</div>
-                <p className="text-xs text-slate-400 mt-1">{data?.authors?.[0]?.commits || 0} commits</p>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ y: -4 }} className="bg-amber-50 rounded-[24px] p-6 transition-all border border-amber-100/50">
+              <div className="flex flex-row items-center justify-between pb-2">
+                <span className="text-sm font-medium text-slate">Top Contribuyente</span>
+                <div className="bg-snow p-2 rounded-full shadow-sm">
+                  <TrendingUp className="h-4 w-4 text-[#fda900]" />
+                </div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-ink truncate mt-4 leading-none">{data?.authors?.[0]?.name || "—"}</div>
+                <p className="text-xs text-slate mt-2">{data?.authors?.[0]?.commits || 0} commits</p>
+              </div>
+            </motion.div>
 
-            <Card className="card-monday overflow-hidden border-t-4 border-t-violet-500">
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-500">Repositorios</CardTitle>
-                <BarChart3 className="h-4 w-4 text-violet-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-ink">{data?.repos?.length || 0}</div>
-                <p className="text-xs text-slate-400 mt-1">Analizados</p>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
+              <div className="flex flex-row items-center justify-between pb-2">
+                <span className="text-sm font-medium text-slate">Repositorios</span>
+                <div className="bg-snow p-2 rounded-full shadow-sm">
+                  <BarChart3 className="h-4 w-4 text-[#fe81e4]" />
+                </div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-ink mt-2">{data?.repos?.length || 0}</div>
+                <p className="text-xs text-slate mt-1">Analizados</p>
+              </div>
+            </motion.div>
           </div>
 
           {/* Chart */}
+          {/* Chart */}
           {chartData.length > 0 && (
-            <Card className="card-monday border-none">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <BarChart3 className="mr-2 h-5 w-5 text-primary" />
+            <div className="bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+              <div className="flex flex-col mb-6">
+                <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
+                  <BarChart3 className="mr-3 h-6 w-6 text-primary" />
                   Commits por Integrante
-                </CardTitle>
-                <CardDescription>
+                </h3>
+                <p className="text-slate mt-1 text-sm">
                   {data?.repos?.map((r: string) => r).join(", ")} — {PERIOD_LABELS[period] || `${customSince} a ${customUntil}`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </p>
+              </div>
+              <div>
                 <div className="h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 60 }}>
@@ -268,20 +277,20 @@ export function GithubStats() {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {/* Ranking table */}
           {data?.authors?.length > 0 && (
-            <Card className="card-monday border-none">
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <Users className="mr-2 h-5 w-5 text-primary" />
+            <div className="bg-snow rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+              <div className="flex flex-col mb-6">
+                <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
+                  <Users className="mr-3 h-6 w-6 text-primary" />
                   Ranking de Contribuyentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                </h3>
+              </div>
+              <div>
                 <div className="space-y-3">
                   {data.authors.map((author: any, i: number) => (
                     <div
@@ -334,8 +343,8 @@ export function GithubStats() {
                     </div>
                   ))}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
 
           {chartData.length === 0 && (
