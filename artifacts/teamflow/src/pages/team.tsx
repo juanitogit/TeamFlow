@@ -499,42 +499,40 @@ export function Team() {
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
               <div 
-                className={`rounded-[24px] shadow-sm h-full flex flex-col bg-white border transition-transform transform hover:scale-[1.02] overflow-hidden ${
+                className={`rounded-[24px] shadow-sm h-full flex flex-col bg-white border transition-transform transform hover:scale-[1.02] relative overflow-hidden ${
                   member.role === 'leader' ? 'border-indigo-200' :
                   member.role === 'co-leader' ? 'border-blue-200' :
                   'border-mist'
                 }`}
               >
                 <div 
-                  className="h-24 w-full relative shrink-0"
+                  className={`absolute inset-0 z-0 ${member.role === 'leader' ? 'opacity-25' : 'opacity-15'}`}
                   style={{
                     backgroundImage: `url(${member.role === 'leader' ? '/bg-leader.png' : member.role === 'co-leader' ? '/bg-coleader.png' : '/bg-member.png'})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/90 to-transparent" />
-                </div>
+                />
                 
-                <div className="flex-1 flex flex-col">
-                <div className={`px-6 pb-6 pt-0 border-b ${
+                <div className="relative z-10 flex-1 flex flex-col">
+                <div className={`p-6 border-b ${
                   member.role === 'leader' ? 'border-indigo-100/50' :
                   member.role === 'co-leader' ? 'border-blue-100' :
                   'border-mist/50'
                 }`}>
-                  <div className="flex justify-between items-start gap-3 -mt-8 relative z-10">
-                    <div className="flex flex-col gap-3 flex-1">
-                      <div className="h-16 w-16 shrink-0 rounded-[16px] overflow-hidden bg-white shadow-sm border-4 border-white flex items-center justify-center text-primary font-bold text-2xl">
+                  <div className="flex justify-between items-start gap-3">
+                    <div className="flex items-center gap-4 overflow-hidden flex-1">
+                      <div className="h-12 w-12 shrink-0 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
                         {member.avatarUrl ? <img src={member.avatarUrl} alt={member.name} className="h-full w-full object-cover" /> : member.name.charAt(0).toUpperCase()}
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <h3 className="text-lg font-semibold text-ink tracking-tight truncate" title={member.name}>{member.name}</h3>
-                        {member.id === user?.id && <span className="text-xs text-slate block mt-0.5">(Tú)</span>}
+                        {member.id === user?.id && <span className="text-xs text-slate block">(Tú)</span>}
                       </div>
                     </div>
                   {isMainLeader && member.id !== user?.id ? (
                     <Select defaultValue={member.role} onValueChange={(val) => roleMutation.mutate({ memberId: member.id, role: val })}>
-                      <SelectTrigger className={`mt-8 h-8 px-3 shrink-0 w-auto text-[10px] uppercase font-bold tracking-wider rounded-xl ${
+                      <SelectTrigger className={`h-8 px-3 shrink-0 w-auto text-[10px] uppercase font-bold tracking-wider rounded-xl ${
                         member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                         member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                         'bg-slate-50 text-slate-700 border-slate-200'
@@ -548,7 +546,7 @@ export function Team() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge variant="outline" className={`mt-8 h-8 px-3 shrink-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-wider rounded-xl ${
+                    <Badge variant="outline" className={`h-8 px-3 shrink-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-wider rounded-xl ${
                       member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                       member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                       'bg-slate-50 text-slate-700 border-slate-200'
@@ -558,7 +556,7 @@ export function Team() {
                   )}
                   </div>
                 </div>
-                <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
+                <div className="p-6 space-y-5 flex-1 flex flex-col justify-between bg-white/40">
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
