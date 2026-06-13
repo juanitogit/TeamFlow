@@ -4,7 +4,7 @@ import { usersTable } from "./users";
 import { workspacesTable } from "./workspaces";
 
 export const wsTaskTypeEnum = pgEnum("ws_task_type", ["programacion", "documentacion", "investigacion"]);
-export const wsTaskStatusEnum = pgEnum("ws_task_status", ["pendiente", "en_progreso", "completada", "vencida"]);
+export const wsTaskStatusEnum = pgEnum("ws_task_status", ["pendiente", "en_progreso", "en_revision", "completada", "vencida"]);
 
 export const workspaceTasksTable = pgTable("workspace_tasks", {
   id: serial("id").primaryKey(),

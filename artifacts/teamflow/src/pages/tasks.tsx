@@ -42,6 +42,25 @@ export function Tasks() {
     enabled: !!workspaceId
   });
 
+  const statusMutation = useMutation({
+    mutationFn: async ({ taskId, status, sha }: { taskId: number, status: string, sha?: string }) => {
+      const res = await fetch(`/api/workspace-tasks/${taskId}/status`, {
+        method: "PATCH",
+        headers: getAuthHeader(),
+        body: JSON.stringify({ status, commitSha: sha })
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: (data, variables) => {
+      toast({ title: variables.status === "completada" ? "¡Tarea completada!" : "Estado actualizado" });
+      setCompletingTask(null);
+      setCommitSha("");
+      queryClient.invalidateQueries({ queryKey: ["workspace_tasks", workspaceId] });
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
+
   const completeMutation = useMutation({
     mutationFn: async ({ taskId, sha }: { taskId: number, sha?: string }) => {
       const res = await fetch(`/api/workspace-tasks/${taskId}/complete`, {
@@ -67,6 +86,14 @@ export function Tasks() {
       return;
     }
     completeMutation.mutate({ taskId: task.id, sha: commitSha });
+  };
+
+  const handleStatusChange = (task: any, newStatus: string) => {
+    if (newStatus === "completada" && task.type === "programacion" && !commitSha && !task.commitSha) {
+      setCompletingTask(task.id);
+      return;
+    }
+    statusMutation.mutate({ taskId: task.id, status: newStatus, sha: commitSha || task.commitSha });
   };
 
   if (isLoading) {
@@ -95,6 +122,8 @@ export function Tasks() {
           <SelectContent>
             <SelectItem value="todos">Todas</SelectItem>
             <SelectItem value="pendiente">Pendientes</SelectItem>
+            <SelectItem value="en_progreso">En Progreso</SelectItem>
+            <SelectItem value="en_revision">En Revisión</SelectItem>
             <SelectItem value="completada">Completadas</SelectItem>
           </SelectContent>
         </Select>
@@ -141,10 +170,29 @@ export function Tasks() {
                             {task.status === 'completada' && (
                               <Badge variant="outline" className="bg-emerald-50 text-emerald-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">Completada</Badge>
                             )}
+                            {task.status === 'en_progreso' && (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Progreso</Badge>
+                            )}
+                            {task.status === 'en_revision' && (
+                              <Badge variant="outline" className="bg-orange-50 text-orange-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Revisión</Badge>
+                            )}
                           </div>
-                          <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through' : 'text-ink'}`}>
-                            {task.title}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through' : 'text-ink'}`}>
+                              {task.title}
+                            </h3>
+                            <Select value={task.status} onValueChange={(val) => handleStatusChange(task, val)}>
+                              <SelectTrigger className="h-7 text-xs px-2 bg-slate-50 border-slate-200">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pendiente">Pendiente</SelectItem>
+                                <SelectItem value="en_progreso">En Progreso</SelectItem>
+                                <SelectItem value="en_revision">En Revisión</SelectItem>
+                                <SelectItem value="completada">Completada</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                           {task.description && (
                             <p className="text-sm text-slate mt-1 whitespace-pre-wrap">{task.description}</p>
                           )}

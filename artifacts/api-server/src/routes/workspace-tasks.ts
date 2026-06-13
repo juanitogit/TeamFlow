@@ -113,6 +113,53 @@ router.get("/workspace/:workspaceId", async (req: AuthedRequest, res: Response) 
   }
 });
 
+// Update task status
+router.patch("/:id/status", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const taskId = parseInt(req.params.id);
+  const { status, commitSha } = req.body;
+
+  if (!["pendiente", "en_progreso", "en_revision", "completada", "vencida"].includes(status)) {
+    res.status(400).json({ error: "Estado inválido" });
+    return;
+  }
+
+  try {
+    const [task] = await db.select().from(workspaceTasksTable).where(eq(workspaceTasksTable.id, taskId));
+    if (!task) { res.status(404).json({ error: "Tarea no encontrada" }); return; }
+    if (task.assignedTo !== userId) { res.status(403).json({ error: "Solo el asignado puede completar" }); return; }
+    if (task.type === "programacion" && !commitSha && status === "completada") {
+      res.status(400).json({ error: "Las tareas de programación requieren un Commit SHA" });
+      return;
+    }
+
+    const [updated] = await db.update(workspaceTasksTable).set({
+      status: status,
+      commitSha: commitSha || task.commitSha,
+      completedAt: status === "completada" ? new Date() : null,
+    }).where(eq(workspaceTasksTable.id, taskId)).returning();
+
+    if (status === "completada") {
+      // Add performance points
+      await db.update(usersTable).set({
+        performanceScore: (await db.select().from(usersTable).where(eq(usersTable.id, userId)))[0].performanceScore + 5,
+      }).where(eq(usersTable.id, userId));
+
+      // Notify the leader who assigned this task
+      const [assignee] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+      const [assigner] = await db.select().from(usersTable).where(eq(usersTable.id, task.assignedBy));
+      if (assigner && assigner.email) {
+        const emailData = taskCompletedEmail(assigner.name, assignee?.name || 'Un miembro', task.title, commitSha);
+        await sendEmail(assigner.email, emailData.subject, `${assignee?.name} completó la tarea ${task.title}`, emailData.html);
+      }
+    }
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar estado de tarea" });
+  }
+});
+
 // Complete a task (the assignee)
 router.post("/:id/complete", async (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
