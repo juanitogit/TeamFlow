@@ -74,20 +74,22 @@ export function Login() {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen flex items-center justify-center bg-cloud p-4 relative"
-    >
+    <div className="relative min-h-screen bg-cloud flex items-center justify-center p-4">
       <Button 
         variant="ghost" 
         onClick={() => setLocation("/")}
-        className="absolute top-4 left-4 md:top-8 md:left-8 text-slate-500 hover:text-ink hover:bg-white/50 rounded-full"
+        className="absolute top-4 left-4 md:top-8 md:left-8 text-slate-500 hover:text-ink hover:bg-white/50 rounded-full z-10"
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
         Volver al inicio
       </Button>
-      <Card className="w-full max-w-md card-monday">
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
+      >
+        <Card className="w-full card-monday">
         <CardHeader className="space-y-2 text-center flex flex-col items-center">
           <img src="/logo.png" alt="TeamFlow Logo" className="h-16 w-auto mb-2 dark:invert" />
           <CardTitle className="text-3xl font-light tracking-tight text-ink">Bienvenido</CardTitle>
@@ -163,7 +165,7 @@ export function Login() {
             </Link>
           </div>
         </CardFooter>
-      </Card>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
