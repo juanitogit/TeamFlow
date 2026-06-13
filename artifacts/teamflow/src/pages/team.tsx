@@ -307,7 +307,7 @@ export function Team() {
         <div className="flex justify-end">
           <Dialog open={githubInviteOpen} onOpenChange={setGithubInviteOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-pill bg-ink text-snow hover:bg-ink/80 shadow-sm gap-2">
+              <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shadow-sm gap-2">
                 <Github className="h-4 w-4" />
                 Invitar por GitHub
               </Button>
