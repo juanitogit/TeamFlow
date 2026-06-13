@@ -384,6 +384,7 @@ export function Team() {
                     </Badge>
                   )}
                 </div>
+              </div>
                 <div className="p-6 space-y-5 flex-1 flex flex-col justify-between">
                   <div className="space-y-4">
                     <div>
