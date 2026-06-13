@@ -221,7 +221,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div className="md:col-span-3 bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
+        <div className="gsap-fade-up bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
           <div className="flex flex-col mb-6">
             <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
               <Activity className="mr-3 h-6 w-6 text-primary" />

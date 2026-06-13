@@ -180,7 +180,7 @@ export function GithubStats() {
         <>
           {/* Summary cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <motion.div whileHover={{ y: -4 }} className="bg-sky/20 rounded-[24px] p-6 transition-all border border-sky/10">
+            <motion.div whileHover={{ y: -4 }} className="bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Total Commits</span>
                 <div className="bg-white p-2 rounded-full shadow-sm">
@@ -193,7 +193,7 @@ export function GithubStats() {
               </div>
             </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-mint/20 rounded-[24px] p-6 transition-all border border-mint/10">
+            <motion.div whileHover={{ y: -4 }} className="bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Contribuyentes</span>
                 <div className="bg-white p-2 rounded-full shadow-sm">
@@ -206,7 +206,7 @@ export function GithubStats() {
               </div>
             </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-slate-50 rounded-[24px] p-6 transition-all border border-slate-200/50">
+            <motion.div whileHover={{ y: -4 }} className="bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Top Contribuyente</span>
                 <div className="bg-white p-2 rounded-full shadow-sm">
@@ -219,7 +219,7 @@ export function GithubStats() {
               </div>
             </motion.div>
 
-            <motion.div whileHover={{ y: -4 }} className="bg-lavender/30 rounded-[24px] p-6 transition-all border border-lavender/10">
+            <motion.div whileHover={{ y: -4 }} className="bg-white rounded-[24px] p-6 transition-all border border-mist shadow-sm">
               <div className="flex flex-row items-center justify-between pb-2">
                 <span className="text-sm font-medium text-slate">Repositorios</span>
                 <div className="bg-white p-2 rounded-full shadow-sm">

@@ -48,7 +48,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-cloud flex flex-col font-sans text-ink">
+    <div className="min-h-screen flex flex-col font-sans text-ink" style={{ backgroundImage: "url('/bg-pattern.png')", backgroundSize: "cover", backgroundPosition: "center", backgroundAttachment: "fixed" }}>
       <header className="sticky top-0 z-50 w-full bg-card border-b border-mist shadow-sm">
         <div className="container max-w-[1200px] mx-auto flex h-20 items-center justify-between px-4">
           <div className="flex items-center gap-4 md:gap-8">
