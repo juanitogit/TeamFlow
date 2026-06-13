@@ -52,7 +52,7 @@ export function Team() {
   const [countdown, setCountdown] = useState("");
   const [regenerating, setRegenerating] = useState(false);
   const [generateInviteOpen, setGenerateInviteOpen] = useState(false);
-  const [inviteExpirationHours, setInviteExpirationHours] = useState("24");
+  const [inviteExpirationMinutes, setInviteExpirationMinutes] = useState("1440");
   const [customExpiration, setCustomExpiration] = useState("");
 
   // Fetch invite code
@@ -144,16 +144,16 @@ export function Team() {
   const handleRegenerate = async () => {
     if (!workspaceId) return;
     setRegenerating(true);
-    let hours = parseInt(inviteExpirationHours);
-    if (hours === 0 && customExpiration) {
-        hours = parseInt(customExpiration);
+    let minutes = parseInt(inviteExpirationMinutes);
+    if (minutes === 0 && customExpiration) {
+        minutes = parseInt(customExpiration);
     }
     
     try {
       const res = await fetch(`/api/workspaces/${workspaceId}/invite/regenerate`, { 
         method: "POST", 
         headers: getAuthHeader(),
-        body: JSON.stringify({ expiresInHours: isNaN(hours) || hours <= 0 ? 24 : hours })
+        body: JSON.stringify({ expiresInHours: isNaN(minutes) || minutes <= 0 ? 24 : minutes / 60 })
       });
       if (res.ok) {
         const data = await res.json();
@@ -264,25 +264,27 @@ export function Team() {
                   <div className="space-y-4 pt-4">
                     <div className="space-y-2">
                       <Label>Vigencia</Label>
-                      <Select value={inviteExpirationHours} onValueChange={setInviteExpirationHours}>
+                      <Select value={inviteExpirationMinutes} onValueChange={setInviteExpirationMinutes}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona la vigencia" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="1">1 hora</SelectItem>
-                          <SelectItem value="10">10 horas</SelectItem>
-                          <SelectItem value="24">1 día</SelectItem>
-                          <SelectItem value="720">30 días</SelectItem>
+                          <SelectItem value="1">1 minuto</SelectItem>
+                          <SelectItem value="5">5 minutos</SelectItem>
+                          <SelectItem value="30">30 minutos</SelectItem>
+                          <SelectItem value="60">1 hora</SelectItem>
+                          <SelectItem value="600">10 horas</SelectItem>
+                          <SelectItem value="1440">1 día</SelectItem>
                           <SelectItem value="0">Personalizado...</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                    {inviteExpirationHours === "0" && (
+                    {inviteExpirationMinutes === "0" && (
                       <div className="space-y-2">
-                        <Label>Horas personalizadas</Label>
+                        <Label>Minutos personalizados</Label>
                         <Input 
                           type="number"
-                          placeholder="Ej: 48 (para 2 días)" 
+                          placeholder="Ej: 45 (para 45 minutos)" 
                           value={customExpiration}
                           onChange={(e) => setCustomExpiration(e.target.value)}
                         />
@@ -291,7 +293,7 @@ export function Team() {
                     <Button 
                       className="w-full" 
                       onClick={handleRegenerate}
-                      disabled={regenerating || (inviteExpirationHours === "0" && (!customExpiration || parseInt(customExpiration) <= 0))}
+                      disabled={regenerating || (inviteExpirationMinutes === "0" && (!customExpiration || parseInt(customExpiration) <= 0))}
                     >
                       {regenerating ? "Generando..." : "Generar Invitación"}
                     </Button>
