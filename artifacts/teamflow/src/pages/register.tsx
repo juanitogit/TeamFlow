@@ -61,12 +61,14 @@ export function Register() {
       animate={{ opacity: 1, y: 0 }}
       className="min-h-screen flex items-center justify-center bg-cloud p-4 relative"
     >
-      <Link href="/">
-        <Button variant="ghost" className="absolute top-4 left-4 md:top-8 md:left-8 text-slate-500 hover:text-ink hover:bg-white/50 rounded-full">
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Volver al inicio
-        </Button>
-      </Link>
+      <Button 
+        variant="ghost" 
+        onClick={() => setLocation("/")}
+        className="absolute top-4 left-4 md:top-8 md:left-8 text-slate-500 hover:text-ink hover:bg-white/50 rounded-full"
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Volver al inicio
+      </Button>
       <Card className="w-full max-w-md card-monday">
         <CardHeader className="space-y-2 text-center flex flex-col items-center">
           <CardTitle className="text-3xl font-light tracking-tight text-ink">Create an account</CardTitle>
