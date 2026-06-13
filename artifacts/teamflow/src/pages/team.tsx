@@ -499,8 +499,8 @@ export function Team() {
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
               <div className={`rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col ${
-                member.role === 'leader' ? 'bg-gradient-to-br from-violet-50/50 to-indigo-50/50 border border-indigo-200' :
-                member.role === 'co-leader' ? 'bg-blue-50/30 border border-blue-200' :
+                member.role === 'leader' ? 'bg-gradient-to-br from-violet-100/80 to-indigo-100/80 border-2 border-indigo-300 shadow-md transform scale-[1.02]' :
+                member.role === 'co-leader' ? 'bg-blue-50 border-2 border-blue-200 shadow-sm' :
                 'bg-snow border border-mist'
               }`}>
                 <div className={`p-6 border-b ${
@@ -688,8 +688,28 @@ export function Team() {
                   <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">URL de la Imagen (Opcional)</label>
-                  <Input value={editImageUrl} onChange={(e) => setEditImageUrl(e.target.value)} placeholder="https://ejemplo.com/logo.png" />
+                  <label className="text-sm font-medium">Logo del Workspace (Opcional)</label>
+                  <div className="flex items-center gap-4">
+                    {editImageUrl && (
+                      <div className="h-12 w-12 rounded-lg overflow-hidden border border-mist shrink-0">
+                        <img src={editImageUrl} alt="Preview" className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                    <Input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setEditImageUrl(reader.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }} 
+                    />
+                  </div>
                 </div>
                 
                 <div className="space-y-2 pt-4 border-t">

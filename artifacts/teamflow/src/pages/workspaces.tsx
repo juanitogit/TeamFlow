@@ -234,8 +234,28 @@ export function Workspaces() {
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="¿Para qué es este espacio?" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">URL de la Imagen (Opcional)</label>
-                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://ejemplo.com/logo.png" />
+                <label className="text-sm font-medium">Logo del Workspace (Opcional)</label>
+                <div className="flex items-center gap-4">
+                  {imageUrl && (
+                    <div className="h-12 w-12 rounded-lg overflow-hidden border border-mist shrink-0">
+                      <img src={imageUrl} alt="Preview" className="h-full w-full object-cover" />
+                    </div>
+                  )}
+                  <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setImageUrl(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }} 
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Repositorios de GitHub (Opcional)</label>
