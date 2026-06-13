@@ -65,7 +65,7 @@ export function GithubStats() {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["github-commits", workspaceId, queryParams],
     queryFn: async () => {
-      const res = await fetch(`/api/workspaces/${workspaceId}/github-commits?${queryParams}`, {
+      const res = await fetch(`/api/github-stats/${workspaceId}/github-commits?${queryParams}`, {
         headers: getAuthHeader(),
       });
       if (!res.ok) {
