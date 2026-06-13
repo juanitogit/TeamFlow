@@ -86,7 +86,7 @@ export function Sprints() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <Timer className="h-7 w-7 text-primary" />
+            <FolderKanban className="h-7 w-7 text-primary" />
             Sprints y Ciclos
           </h1>
           <p className="text-slate mt-1 text-sm">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
