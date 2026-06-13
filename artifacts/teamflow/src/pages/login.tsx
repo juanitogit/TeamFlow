@@ -165,6 +165,7 @@ export function Login() {
             </Link>
           </div>
         </CardFooter>
+      </Card>
       </motion.div>
     </div>
   );

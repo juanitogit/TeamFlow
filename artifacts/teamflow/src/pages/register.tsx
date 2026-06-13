@@ -159,6 +159,7 @@ export function Register() {
             </Link>
           </div>
         </CardFooter>
+      </Card>
       </motion.div>
     </div>
   );
