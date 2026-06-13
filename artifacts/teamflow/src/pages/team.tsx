@@ -499,13 +499,17 @@ export function Team() {
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
               <div 
-                className="rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col bg-snow border border-mist transition-transform transform hover:scale-[1.02]"
-                style={{
-                  backgroundImage: `url(${member.role === 'leader' ? '/bg-leader.png' : member.role === 'co-leader' ? '/bg-coleader.png' : '/bg-member.png'})`,
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center'
-                }}
+                className="rounded-[24px] shadow-sm h-full flex flex-col bg-snow border border-mist transition-transform transform hover:scale-[1.02] relative overflow-hidden"
               >
+                <div 
+                  className="absolute inset-0 z-0 opacity-100"
+                  style={{
+                    backgroundImage: `url(${member.role === 'leader' ? '/bg-leader.png' : member.role === 'co-leader' ? '/bg-coleader.png' : '/bg-member.png'})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                />
+                <div className="relative z-10 flex-1 flex flex-col bg-white/90 backdrop-blur-sm m-1.5 sm:m-2.5 rounded-[20px] overflow-hidden shadow-sm">
                 <div className={`p-6 border-b ${
                   member.role === 'leader' ? 'border-indigo-100/50' :
                   member.role === 'co-leader' ? 'border-blue-100' :
@@ -604,6 +608,7 @@ export function Team() {
                       </Button>
                     </div>
                   )}
+                </div>
                 </div>
               </div>
             </motion.div>
