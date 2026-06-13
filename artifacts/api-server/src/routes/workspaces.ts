@@ -10,6 +10,7 @@ import { sendEmail, joinedWorkspaceEmail, memberRemovedEmail, roleChangedEmail, 
 import { fetchGithubCommits } from "./github-stats";
 import path from "path";
 import fs from "fs";
+import { logoBase64 } from "./logoBase64";
 
 const router = Router();
 router.use(requireAuth);
@@ -24,6 +25,7 @@ function generateInviteCode(expiresInHours: number = 24) {
 const createWorkspaceSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
+  imageUrl: z.string().url("Debe ser una URL válida").optional().or(z.literal("")),
   githubRepos: z.array(z.string().url("Must be a valid URL")).optional(),
 });
 
@@ -36,7 +38,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     return;
   }
 
-  const { name, description, githubRepos } = parse.data;
+  const { name, description, imageUrl, githubRepos } = parse.data;
   
   // Generate invite code with 24-hour expiry by default
   const invite = generateInviteCode(24);
@@ -45,6 +47,7 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
     const [workspace] = await db.insert(workspacesTable).values({
       name,
       description,
+      imageUrl: imageUrl || null,
       githubRepos: JSON.stringify(githubRepos || []),
       inviteCode: invite.code,
       inviteCodeExpiresAt: invite.expiresAt,
@@ -481,11 +484,24 @@ router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Resp
   }
 });
 
-// Update workspace settings (e.g. repos, name, description) (leader only)
+// Update workspace settings
 router.patch("/:id", async (req: AuthedRequest, res: Response) => {
   const userId = req.userId!;
   const workspaceId = parseInt(req.params.id);
-  const { githubRepos, name, description } = req.body;
+
+  const updateSchema = z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    imageUrl: z.string().optional().or(z.literal("")),
+    githubRepos: z.array(z.string()).optional(),
+  });
+
+  const parseResult = updateSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    res.status(400).json({ error: parseResult.error.errors[0].message });
+    return;
+  }
+  const { name, description, imageUrl, githubRepos } = parseResult.data;
 
   try {
     const [myMembership] = await db.select().from(workspaceMembersTable)
@@ -497,9 +513,10 @@ router.patch("/:id", async (req: AuthedRequest, res: Response) => {
     }
 
     const updates: any = {};
-    if (githubRepos !== undefined) updates.githubRepos = JSON.stringify(githubRepos || []);
     if (name !== undefined) updates.name = name;
     if (description !== undefined) updates.description = description;
+    if (imageUrl !== undefined) updates.imageUrl = imageUrl || null;
+    if (githubRepos !== undefined) updates.githubRepos = JSON.stringify(githubRepos);
 
     const [updated] = await db.update(workspacesTable)
       .set(updates)
@@ -647,7 +664,7 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
     // Table Headers
     sheet.getRow(7).values = ["Nombre del Miembro", "Rol en el Equipo", "Score de Rendimiento (%)", "Puntos de Salud", "Commits en GitHub"];
     sheet.getRow(7).font = { bold: true, color: { argb: "FFFFFFFF" } };
-    sheet.getRow(7).alignment = { horizontal: "center" };
+    sheet.getRow(7).alignment = { horizontal: "center", vertical: "middle" };
     
     const headerColors = ["FF2563EB", "FF3B82F6", "FF10B981", "FF14B8A6", "FF6366F1"]; // Blues & Emeralds & Indigo
     sheet.getRow(7).eachCell((cell, colNumber) => {
@@ -692,7 +709,7 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
       }
 
       const row = sheet.addRow([m.name, roleEs[m.role] || "Miembro", m.performanceScore, m.healthPoints, userCommitsCount]);
-      row.alignment = { horizontal: "center" };
+      row.alignment = { horizontal: "center", vertical: "middle" };
       row.eachCell((cell) => {
         cell.border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
       });
@@ -721,34 +738,39 @@ router.get("/:id/reports/excel", async (req: AuthedRequest, res: Response) => {
     summaryTitle.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFE2E8F0" } }; // Slate 200
 
     sheet.getCell(`A${summaryRow + 1}`).value = "Promedio Rendimiento:";
+    sheet.getCell(`A${summaryRow + 1}`).alignment = { horizontal: "center", vertical: "middle" };
     sheet.getCell(`B${summaryRow + 1}`).value = `${avgScore.toFixed(1)}%`;
     sheet.getCell(`B${summaryRow + 1}`).font = { bold: true, color: { argb: "FF2563EB" } };
+    sheet.getCell(`B${summaryRow + 1}`).alignment = { horizontal: "center", vertical: "middle" };
 
     sheet.getCell(`A${summaryRow + 2}`).value = "Promedio Salud:";
+    sheet.getCell(`A${summaryRow + 2}`).alignment = { horizontal: "center", vertical: "middle" };
     sheet.getCell(`B${summaryRow + 2}`).value = avgHealth.toFixed(1);
     sheet.getCell(`B${summaryRow + 2}`).font = { bold: true, color: { argb: "FF10B981" } };
+    sheet.getCell(`B${summaryRow + 2}`).alignment = { horizontal: "center", vertical: "middle" };
 
     sheet.getCell(`D${summaryRow + 1}`).value = "Total Commits:";
+    sheet.getCell(`D${summaryRow + 1}`).alignment = { horizontal: "center", vertical: "middle" };
     sheet.getCell(`E${summaryRow + 1}`).value = totalTeamCommits;
     sheet.getCell(`E${summaryRow + 1}`).font = { bold: true, color: { argb: "FF6366F1" } };
+    sheet.getCell(`E${summaryRow + 1}`).alignment = { horizontal: "center", vertical: "middle" };
 
     sheet.getCell(`D${summaryRow + 2}`).value = "Top Contribuyente:";
+    sheet.getCell(`D${summaryRow + 2}`).alignment = { horizontal: "center", vertical: "middle" };
     sheet.getCell(`E${summaryRow + 2}`).value = topContributorName;
     sheet.getCell(`E${summaryRow + 2}`).font = { bold: true, color: { argb: "FF6366F1" } };
+    sheet.getCell(`E${summaryRow + 2}`).alignment = { horizontal: "center", vertical: "middle" };
 
     // Try to add TeamFlow logo
     try {
-      const logoPath = path.resolve(process.cwd(), "../../teamflow/public/logo.png");
-      if (fs.existsSync(logoPath)) {
-        const logoId = workbook.addImage({
-          filename: logoPath,
-          extension: "png",
-        });
-        sheet.addImage(logoId, {
-          tl: { col: 0, row: 0 },
-          ext: { width: 40, height: 40 },
-        });
-      }
+      const logoId = workbook.addImage({
+        base64: `data:image/png;base64,${logoBase64}`,
+        extension: "png",
+      });
+      sheet.addImage(logoId, {
+        tl: { col: 0, row: 0 },
+        ext: { width: 40, height: 40 },
+      });
     } catch (e) {
       console.log("Could not add logo", e);
     }

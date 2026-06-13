@@ -133,6 +133,7 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
       name: usersTable.name,
       githubUsername: usersTable.githubUsername,
       avatarUrl: usersTable.avatarUrl,
+      role: workspaceMembersTable.role,
     })
     .from(workspaceMembersTable)
     .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
@@ -144,6 +145,7 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
       login: string; 
       avatar: string | null;
       memberId: number | null;
+      role: string | null;
       commits: number; 
       repos: Record<string, number>;
     }> = {};
@@ -161,6 +163,7 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
           login: commit.authorLogin,
           avatar: commit.authorAvatar || matchedMember?.avatarUrl || null,
           memberId: matchedMember?.id || null,
+          role: matchedMember?.role || null,
           commits: 0,
           repos: {},
         };

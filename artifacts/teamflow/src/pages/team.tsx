@@ -137,11 +137,13 @@ export function Team() {
   const [repos, setRepos] = useState<string[]>([]);
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
 
   useEffect(() => {
     if (activeWorkspace?.workspace) {
       setEditName(activeWorkspace.workspace.name || "");
       setEditDesc(activeWorkspace.workspace.description || "");
+      setEditImageUrl(activeWorkspace.workspace.imageUrl || "");
       if (activeWorkspace.workspace.githubRepos) {
         try { setRepos(JSON.parse(activeWorkspace.workspace.githubRepos)); } catch(e) { setRepos([]); }
       } else {
@@ -151,14 +153,15 @@ export function Team() {
   }, [activeWorkspace]);
 
   const workspaceMutation = useMutation({
-    mutationFn: async ({ repos, name, description }: { repos: string[], name: string, description: string }) => {
+    mutationFn: async ({ repos, name, description, imageUrl }: { repos: string[], name: string, description: string, imageUrl: string }) => {
       const res = await fetch(`/api/workspaces/${workspaceId}`, {
         method: "PATCH",
         headers: getAuthHeader(),
         body: JSON.stringify({ 
           githubRepos: repos.filter(r => r.trim() !== ""),
           name,
-          description
+          description,
+          imageUrl
         })
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
@@ -495,8 +498,16 @@ export function Team() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
-              <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col">
-                <div className="p-6 border-b border-mist/50">
+              <div className={`rounded-[24px] shadow-sm overflow-hidden h-full flex flex-col ${
+                member.role === 'leader' ? 'bg-gradient-to-br from-violet-50/50 to-indigo-50/50 border border-indigo-200' :
+                member.role === 'co-leader' ? 'bg-blue-50/30 border border-blue-200' :
+                'bg-snow border border-mist'
+              }`}>
+                <div className={`p-6 border-b ${
+                  member.role === 'leader' ? 'border-indigo-100/50' :
+                  member.role === 'co-leader' ? 'border-blue-100' :
+                  'border-mist/50'
+                }`}>
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex items-center gap-4 overflow-hidden flex-1">
                       <div className="h-12 w-12 shrink-0 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center text-primary font-bold text-xl">
@@ -676,6 +687,10 @@ export function Team() {
                   <label className="text-sm font-medium">Descripción</label>
                   <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">URL de la Imagen (Opcional)</label>
+                  <Input value={editImageUrl} onChange={(e) => setEditImageUrl(e.target.value)} placeholder="https://ejemplo.com/logo.png" />
+                </div>
                 
                 <div className="space-y-2 pt-4 border-t">
                   <label className="text-sm font-medium">Repositorios de GitHub</label>
@@ -701,7 +716,7 @@ export function Team() {
                         <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
                       </Button>
                     </div>
-                    <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc })}>
+                    <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc, imageUrl: editImageUrl })}>
                       {workspaceMutation.isPending ? "Guardando..." : "Guardar Cambios"}
                     </Button>
                   </div>

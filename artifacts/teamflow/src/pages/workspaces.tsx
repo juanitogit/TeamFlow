@@ -29,6 +29,7 @@ export function Workspaces() {
   
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [githubRepos, setGithubRepos] = useState<string[]>([""]);
   const [joinCode, setJoinCode] = useState("");
 
@@ -87,12 +88,13 @@ export function Workspaces() {
     if (!name) return;
     const validRepos = githubRepos.filter(r => r.trim() !== "");
     createWorkspace.mutate(
-      { name, description, githubRepos: validRepos.length > 0 ? validRepos : undefined } as any,
+      { name, description, imageUrl, githubRepos: validRepos.length > 0 ? validRepos : undefined } as any,
       {
         onSuccess: (newWorkspace) => {
           setIsCreateOpen(false);
           setName("");
           setDescription("");
+          setImageUrl("");
           setGithubRepos([""]);
           handleSelectWorkspace(newWorkspace.id, "leader");
           toast({ title: "¡Workspace creado!", description: `Código de invitación: ${newWorkspace.inviteCode}` });
@@ -157,8 +159,12 @@ export function Workspaces() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="p-6 flex-1 relative z-10">
                 <div className="flex justify-between items-start">
-                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 shadow-sm p-3 rounded-2xl">
-                    <FolderKanban className="h-6 w-6 text-primary drop-shadow-sm" />
+                  <div className="h-12 w-12 shrink-0 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 shadow-sm rounded-2xl flex items-center justify-center overflow-hidden">
+                    {membership.workspace.imageUrl ? (
+                      <img src={membership.workspace.imageUrl} alt="Logo" className="h-full w-full object-cover" />
+                    ) : (
+                      <FolderKanban className="h-6 w-6 text-primary drop-shadow-sm" />
+                    )}
                   </div>
                   <span className={`text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
                     membership.role === 'leader' ? 'bg-gradient-to-r from-[#8b5cf6] to-[#4f46e5] text-white shadow-md' :
@@ -174,16 +180,27 @@ export function Workspaces() {
                 </p>
               </div>
               <div className="p-4 border-t border-mist bg-cloud/50 flex justify-between items-center relative z-10">
-                <div className="text-xs text-slate flex items-center gap-2">
-                  Código: <span className="font-mono font-bold text-primary tracking-wider bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10">{membership.workspace.inviteCode}</span>
+                <div className="text-xs text-slate font-medium flex items-center">
+                  <Users className="h-3.5 w-3.5 mr-1.5 opacity-70" />
+                  ID: {membership.workspaceId}
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors" onClick={(e) => {
-                  e.stopPropagation();
-                  navigator.clipboard.writeText(membership.workspace.inviteCode);
-                  toast({ title: "¡Código copiado!" });
-                }} title="Copiar código">
-                  <Copy className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-2">
+                  {membership.role === "leader" && (
+                    <Button variant="ghost" size="sm" className="h-8 text-xs hover:bg-primary/10 hover:text-primary transition-colors border border-transparent hover:border-primary/20" onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(membership.workspace.inviteCode);
+                      toast({ title: "¡Invitación copiada!" });
+                    }}>
+                      <Copy className="h-3 w-3 mr-1.5" /> Código
+                    </Button>
+                  )}
+                  <Button size="sm" className="h-8 text-xs rounded-lg shadow-sm" onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectWorkspace(membership.workspaceId, membership.role);
+                  }}>
+                    Entrar
+                  </Button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -215,6 +232,10 @@ export function Workspaces() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Descripción</label>
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="¿Para qué es este espacio?" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">URL de la Imagen (Opcional)</label>
+                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://ejemplo.com/logo.png" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Repositorios de GitHub (Opcional)</label>

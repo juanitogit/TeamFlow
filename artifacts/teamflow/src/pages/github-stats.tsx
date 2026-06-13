@@ -319,8 +319,14 @@ export function GithubStats() {
                         <div className="text-xs text-slate-400 flex items-center gap-1">
                           <Github className="h-3 w-3" />
                           @{author.login}
-                          {author.memberId && (
-                            <Badge variant="outline" className="ml-1 text-[9px] px-1.5 py-0 bg-primary/5 text-primary border-primary/20">Miembro</Badge>
+                          {author.role && (
+                            <Badge variant="outline" className={`ml-1 text-[9px] px-1.5 py-0 ${
+                              author.role === 'leader' ? 'bg-gradient-to-r from-[#8b5cf6] to-[#4f46e5] text-white border-transparent' :
+                              author.role === 'co-leader' ? 'bg-primary/10 text-primary border-primary/20' :
+                              'bg-slate-100 text-slate-600 border-slate-200'
+                            }`}>
+                              {author.role === 'leader' ? 'Líder' : author.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
+                            </Badge>
                           )}
                         </div>
                       </div>

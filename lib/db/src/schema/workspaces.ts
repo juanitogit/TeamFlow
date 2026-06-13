@@ -8,6 +8,7 @@ export const workspacesTable = pgTable("workspaces", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
+  imageUrl: text("image_url"),
   githubRepoUrl: text("github_repo_url"), // Deprecated, keeping for backwards compatibility
   githubRepos: text("github_repos").default("[]"), // Stored as JSON string
   inviteCode: text("invite_code").notNull().unique(),

@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, ListTodo, Users, Menu, X, Github, LogOut, ArrowLeftRight, FolderKanban } from "lucide-react";
+import { Loader2, Home, ListTodo, Users, Menu, X, Github, LogOut, ArrowLeftRight, FolderKanban, Timer } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { LogoLoader } from "@/components/ui/logo-loader";
@@ -43,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Dashboard", icon: Home },
     { href: "/tasks", label: "Tareas", icon: ListTodo },
     { href: "/team", label: "Equipo", icon: Users },
-    { href: "/sprints", label: "Sprints", icon: FolderKanban },
+    { href: "/sprints", label: "Sprints", icon: Timer },
     { href: "/github-stats", label: "GitHub", icon: Github },
   ];
 
