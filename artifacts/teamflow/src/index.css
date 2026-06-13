@@ -197,7 +197,7 @@
 }
 
 .btn-pill {
-  @apply rounded-pill bg-obsidian text-snow shadow-subtle border-none hover:opacity-90;
+  @apply rounded-full bg-obsidian text-snow shadow-subtle border-none hover:opacity-90;
 }
 
 .card-awesomic {
