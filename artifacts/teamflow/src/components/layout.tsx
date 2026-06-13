@@ -94,8 +94,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="h-8 w-px bg-slate-200 hidden sm:block mx-1"></div>
             <div className="flex items-center gap-2 cursor-default" title={user.name}>
               <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-tr from-primary to-[#fe81e4] p-[2px] shadow-sm">
-                <div className="h-full w-full rounded-full bg-snow flex items-center justify-center text-primary font-bold text-sm">
-                  {user.name.charAt(0).toUpperCase()}
+                <div className="h-full w-full rounded-full bg-snow flex items-center justify-center text-primary font-bold text-sm overflow-hidden">
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    user.name.charAt(0).toUpperCase()
+                  )}
                 </div>
               </div>
             </div>
