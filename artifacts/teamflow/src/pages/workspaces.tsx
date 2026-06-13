@@ -157,13 +157,13 @@ export function Workspaces() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div className="p-6 flex-1 relative z-10">
                 <div className="flex justify-between items-start">
-                  <div className="bg-sky/20 p-3 rounded-[16px]">
-                    <FolderKanban className="h-6 w-6 text-primary" />
+                  <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/10 shadow-sm p-3 rounded-2xl">
+                    <FolderKanban className="h-6 w-6 text-primary drop-shadow-sm" />
                   </div>
-                  <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${
-                    membership.role === 'leader' ? 'bg-amber-100 text-amber-700' :
-                    membership.role === 'co-leader' ? 'bg-blue-100 text-blue-700' :
-                    'bg-slate-100 text-slate-600'
+                  <span className={`text-[11px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${
+                    membership.role === 'leader' ? 'bg-gradient-to-r from-primary to-[#fe81e4] text-white shadow-md' :
+                    membership.role === 'co-leader' ? 'bg-primary/10 text-primary border border-primary/20' :
+                    'bg-slate-100 text-slate-600 border border-slate-200'
                   }`}>
                     {membership.role === 'leader' ? 'Líder' : membership.role === 'co-leader' ? 'Co-líder' : 'Miembro'}
                   </span>
@@ -174,15 +174,15 @@ export function Workspaces() {
                 </p>
               </div>
               <div className="p-4 border-t border-mist bg-cloud/50 flex justify-between items-center relative z-10">
-                <div className="text-xs text-slate">
-                  Código: <span className="font-mono font-bold text-ink tracking-wider bg-snow px-2 py-1 rounded-md">{membership.workspace.inviteCode}</span>
+                <div className="text-xs text-slate flex items-center gap-2">
+                  Código: <span className="font-mono font-bold text-primary tracking-wider bg-primary/5 px-2.5 py-1 rounded-md border border-primary/10">{membership.workspace.inviteCode}</span>
                 </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full hover:bg-snow hover:shadow-sm" onClick={(e) => {
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-primary/10 hover:text-primary transition-colors" onClick={(e) => {
                   e.stopPropagation();
                   navigator.clipboard.writeText(membership.workspace.inviteCode);
                   toast({ title: "¡Código copiado!" });
-                }}>
-                  <Copy className="h-4 w-4 text-slate" />
+                }} title="Copiar código">
+                  <Copy className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -193,12 +193,12 @@ export function Workspaces() {
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <motion.div whileHover={{ y: -6 }} className="h-full">
-              <div className="h-full cursor-pointer border-dashed border-2 border-mist bg-snow/50 hover:bg-snow hover:shadow-md transition-all flex flex-col items-center justify-center p-8 rounded-[24px]">
-                <div className="h-16 w-16 rounded-[16px] bg-mint/20 flex items-center justify-center mb-6">
+              <div className="h-full cursor-pointer border-dashed border-2 border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all flex flex-col items-center justify-center p-8 rounded-[24px] group">
+                <div className="h-16 w-16 rounded-[16px] bg-white shadow-sm flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <Plus className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-ink tracking-tight">Crear Workspace</h3>
-                <p className="text-sm text-center text-slate mt-2">Empieza un nuevo proyecto como Líder</p>
+                <h3 className="text-xl font-semibold text-primary tracking-tight">Crear Workspace</h3>
+                <p className="text-sm text-center text-primary/70 mt-2 font-medium">Empieza un nuevo proyecto como Líder</p>
               </div>
             </motion.div>
           </DialogTrigger>
