@@ -102,9 +102,9 @@ export function GithubStats() {
       {/* Filters */}
       <Card className="card-monday border-none">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-3 flex-wrap items-end">
+          <div className="grid grid-cols-1 sm:flex sm:flex-row gap-3 items-end">
             {/* Repo selector */}
-            <div className="flex-1 min-w-[200px]">
+            <div className="w-full sm:flex-1">
               <label className="text-xs font-medium text-slate-500 mb-1 block">Repositorio</label>
               <Select value={selectedRepo} onValueChange={setSelectedRepo}>
                 <SelectTrigger className="bg-white shadow-sm">
@@ -120,7 +120,7 @@ export function GithubStats() {
             </div>
 
             {/* Period selector */}
-            <div className="min-w-[160px]">
+            <div className="w-full sm:w-[200px]">
               <label className="text-xs font-medium text-slate-500 mb-1 block">Período</label>
               <Select value={period} onValueChange={setPeriod}>
                 <SelectTrigger className="bg-white shadow-sm">

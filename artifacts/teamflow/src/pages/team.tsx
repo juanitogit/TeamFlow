@@ -435,26 +435,28 @@ export function Team() {
         )}
       </div>
 
-      <div className="flex flex-wrap justify-end gap-3">
-        <Button onClick={() => setManualLogOpen(true)} className="bg-primary text-white hover:bg-primary/90 rounded-full shadow-sm gap-2">
+      <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2 w-full">
+        <Button onClick={() => setManualLogOpen(true)} className="w-full sm:w-auto bg-primary text-white hover:bg-primary/90 rounded-full shadow-sm gap-2">
           <BookOpen className="h-4 w-4" />
-          Registrar Trabajo
+          <span className="hidden sm:inline">Registrar Trabajo</span>
+          <span className="sm:hidden">Registrar</span>
         </Button>
         {isLeaderOrCoLeader && (
           <>
-            <Button onClick={() => setAuditOpen(true)} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
+            <Button onClick={() => setAuditOpen(true)} variant="outline" className="w-full sm:w-auto rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
               <ScrollText className="h-4 w-4" />
               Historial
             </Button>
-            <Button onClick={handleExportExcel} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
+            <Button onClick={handleExportExcel} variant="outline" className="w-full sm:w-auto rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
               <Download className="h-4 w-4" />
               Exportar
             </Button>
             <Dialog open={githubInviteOpen} onOpenChange={setGithubInviteOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-slate-900 text-white hover:bg-slate-800 rounded-full shadow-sm gap-2">
+                <Button className="w-full sm:w-auto bg-slate-900 text-white hover:bg-slate-800 rounded-full shadow-sm gap-2">
                   <Github className="h-4 w-4" />
-                  Invitar por GitHub
+                  <span className="hidden sm:inline">Invitar por GitHub</span>
+                  <span className="sm:hidden">Invitar (GH)</span>
                 </Button>
               </DialogTrigger>
             <DialogContent>
