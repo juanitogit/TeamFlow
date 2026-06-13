@@ -321,6 +321,27 @@ export function Team() {
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
+  const handleExportCsv = async () => {
+    try {
+      const res = await fetch(`/api/workspaces/${workspaceId}/reports/csv`, {
+        headers: getAuthHeader()
+      });
+      if (!res.ok) throw new Error("Error al obtener datos");
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `teamflow_report_${workspaceId}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Error al exportar", description: e.message });
+    }
+  };
+
   if (isLoading) {
     return (<div className="h-96 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>);
   }
@@ -425,7 +446,7 @@ export function Team() {
               <ScrollText className="h-4 w-4" />
               Historial
             </Button>
-            <Button onClick={() => window.open(`/api/workspaces/${workspaceId}/reports/csv`, "_blank")} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
+            <Button onClick={handleExportCsv} variant="outline" className="rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
               <Download className="h-4 w-4" />
               Exportar
             </Button>
