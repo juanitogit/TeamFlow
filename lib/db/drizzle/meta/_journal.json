@@ -15,6 +15,13 @@
       "when": 1781385674731,
       "tag": "0001_graceful_bill_hollister",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781406655525,
+      "tag": "0002_tan_senator_kelly",
+      "breakpoints": true
     }
   ]
 }

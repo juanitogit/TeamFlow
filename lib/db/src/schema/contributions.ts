@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { pgTable, text, serial, timestamp, integer, pgEnum, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, pgEnum, jsonb, index } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { workspacesTable } from "./workspaces";
 import { createInsertSchema } from "drizzle-zod";
@@ -20,7 +20,11 @@ export const contributionsTable = pgTable("contributions", {
   reviewComment: text("review_comment"),
   reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  workspaceIdx: index("contributions_workspace_idx").on(table.workspaceId),
+  userIdx: index("contributions_user_idx").on(table.userId),
+  createdAtIdx: index("contributions_created_at_idx").on(table.createdAt),
+}));
 
 export const insertContributionSchema = createInsertSchema(contributionsTable).omit({ id: true, createdAt: true, reviewedAt: true });
 export type InsertContribution = z.infer<typeof insertContributionSchema>;

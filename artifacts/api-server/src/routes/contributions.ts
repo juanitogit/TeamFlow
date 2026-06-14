@@ -67,7 +67,8 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
         const emailData = contributionSubmittedEmail(user.name, wsInfo.name, commitMessage);
         for (const leader of leaders) {
           if (leader.email) {
-            await sendEmail(leader.email, emailData.subject, emailData.subject, emailData.html);
+            sendEmail(leader.email, emailData.subject, emailData.subject, emailData.html)
+              .catch(e => console.error("Failed to send contribution email to leader", e));
           }
         }
       }
@@ -188,7 +189,8 @@ router.post("/:id/review", async (req: AuthedRequest, res: Response) => {
           parse.data.status, 
           parse.data.reviewComment || "No se dejó comentario adicional."
         );
-        await sendEmail(user.email, emailData.subject, emailData.subject, emailData.html);
+        sendEmail(user.email, emailData.subject, emailData.subject, emailData.html)
+          .catch(e => console.error("Failed to send review email", e));
       }
     } catch (e) {
       console.error("Failed to send review email", e);

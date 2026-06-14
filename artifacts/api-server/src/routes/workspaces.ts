@@ -129,7 +129,8 @@ router.post("/join", async (req: AuthedRequest, res: Response) => {
     const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (userRecord && userRecord.email) {
       const emailData = joinedWorkspaceEmail(userRecord.name, workspace.name);
-      await sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html);
+      sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html)
+        .catch(e => console.error("Failed to send join workspace email", e));
     }
 
     res.json({ success: true, message: "Joined workspace", workspace });
@@ -211,7 +212,8 @@ router.post("/:id/invite-github", async (req: AuthedRequest, res: Response) => {
     const inviteUrl = `${appUrl}/workspaces?accept_github_invite=${token}`;
 
     const emailData = githubInviteEmail(targetName, workspace.name, inviteUrl);
-    await sendEmail(targetEmail, emailData.subject, "Invitación", emailData.html);
+    sendEmail(targetEmail, emailData.subject, "Invitación", emailData.html)
+      .catch(e => console.error("Failed to send invite email", e));
     res.json({ success: true, message: "Invitación enviada por correo exitosamente" });
   } catch (error) {
     res.status(500).json({ error: "Error al enviar invitación" });
@@ -278,7 +280,8 @@ router.post("/accept-github-invite", async (req: AuthedRequest, res: Response) =
     const [userRecord] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
     if (userRecord && userRecord.email) {
       const emailData = joinedWorkspaceEmail(userRecord.name, workspace.name);
-      await sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html);
+      sendEmail(userRecord.email, emailData.subject, `Te uniste al workspace ${workspace.name}`, emailData.html)
+        .catch(e => console.error("Failed to send join workspace email", e));
     }
 
     res.json({ success: true, message: "Joined workspace", workspace });
@@ -430,7 +433,8 @@ router.delete("/:id/members/:memberId", async (req: AuthedRequest, res: Response
     // Notify removed member via email
     if (removedUser && removedUser.email) {
       const emailData = memberRemovedEmail(removedUser.name, workspace?.name || 'desconocido');
-      await sendEmail(removedUser.email, emailData.subject, `Fuiste removido del workspace ${workspace?.name}`, emailData.html);
+      sendEmail(removedUser.email, emailData.subject, `Fuiste removido del workspace ${workspace?.name}`, emailData.html)
+        .catch(e => console.error("Failed to send remove member email", e));
     }
 
     res.json({ success: true, message: "Miembro eliminado" });
@@ -475,7 +479,8 @@ router.patch("/:id/members/:memberId/role", async (req: AuthedRequest, res: Resp
     const [ws] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, workspaceId));
     if (userRecord && userRecord.email) {
       const emailData = roleChangedEmail(userRecord.name, role, ws?.name || 'Workspace');
-      await sendEmail(userRecord.email, emailData.subject, `Tu rol cambió a ${role}`, emailData.html);
+      sendEmail(userRecord.email, emailData.subject, `Tu rol cambió a ${role}`, emailData.html)
+        .catch(e => console.error("Failed to send role changed email", e));
     }
 
     res.json({ success: true, message: "Rol actualizado" });

@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -12,7 +12,10 @@ export const activityLogTable = pgTable("activity_log", {
   entityId: integer("entity_id"),
   entityTitle: text("entity_title").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  userIdx: index("activity_log_user_idx").on(table.userId),
+  createdAtIdx: index("activity_log_created_at_idx").on(table.createdAt),
+}));
 
 export const insertActivityLogSchema = createInsertSchema(activityLogTable).omit({ id: true, createdAt: true });
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;

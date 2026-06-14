@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { pgTable, serial, timestamp, integer, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, integer, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { workspacesTable } from "./workspaces";
 import { createInsertSchema } from "drizzle-zod";
@@ -13,7 +13,9 @@ export const workspaceMembersTable = pgTable("workspace_members", {
   userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   role: workspaceRoleEnum("role").notNull().default("member"),
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  workspaceUserIdx: uniqueIndex("workspace_user_idx").on(table.workspaceId, table.userId),
+}));
 
 export const insertWorkspaceMemberSchema = createInsertSchema(workspaceMembersTable).omit({ id: true, joinedAt: true });
 export type InsertWorkspaceMember = z.infer<typeof insertWorkspaceMemberSchema>;
