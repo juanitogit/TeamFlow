@@ -161,4 +161,59 @@ router.delete("/:id", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// POST /:id/resend
+router.post("/:id/resend", async (req: AuthedRequest, res: Response) => {
+  try {
+    const meetingId = parseInt(req.params.id);
+    const userId = req.userId!;
+
+    const [meeting] = await db.select().from(meetingsTable).where(eq(meetingsTable.id, meetingId));
+    if (!meeting) {
+      res.status(404).json({ error: "Meeting not found" });
+      return;
+    }
+
+    const [membership] = await db.select()
+      .from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, meeting.workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader" && meeting.organizerId !== userId)) {
+      res.status(403).json({ error: "Only leaders or the organizer can resend invites" });
+      return;
+    }
+
+    const [workspace] = await db.select().from(workspacesTable).where(eq(workspacesTable.id, meeting.workspaceId));
+
+    // Fetch all members to send invites
+    const members = await db.select({
+      email: usersTable.email,
+    })
+    .from(workspaceMembersTable)
+    .innerJoin(usersTable, eq(workspaceMembersTable.userId, usersTable.id))
+    .where(eq(workspaceMembersTable.workspaceId, meeting.workspaceId));
+
+    // Send emails (fire and forget)
+    const emailData = meetingInviteEmail(
+      workspace.name, 
+      meeting.title, 
+      meeting.description || "", 
+      meeting.meetLink || "", 
+      new Date(meeting.startTime), 
+      new Date(meeting.endTime)
+    );
+
+    for (const member of members) {
+      if (member.email) {
+        sendEmail(member.email, emailData.subject, emailData.subject, emailData.html, emailData.attachments)
+          .catch(err => console.error("Failed to send meeting invite to", member.email, err));
+      }
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[Meetings] Error resending:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;

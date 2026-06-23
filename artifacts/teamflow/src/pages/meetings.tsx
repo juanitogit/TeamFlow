@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { IconVideo, IconClock, IconUsers, IconX, IconCalendar } from "@tabler/icons-react";
+import { IconVideo, IconClock, IconUsers, IconX, IconCalendar, IconMailForward } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { LogoLoader } from "@/components/ui/logo-loader";
 
@@ -77,6 +77,17 @@ export function Meetings() {
     }
   });
 
+  const resendMutation = useMutation({
+    mutationFn: async (meetingId: number) => {
+      const res = await fetch(`/api/meetings/${meetingId}/resend`, { method: "POST", headers: getAuthHeader() });
+      if (!res.ok) throw new Error("Error resending invites");
+    },
+    onSuccess: () => {
+      toast({ title: "Invitaciones reenviadas", description: "Se ha enviado el correo a todos los miembros." });
+    },
+    onError: () => toast({ variant: "destructive", title: "Error al reenviar invitaciones" })
+  });
+
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate({ title, description, meetLink, startTime: new Date(startTime).toISOString(), endTime: new Date(endTime).toISOString() });
@@ -93,9 +104,7 @@ export function Meetings() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-2xl">
-              <IconVideo className="h-6 w-6 text-primary" />
-            </div>
+            <IconVideo className="h-8 w-8 text-primary" />
             Reuniones
           </h1>
           <p className="text-slate mt-1 text-sm font-medium">Sincronización y agenda del equipo</p>
@@ -158,7 +167,7 @@ export function Meetings() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {meetings?.map((m: any) => (
             <motion.div key={m.id} whileHover={{ y: -4 }}>
-              <div className="bg-snow border border-mist rounded-[24px] shadow-sm p-6 relative flex flex-col h-full overflow-hidden">
+              <div className="bg-white border border-mist rounded-[24px] shadow-sm p-6 relative flex flex-col h-full overflow-hidden">
                 {/* Decorative background element */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
                 
@@ -187,13 +196,18 @@ export function Meetings() {
                   ) : <span className="text-slate text-sm font-medium flex items-center gap-1.5"><IconUsers className="w-4 h-4"/> Presencial</span>}
 
                   {(isLeader || m.organizer?.id === user?.id) && (
-                    <Button variant="ghost" size="icon" onClick={() => {
-                      if(window.confirm("¿Seguro que deseas cancelar esta reunión?")) {
-                        deleteMutation.mutate(m.id);
-                      }
-                    }} className="h-8 w-8 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50">
-                      <IconX className="w-4 h-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => resendMutation.mutate(m.id)} disabled={resendMutation.isPending} className="h-8 w-8 rounded-full text-blue-500 hover:text-blue-700 hover:bg-blue-50" title="Reenviar invitación a todos">
+                        <IconMailForward className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        if (confirm("¿Estás seguro de cancelar esta reunión?")) {
+                          deleteMutation.mutate(m.id);
+                        }
+                      }} className="h-8 w-8 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50" title="Cancelar reunión">
+                        <IconX className="w-4 h-4" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>

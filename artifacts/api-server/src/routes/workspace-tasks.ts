@@ -209,7 +209,7 @@ router.put("/:id", async (req: AuthedRequest, res: Response) => {
   const taskId = parseInt(req.params.id);
   const parse = z.object({
     title: z.string().min(1),
-    description: z.string().optional(),
+    description: z.string().optional().nullable(),
     dueDate: z.string().optional().nullable(),
     status: z.enum(["pendiente", "en_progreso", "en_revision", "completada", "vencida"]),
   }).safeParse(req.body);
@@ -242,8 +242,9 @@ router.put("/:id", async (req: AuthedRequest, res: Response) => {
     }).where(eq(workspaceTasksTable.id, taskId)).returning();
 
     res.json(updated);
-  } catch (error) {
-    res.status(500).json({ error: "Error al actualizar la tarea" });
+  } catch (error: any) {
+    console.error("Error updating task:", error);
+    res.status(500).json({ error: error.message || "Error al actualizar la tarea" });
   }
 });
 

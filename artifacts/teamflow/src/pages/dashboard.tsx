@@ -101,9 +101,7 @@ export function Dashboard() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-ink flex items-center gap-3">
-             <div className="p-2 bg-primary/10 rounded-2xl">
-               <IconLayoutDashboard className="h-6 w-6 text-primary" />
-             </div>
+             <IconLayoutDashboard className="h-8 w-8 text-primary" />
              Dashboard de Rendimiento
           </h1>
           <div className="flex items-center gap-3 mt-2">

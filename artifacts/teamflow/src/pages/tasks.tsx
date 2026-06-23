@@ -325,9 +325,7 @@ export function Tasks() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-2xl">
-              <IconListCheck className="h-6 w-6 text-[#fe81e4]" />
-            </div>
+            <IconListCheck className="h-8 w-8 text-[#fe81e4]" />
             Tareas de Proyecto
           </h1>
           <p className="text-slate mt-1 text-sm font-medium">Gestiona tu backlog y actividades</p>
