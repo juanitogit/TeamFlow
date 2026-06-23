@@ -165,7 +165,7 @@ export function taskAssignedEmail(userName: string, taskTitle: string, taskType:
           <table cellpadding="0" cellspacing="0">
             <tr>
               <td style="padding-right:12px;">${badge(typeLabels[taskType] || taskType, typeColors[taskType] || "#2f72ce")}</td>
-              ${dueDate ? `<td>${badge("📅 " + new Date(dueDate).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }), "#e98dfe")}</td>` : ""}
+              ${dueDate ? `<td>${badge("📅 " + new Date(dueDate).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Bogota" }), "#e98dfe")}</td>` : ""}
             </tr>
           </table>
         </td>
@@ -317,7 +317,7 @@ export function contributionReviewedEmail(userName: string, workspaceName: strin
 
 export function meetingInviteEmail(workspaceName: string, meetingTitle: string, description: string, meetLink: string, startTime: Date, endTime: Date): { subject: string; html: string; attachments: any[] } {
   const appUrl = getAppUrl();
-  const formatTime = (d: Date) => d.toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short" });
+  const formatTime = (d: Date) => d.toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short", timeZone: "America/Bogota" });
   
   const content = `
     <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Agendamiento de Reunión</h1>
