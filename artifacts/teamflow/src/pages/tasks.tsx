@@ -34,8 +34,8 @@ export function Tasks() {
     if (id) setWorkspaceId(parseInt(id));
   }, []);
 
-  const activeWorkspaceRole = workspaces?.find(w => w.workspace.id === workspaceId)?.role;
-  const isLeader = activeWorkspaceRole === "leader" || activeWorkspaceRole === "co-leader";
+  const role = typeof window !== 'undefined' ? localStorage.getItem("active_workspace_role") : null;
+  const isLeader = role === "leader" || role === "co-leader";
 
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["workspace_tasks", workspaceId],

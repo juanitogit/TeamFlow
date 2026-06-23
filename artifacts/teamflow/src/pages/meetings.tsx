@@ -21,8 +21,8 @@ export function Meetings() {
   const queryClient = useQueryClient();
   const { workspaces } = useWorkspaces();
   const activeWorkspaceId = parseInt(localStorage.getItem("active_workspace_id") || "0");
-  const activeWorkspaceRole = workspaces?.find(w => w.workspace.id === activeWorkspaceId)?.role;
-  const isLeader = activeWorkspaceRole === "leader" || activeWorkspaceRole === "co-leader";
+  const role = typeof window !== 'undefined' ? localStorage.getItem("active_workspace_role") : null;
+  const isLeader = role === "leader" || role === "co-leader";
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");

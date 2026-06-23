@@ -45,7 +45,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/team", label: "Equipo", icon: Users },
     { href: "/sprints", label: "Sprints", icon: Timer },
     { href: "/meetings", label: "Reuniones", icon: Calendar },
-    { href: "/github-stats", label: "GitHub", icon: Github },
   ];
 
   return (
