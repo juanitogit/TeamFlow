@@ -315,12 +315,76 @@ export function contributionReviewedEmail(userName: string, workspaceName: strin
   return { subject: `Tu aporte fue ${label.toLowerCase()} en "${workspaceName}"`, html: emailLayout(content) };
 }
 
-export async function sendEmail(to: string, subject: string, body: string, html?: string) {
+export function meetingInviteEmail(workspaceName: string, meetingTitle: string, description: string, meetLink: string, startTime: Date, endTime: Date): { subject: string; html: string; attachments: any[] } {
+  const appUrl = getAppUrl();
+  const formatTime = (d: Date) => d.toLocaleString("es-ES", { dateStyle: "full", timeStyle: "short" });
+  
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:28px;font-weight:300;color:#333333;letter-spacing:-0.5px;">Agendamiento de Reunión</h1>
+    <p style="margin:0 0 24px;font-size:16px;color:#535768;line-height:1.6;">
+      Has sido invitado a una nueva reunión para el equipo <strong>"${workspaceName}"</strong>.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+      <tr>
+        <td style="background-color:#ffffff;border:1px solid #d0d4e4;border-radius:16px;padding:24px;">
+          <p style="margin:0 0 12px;font-size:20px;font-weight:600;color:#333333;">${meetingTitle}</p>
+          <p style="margin:0 0 8px;font-size:15px;color:#535768;"><strong>Cuándo:</strong> ${formatTime(startTime)}</p>
+          ${meetLink ? `<p style="margin:0 0 8px;font-size:15px;color:#535768;"><strong>Enlace:</strong> <a href="${meetLink}" style="color:#2f72ce;">Unirse a la reunión</a></p>` : ""}
+          ${description ? `<p style="margin:8px 0 0;font-size:14px;color:#808080;">${description}</p>` : ""}
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0 0 16px;font-size:14px;color:#808080;">
+      Se ha adjuntado una invitación de calendario (.ics) a este correo.
+    </p>
+    ${button("Ir al Workspace", appUrl + "/dashboard")}
+  `;
+
+  // Generate .ics file content manually (very simple valid format)
+  const pad = (n: number) => (n < 10 ? '0' + n : n);
+  const formatDateIcs = (d: Date) => {
+    return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
+           pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+  };
+
+  const icsContent = \`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//TeamFlow//ES
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:\${Math.random().toString(36).substring(2)}@teamflow.app
+DTSTAMP:\${formatDateIcs(new Date())}
+DTSTART:\${formatDateIcs(startTime)}
+DTEND:\${formatDateIcs(endTime)}
+SUMMARY:\${meetingTitle}
+DESCRIPTION:\${description || "Reunión de equipo en TeamFlow."}
+\${meetLink ? \`LOCATION:\${meetLink}\\n\` : ""}STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR\`;
+
+  return {
+    subject: \`Invitación: \${meetingTitle} - \${workspaceName}\`,
+    html: emailLayout(content),
+    attachments: [
+      {
+        filename: 'invite.ics',
+        content: icsContent,
+        contentType: 'text/calendar; method=REQUEST'
+      }
+    ]
+  };
+}
+
+export async function sendEmail(to: string, subject: string, body: string, html?: string, attachments?: any[]) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.log("\n=======================================================");
     console.log(`📧 EMAIL MOCK (Configura credenciales SMTP para correo real)`);
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
+    if (attachments) console.log(`Attachments: ${attachments.length}`);
     console.log("=======================================================\n");
     return true;
   }
@@ -332,6 +396,7 @@ export async function sendEmail(to: string, subject: string, body: string, html?
       subject,
       text: body,
       html: html || undefined,
+      attachments: attachments || undefined,
     });
     console.log(`[Email] Correo enviado a ${to}. ID: ${info.messageId}`);
     return true;

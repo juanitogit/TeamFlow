@@ -152,6 +152,12 @@ router.get("/:id/github-commits", async (req: AuthedRequest, res: Response) => {
 
     for (const commit of allCommits) {
       const login = commit.authorLogin.toLowerCase();
+      const authorName = commit.authorName?.toLowerCase() || '';
+
+      if (login.includes("replit") || authorName.includes("replit")) {
+        continue;
+      }
+
       if (!commitsByAuthor[login]) {
         // Match against members of this workspace
         const matchedMember = workspaceMembers.find(u => 

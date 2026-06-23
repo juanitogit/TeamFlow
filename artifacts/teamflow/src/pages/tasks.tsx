@@ -1,35 +1,52 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Clock, ListTodo, AlertCircle } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
 }
 
+// Brutalist SVG Icons
+const TasksIcon = () => (
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+    <path d="M9 5H21M9 12H21M9 19H21M3 5H5M3 12H5M3 19H5" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
 export function Tasks() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { workspaces } = useWorkspaces();
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("todos");
   const [commitSha, setCommitSha] = useState("");
   const [completingTask, setCompletingTask] = useState<number | null>(null);
+  const [editingTask, setEditingTask] = useState<any>(null);
 
   useEffect(() => {
     const id = localStorage.getItem("active_workspace_id");
     if (id) setWorkspaceId(parseInt(id));
   }, []);
+
+  const activeWorkspaceRole = workspaces?.find(w => w.workspace.id === workspaceId)?.role;
+  const isLeader = activeWorkspaceRole === "leader" || activeWorkspaceRole === "co-leader";
 
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["workspace_tasks", workspaceId],
@@ -61,32 +78,34 @@ export function Tasks() {
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
-  const completeMutation = useMutation({
-    mutationFn: async ({ taskId, sha }: { taskId: number, sha?: string }) => {
-      const res = await fetch(`/api/workspace-tasks/${taskId}/complete`, {
-        method: "POST",
+  const editMutation = useMutation({
+    mutationFn: async ({ taskId, data }: { taskId: number, data: any }) => {
+      const res = await fetch(`/api/workspace-tasks/${taskId}`, {
+        method: "PUT",
         headers: getAuthHeader(),
-        body: JSON.stringify({ commitSha: sha })
+        body: JSON.stringify(data)
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "¡Tarea completada!" });
-      setCompletingTask(null);
-      setCommitSha("");
+      toast({ title: "Tarea editada exitosamente" });
+      setEditingTask(null);
       queryClient.invalidateQueries({ queryKey: ["workspace_tasks", workspaceId] });
     },
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
-  const handleComplete = (task: any) => {
-    if (task.type === "programacion" && !commitSha) {
-      setCompletingTask(task.id);
-      return;
+  const deleteMutation = useMutation({
+    mutationFn: async (taskId: number) => {
+      const res = await fetch(`/api/workspace-tasks/${taskId}`, { method: "DELETE", headers: getAuthHeader() });
+      if (!res.ok) throw new Error("Error deleting task");
+    },
+    onSuccess: () => {
+      toast({ title: "Tarea eliminada." });
+      queryClient.invalidateQueries({ queryKey: ["workspace_tasks", workspaceId] });
     }
-    completeMutation.mutate({ taskId: task.id, sha: commitSha });
-  };
+  });
 
   const handleStatusChange = (task: any, newStatus: string) => {
     if (newStatus === "completada" && task.type === "programacion" && !commitSha && !task.commitSha) {
@@ -96,158 +115,170 @@ export function Tasks() {
     statusMutation.mutate({ taskId: task.id, status: newStatus, sha: commitSha || task.commitSha });
   };
 
-  if (isLoading) {
-    return (<div className="h-96 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>);
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTask) return;
+    editMutation.mutate({ taskId: editingTask.id, data: { title: editingTask.title, description: editingTask.description, status: editingTask.status, dueDate: editingTask.dueDate } });
+  };
+
+  if (!workspaceId) {
+    return <div className="text-center py-12 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Selecciona un workspace arriba.</div>;
   }
 
-  // Filter tasks assigned to ME
   const myTasks = tasks?.filter((t: any) => t.assignedTo.id === user?.id) || [];
-  const filteredTasks = myTasks.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
+  const teamTasks = tasks || [];
+
+  const renderTaskList = (list: any[], showAssignee = false) => {
+    const filtered = list.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
+    if (isLoading) return <div className="h-40 flex items-center justify-center border-2 border-black bg-secondary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase tracking-widest">Cargando...</div>;
+    if (filtered.length === 0) return <div className="py-16 text-center border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase tracking-widest text-muted-foreground">¡Sin tareas!</div>;
+
+    return (
+      <div className="space-y-6">
+        {filtered.map((task: any) => (
+          <div key={task.id} className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 transition-all hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5">
+            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                {!showAssignee && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={`rounded-none border-2 h-10 w-10 shrink-0 ${task.status === 'completada' ? 'border-primary bg-primary text-primary-foreground' : 'border-black bg-transparent text-black hover:bg-black hover:text-white'}`}
+                    onClick={() => task.status !== 'completada' && handleStatusChange(task, 'completada')}
+                    disabled={task.status === 'completada' || statusMutation.isPending}
+                  >
+                    <CheckIcon />
+                  </Button>
+                )}
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span className="border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest bg-accent">{task.type}</span>
+                    <span className="border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest">{task.status.replace("_", " ")}</span>
+                    {showAssignee && (
+                       <span className="border-2 border-primary text-primary px-2 py-0.5 text-[10px] font-black uppercase tracking-widest ml-auto flex items-center gap-1">
+                         <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=000&color=fff`} className="w-3 h-3 border border-black" />
+                         {task.assignedTo.name}
+                       </span>
+                    )}
+                  </div>
+                  <h3 className={`text-2xl font-black uppercase tracking-tight ${task.status === 'completada' ? 'line-through opacity-50' : ''}`}>{task.title}</h3>
+                  {task.description && <p className="text-sm font-medium mt-2 border-l-4 border-black pl-3">{task.description}</p>}
+                  
+                  {completingTask === task.id && !showAssignee && (
+                    <div className="mt-4 flex items-center gap-2 bg-secondary p-3 border-2 border-black">
+                      <Input placeholder="Commit SHA..." value={commitSha} onChange={e => setCommitSha(e.target.value)} className="border-2 border-black rounded-none h-8 font-mono text-xs" />
+                      <Button size="sm" className="rounded-none border-2 border-black h-8 font-bold uppercase text-xs" onClick={() => handleStatusChange(task, 'completada')}>OK</Button>
+                      <Button size="sm" variant="ghost" className="rounded-none border-2 border-transparent h-8 font-bold uppercase text-xs" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>X</Button>
+                    </div>
+                  )}
+
+                  {task.commitSha && (
+                    <div className="mt-3 text-xs font-mono font-bold bg-black text-white px-2 py-1 inline-block">SHA: {task.commitSha.substring(0, 7)}</div>
+                  )}
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                {task.dueDate ? (
+                  <div className="border-2 border-black px-3 py-1 font-bold uppercase text-xs">
+                    Vence: {format(new Date(task.dueDate), "d MMM", { locale: es })}
+                  </div>
+                ) : <div className="border-2 border-transparent px-3 py-1 font-bold uppercase text-xs text-muted-foreground">Sin fecha</div>}
+
+                {showAssignee && isLeader && (
+                  <div className="flex gap-2 mt-4">
+                    <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ''}); }}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" className="rounded-none border-2 border-black font-bold uppercase text-xs h-8">Editar</Button>
+                      </DialogTrigger>
+                      <DialogContent className="border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <DialogHeader>
+                          <DialogTitle className="text-2xl font-black uppercase border-b-2 border-black pb-2">Editar Tarea</DialogTitle>
+                        </DialogHeader>
+                        {editingTask && (
+                          <form onSubmit={handleEditSubmit} className="space-y-4 pt-4">
+                            <div>
+                              <label className="text-xs font-bold uppercase block mb-1">Título</label>
+                              <Input required value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="border-2 border-black rounded-none" />
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold uppercase block mb-1">Descripción</label>
+                              <Input value={editingTask.description || ''} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="border-2 border-black rounded-none" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-xs font-bold uppercase block mb-1">Fecha Límite</label>
+                                <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({...editingTask, dueDate: e.target.value})} className="border-2 border-black rounded-none" />
+                              </div>
+                              <div>
+                                <label className="text-xs font-bold uppercase block mb-1">Estado</label>
+                                <Select value={editingTask.status} onValueChange={v => setEditingTask({...editingTask, status: v})}>
+                                  <SelectTrigger className="border-2 border-black rounded-none"><SelectValue /></SelectTrigger>
+                                  <SelectContent className="border-2 border-black rounded-none">
+                                    <SelectItem value="pendiente">Pendiente</SelectItem>
+                                    <SelectItem value="en_progreso">En Progreso</SelectItem>
+                                    <SelectItem value="en_revision">En Revisión</SelectItem>
+                                    <SelectItem value="completada">Completada</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <Button type="submit" className="w-full rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase mt-4">Guardar</Button>
+                          </form>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                    <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(task.id)} className="rounded-none border-2 border-black font-bold uppercase text-xs h-8">Borrar</Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-4 border-black pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <ListTodo className="h-7 w-7 text-primary" />
-            Mis Tareas
+          <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-3">
+            <TasksIcon />
+            Tareas
           </h1>
-          <p className="text-slate mt-1 text-sm">Gestiona el trabajo que te han asignado en este workspace</p>
+          <p className="text-muted-foreground mt-1 text-sm font-medium uppercase tracking-widest">Gestión de Tareas</p>
         </div>
         
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] bg-card shadow-sm">
-            <SelectValue placeholder="Filtrar por estado" />
+          <SelectTrigger className="w-[180px] border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase text-xs">
+            <SelectValue placeholder="Filtro" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todos">Todas</SelectItem>
-            <SelectItem value="pendiente">Pendientes</SelectItem>
-            <SelectItem value="en_progreso">En Progreso</SelectItem>
-            <SelectItem value="en_revision">En Revisión</SelectItem>
-            <SelectItem value="completada">Completadas</SelectItem>
+          <SelectContent className="border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <SelectItem value="todos" className="font-bold uppercase text-xs">Todas</SelectItem>
+            <SelectItem value="pendiente" className="font-bold uppercase text-xs">Pendientes</SelectItem>
+            <SelectItem value="en_progreso" className="font-bold uppercase text-xs">En Progreso</SelectItem>
+            <SelectItem value="en_revision" className="font-bold uppercase text-xs">En Revisión</SelectItem>
+            <SelectItem value="completada" className="font-bold uppercase text-xs">Completadas</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-white rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>
+      {isLeader ? (
+        <Tabs defaultValue="mis_tareas" className="w-full">
+          <TabsList className="bg-transparent border-b-2 border-black w-full justify-start rounded-none p-0 h-auto space-x-4 mb-8">
+            <TabsTrigger value="mis_tareas" className="rounded-none border-2 border-transparent data-[state=active]:border-black data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:shadow-[2px_-2px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-black uppercase text-sm">Mis Tareas</TabsTrigger>
+            <TabsTrigger value="equipo" className="rounded-none border-2 border-transparent data-[state=active]:border-black data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:shadow-[2px_-2px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-black uppercase text-sm">Equipo (Líder)</TabsTrigger>
+          </TabsList>
+          <TabsContent value="mis_tareas" className="mt-0 outline-none">
+            {renderTaskList(myTasks, false)}
+          </TabsContent>
+          <TabsContent value="equipo" className="mt-0 outline-none">
+            {renderTaskList(teamTasks, true)}
+          </TabsContent>
+        </Tabs>
       ) : (
-        <div className="space-y-4">
-          {filteredTasks.length === 0 ? (
-            <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
-              <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
-              <h3 className="text-xl font-semibold text-ink">¡Estás al día!</h3>
-              <p className="text-slate mt-2">No hay tareas para el filtro seleccionado.</p>
-            </div>
-          ) : (
-            filteredTasks.map((task: any) => {
-              const daysLeft = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
-              
-              return (
-                <motion.div key={task.id} whileHover={{ y: -4 }}>
-                  <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden p-6 transition-all">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                      <div className="flex items-start gap-4 flex-1">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={`rounded-full h-8 w-8 mt-0.5 shrink-0 ${task.status === 'completada' ? 'text-emerald-500 bg-emerald-50' : 'text-slate hover:text-primary hover:bg-primary/10 bg-slate-50'}`}
-                          onClick={() => task.status !== 'completada' && handleComplete(task)}
-                          disabled={task.status === 'completada' || completeMutation.isPending}
-                        >
-                          <CheckCircle2 className="h-6 w-6" />
-                        </Button>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <Badge variant="outline" className={`
-                              ${task.type === 'programacion' ? 'bg-blue-50 text-blue-600 border-none' : ''}
-                              ${task.type === 'documentacion' ? 'bg-emerald-50 text-emerald-600 border-none' : ''}
-                              ${task.type === 'investigacion' ? 'bg-purple-50 text-purple-600 border-none' : ''}
-                              text-[10px] px-2 py-0 uppercase tracking-wider
-                            `}>
-                              {task.type}
-                            </Badge>
-                            {task.status === 'completada' && (
-                              <Badge variant="outline" className="bg-emerald-50 text-emerald-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">Completada</Badge>
-                            )}
-                            {task.status === 'en_progreso' && (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Progreso</Badge>
-                            )}
-                            {task.status === 'en_revision' && (
-                              <Badge variant="outline" className="bg-orange-50 text-orange-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Revisión</Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through' : 'text-ink'}`}>
-                              {task.title}
-                            </h3>
-                            <Select value={task.status} onValueChange={(val) => handleStatusChange(task, val)}>
-                              <SelectTrigger className="h-7 text-xs px-2 bg-slate-50 border-slate-200">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pendiente">Pendiente</SelectItem>
-                                <SelectItem value="en_progreso">En Progreso</SelectItem>
-                                <SelectItem value="en_revision">En Revisión</SelectItem>
-                                <SelectItem value="completada">Completada</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          {task.description && (
-                            <p className="text-sm text-slate mt-1 whitespace-pre-wrap">{task.description}</p>
-                          )}
-
-                          {completingTask === task.id && (
-                            <div className="mt-4 flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
-                              <Input 
-                                placeholder="Pega el Commit SHA de GitHub aquí..." 
-                                value={commitSha} 
-                                onChange={e => setCommitSha(e.target.value)}
-                                className="h-8 text-sm"
-                              />
-                              <Button size="sm" className="h-8 shrink-0" onClick={() => handleComplete(task)}>
-                                Confirmar
-                              </Button>
-                              <Button size="sm" variant="ghost" className="h-8 shrink-0 text-slate" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>
-                                Cancelar
-                              </Button>
-                            </div>
-                          )}
-
-                          {task.commitSha && (
-                            <div className="mt-3 text-xs text-slate flex items-center gap-1">
-                              <span className="font-semibold">Commit SHA:</span> 
-                              <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">{task.commitSha.substring(0, 7)}</code>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between md:flex-col md:items-end gap-2 pl-12 md:pl-0 shrink-0">
-                        <div className="flex items-center text-sm">
-                          {task.dueDate ? (
-                            <Badge variant="outline" className={`flex items-center gap-1.5 px-2.5 py-1 font-medium ${daysLeft !== null && daysLeft < 0 ? 'border-red-200 bg-red-50 text-red-600' : daysLeft === 0 ? 'border-slate-200 bg-slate-50 text-slate-600' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
-                              <Clock className="h-3.5 w-3.5" />
-                              <span>
-                                {daysLeft !== null && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
-                              </span>
-                              <span className="opacity-70 ml-0.5 border-l pl-1.5 border-current">
-                                {format(new Date(task.dueDate), "d MMM", { locale: es })}
-                              </span>
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-normal px-2.5 py-1">Sin fecha límite</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })
-          )}
-        </div>
+        renderTaskList(myTasks, false)
       )}
-    </motion.div>
+    </div>
   );
 }

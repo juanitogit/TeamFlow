@@ -13,3 +13,4 @@ export * from "./workspace_tasks";
 export * from "./sprints";
 export * from "./manual_logs";
 export * from "./suggestions";
+export * from "./meetings";

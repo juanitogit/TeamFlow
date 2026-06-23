@@ -22,6 +22,13 @@
       "when": 1781406655525,
       "tag": "0002_tan_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782185083177,
+      "tag": "0003_overrated_zodiak",
+      "breakpoints": true
     }
   ]
 }

@@ -68,51 +68,52 @@
 }
 
 :root {
-  --background: 220 16% 96%; /* Cloud */
-  --foreground: 216 63% 18%; /* Deep blue for text instead of ink */
+  --background: 0 0% 100%; /* Pure white */
+  --foreground: 0 0% 0%; /* Pure black */
+  
   --card: 0 0% 100%;
-  --card-foreground: 216 63% 18%;
-  --card-border: 228 26% 85%;
+  --card-foreground: 0 0% 0%;
+  --card-border: 0 0% 0%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 216 63% 18%;
-  --popover-border: 228 26% 85%;
+  --popover-foreground: 0 0% 0%;
+  --popover-border: 0 0% 0%;
   
-  --primary: 215 63% 50%; /* #2f72ce Mid Blue */
+  --primary: 240 100% 50%; /* Electric Blue */
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 195 73% 59%; /* #46bce5 Cyan */
-  --secondary-foreground: 0 0% 100%;
+  --secondary: 0 0% 90%; /* Light gray */
+  --secondary-foreground: 0 0% 0%;
   
-  --muted: 220 16% 96%;
-  --muted-foreground: 228 11% 37%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 40%;
   
-  --accent: 216 63% 18%; /* #11284a Deep Blue */
-  --accent-foreground: 0 0% 100%;
+  --accent: 60 100% 50%; /* Electric Yellow */
+  --accent-foreground: 0 0% 0%;
   
-  --destructive: 0 84% 60%;
+  --destructive: 0 100% 50%; /* Pure Red */
   --destructive-foreground: 0 0% 100%;
   
-  --border: 230 25% 89%;
-  --input: 230 25% 89%;
-  --ring: 215 63% 50%;
+  --border: 0 0% 0%;
+  --input: 0 0% 0%;
+  --ring: 0 0% 0%;
   
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 216 63% 18%;
-  --sidebar-border: 230 25% 89%;
-  --sidebar-primary: 215 63% 50%;
+  --sidebar-foreground: 0 0% 0%;
+  --sidebar-border: 0 0% 0%;
+  --sidebar-primary: 240 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 216 63% 18%;
-  --sidebar-accent-foreground: 0 0% 100%;
-  --sidebar-ring: 215 63% 50%;
+  --sidebar-accent: 60 100% 50%;
+  --sidebar-accent-foreground: 0 0% 0%;
+  --sidebar-ring: 0 0% 0%;
 
-  --chart-1: 240 100% 69%;
-  --chart-2: 96 98% 78%;
-  --chart-3: 190 100% 84%;
-  --chart-4: 275 60% 92%;
-  --chart-5: 25 100% 62%;
+  --chart-1: 240 100% 50%;
+  --chart-2: 60 100% 50%;
+  --chart-3: 0 100% 50%;
+  --chart-4: 300 100% 50%;
+  --chart-5: 120 100% 25%;
 
-  --radius: 6px;
+  --radius: 0px;
   
   /* Monday variables */
   --color-monday-violet: #6161ff;
@@ -123,10 +124,11 @@
   --color-mint: #bcfe90;
   --color-sky: #abf0ff;
   --color-apricot: #ff8940;
-  --color-lavender: #eddff7;
-  --color-periwinkle: #e7ecff;
-  --color-aqua: #d1faff;
-  --shadow-xl: rgba(205, 208, 223, 0.4) 0px 2px 48px 0px;
+  --color-lavender: #ff00ff; /* Magenta */
+  --color-periwinkle: #00ffff; /* Cyan */
+  --color-aqua: #00ffff;
+  --shadow-xl: 4px 4px 0px 0px rgba(0,0,0,1);
+  --shadow-sm: 2px 2px 0px 0px rgba(0,0,0,1);
 
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -180,11 +182,11 @@
 }
 
 .card-monday {
-  @apply bg-card border border-border shadow-[rgba(205,208,223,0.4)_0px_2px_48px_0px] rounded-[24px];
+  @apply bg-card border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none;
 }
 
 .btn-pill {
-  @apply rounded-[160px];
+  @apply rounded-none;
 }
 
 @layer utilities {

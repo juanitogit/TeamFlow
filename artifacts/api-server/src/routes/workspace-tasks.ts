@@ -203,4 +203,72 @@ router.post("/:id/complete", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Leader updates a task
+router.put("/:id", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const taskId = parseInt(req.params.id);
+  const parse = z.object({
+    title: z.string().min(1),
+    description: z.string().optional(),
+    dueDate: z.string().optional().nullable(),
+    status: z.enum(["pendiente", "en_progreso", "en_revision", "completada", "vencida"]),
+  }).safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).json({ error: parse.error.errors[0].message });
+    return;
+  }
+
+  try {
+    const [task] = await db.select().from(workspaceTasksTable).where(eq(workspaceTasksTable.id, taskId));
+    if (!task) { res.status(404).json({ error: "Tarea no encontrada" }); return; }
+
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, task.workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden editar tareas de otros" });
+      return;
+    }
+
+    const { title, description, dueDate, status } = parse.data;
+
+    const [updated] = await db.update(workspaceTasksTable).set({
+      title,
+      description: description || null,
+      dueDate: dueDate ? new Date(dueDate) : null,
+      status,
+      completedAt: status === "completada" && task.status !== "completada" ? new Date() : (status === "completada" ? task.completedAt : null),
+    }).where(eq(workspaceTasksTable.id, taskId)).returning();
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar la tarea" });
+  }
+});
+
+// Leader deletes a task
+router.delete("/:id", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const taskId = parseInt(req.params.id);
+
+  try {
+    const [task] = await db.select().from(workspaceTasksTable).where(eq(workspaceTasksTable.id, taskId));
+    if (!task) { res.status(404).json({ error: "Tarea no encontrada" }); return; }
+
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, task.workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden eliminar tareas" });
+      return;
+    }
+
+    await db.delete(workspaceTasksTable).where(eq(workspaceTasksTable.id, taskId));
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: "Error al eliminar la tarea" });
+  }
+});
+
 export default router;

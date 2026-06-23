@@ -16,7 +16,7 @@ import githubStatsRouter from "./github-stats";
 import sprintsRouter from "./sprints";
 import manualLogsRouter from "./manual-logs";
 import suggestionsRouter from "./suggestions";
-
+import meetingsRouter from "./meetings";
 const router: IRouter = Router();
 
 router.use(healthRouter);
@@ -35,5 +35,6 @@ router.use("/github-stats", githubStatsRouter);
 router.use("/sprints", sprintsRouter);
 router.use("/manual-logs", manualLogsRouter);
 router.use("/suggestions", suggestionsRouter);
+router.use("/meetings", meetingsRouter);
 
 export default router;
