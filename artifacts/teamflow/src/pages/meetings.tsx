@@ -35,7 +35,7 @@ export function Meetings() {
     queryKey: ["meetings", activeWorkspaceId],
     queryFn: async () => {
       if (!activeWorkspaceId) return [];
-      const res = await fetch(`/api/workspaces/${activeWorkspaceId}/meetings`, { headers: getAuthHeader() });
+      const res = await fetch(`/api/meetings/workspaces/${activeWorkspaceId}`, { headers: getAuthHeader() });
       if (!res.ok) throw new Error("Error fetching meetings");
       return res.json();
     },
@@ -44,7 +44,7 @@ export function Meetings() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await fetch(`/api/workspaces/${activeWorkspaceId}/meetings`, {
+      const res = await fetch(`/api/meetings/workspaces/${activeWorkspaceId}`, {
         method: "POST",
         headers: getAuthHeader(),
         body: JSON.stringify(data)

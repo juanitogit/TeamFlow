@@ -19,5 +19,7 @@ export const workspaceTasksTable = pgTable("workspace_tasks", {
   commitSha: text("commit_sha"),
   dueDate: timestamp("due_date", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
+  warningEmailSentAt: timestamp("warning_email_sent_at", { withTimezone: true }),
+  penaltyAppliedAt: timestamp("penalty_applied_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
