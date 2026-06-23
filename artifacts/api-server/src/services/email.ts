@@ -342,9 +342,9 @@ export function meetingInviteEmail(workspaceName: string, meetingTitle: string, 
   `;
 
   // Generate .ics file content manually (very simple valid format)
-  const pad = (n: number) => (n < 10 ? '0' + n : n);
+  const pad = (n: number) => (n < 10 ? '0' + n : n.toString());
   const formatDateIcs = (d: Date) => {
-    return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
+    return d.getUTCFullYear().toString() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
            pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
   };
 

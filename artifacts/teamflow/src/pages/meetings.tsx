@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Video, Clock, Users, X } from "lucide-react";
+import { IconVideo, IconClock, IconUsers, IconX, IconCalendar } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { IconMeetings } from "@/components/ui/custom-icons";
 import { LogoLoader } from "@/components/ui/logo-loader";
 
 function getAuthHeader() {
@@ -95,7 +94,7 @@ export function Meetings() {
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-2xl">
-              <IconMeetings className="h-6 w-6" />
+              <IconVideo className="h-6 w-6 text-primary" />
             </div>
             Reuniones
           </h1>
@@ -106,7 +105,7 @@ export function Meetings() {
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
               <Button className="rounded-full shadow-sm hover:shadow-md transition-all">
-                <Video className="mr-2 h-4 w-4" />
+                <IconVideo className="mr-2 h-4 w-4" />
                 Agendar Reunión
               </Button>
             </DialogTrigger>
@@ -151,7 +150,7 @@ export function Meetings() {
 
       {meetings?.length === 0 ? (
         <div className="py-16 flex flex-col items-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
-          <IconMeetings className="h-12 w-12 text-slate-300 mb-4" />
+          <IconVideo className="h-12 w-12 text-slate-300 mb-4" />
           <h3 className="text-lg font-medium text-ink">Sin Reuniones</h3>
           <p className="text-slate mt-1 text-sm">No hay reuniones agendadas por el momento.</p>
         </div>
@@ -165,16 +164,16 @@ export function Meetings() {
                 
                 <div className="flex items-start justify-between mb-4 z-10">
                   <div className="flex items-center gap-2">
-                    <IconMeetings className="h-4 w-4 opacity-50" />
+                    <IconCalendar className="h-4 w-4 opacity-50" />
                     {format(new Date(m.startTime), "EEEE, d 'de' MMMM", { locale: es })}
                   </div>
-                  <Users className="w-5 h-5 text-slate opacity-50" />
+                  <IconUsers className="w-5 h-5 text-slate opacity-50" />
                 </div>
                 
                 <h3 className="text-xl font-semibold text-ink leading-tight mb-2 z-10">{m.title}</h3>
                 
                 <div className="flex items-center text-sm font-medium text-slate mb-4 z-10">
-                  <Clock className="w-4 h-4 mr-1.5 text-primary/60" />
+                  <IconClock className="w-4 h-4 mr-1.5 text-primary/60" />
                   <span>{format(new Date(m.startTime), "HH:mm")} - {format(new Date(m.endTime), "HH:mm")}</span>
                 </div>
                 
@@ -183,9 +182,9 @@ export function Meetings() {
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-mist/50 z-10">
                   {m.meetLink ? (
                     <a href={m.meetLink} target="_blank" rel="noopener noreferrer" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1.5 bg-primary/5 px-3 py-1.5 rounded-full">
-                      <Video className="w-4 h-4" /> Unirse a la sala
+                      <IconVideo className="w-4 h-4" /> Unirse a la sala
                     </a>
-                  ) : <span className="text-slate text-sm font-medium flex items-center gap-1.5"><Users className="w-4 h-4"/> Presencial</span>}
+                  ) : <span className="text-slate text-sm font-medium flex items-center gap-1.5"><IconUsers className="w-4 h-4"/> Presencial</span>}
 
                   {(isLeader || m.organizer?.id === user?.id) && (
                     <Button variant="ghost" size="icon" onClick={() => {
@@ -193,7 +192,7 @@ export function Meetings() {
                         deleteMutation.mutate(m.id);
                       }
                     }} className="h-8 w-8 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50">
-                      <X className="w-4 h-4" />
+                      <IconX className="w-4 h-4" />
                     </Button>
                   )}
                 </div>

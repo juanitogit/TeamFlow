@@ -2,8 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, Menu, X, ArrowLeftRight } from "lucide-react";
-import { IconDashboard, IconTasks, IconTeam, IconSprints, IconMeetings, IconSwap, IconLogout } from "@/components/ui/custom-icons";
+import { IconLoader2, IconMenu2, IconX, IconArrowsLeftRight, IconLayoutDashboard, IconListCheck, IconUsers, IconFlame, IconVideo, IconArrowsExchange, IconLogout, IconBrandGithub } from "@tabler/icons-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { LogoLoader } from "@/components/ui/logo-loader";
@@ -41,11 +40,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: IconDashboard },
-    { href: "/tasks", label: "Tareas", icon: IconTasks },
-    { href: "/team", label: "Equipo", icon: IconTeam },
-    { href: "/sprints", label: "Sprints", icon: IconSprints },
-    { href: "/meetings", label: "Reuniones", icon: IconMeetings },
+    { href: "/dashboard", label: "Dashboard", icon: IconLayoutDashboard },
+    { href: "/tasks", label: "Tareas", icon: IconListCheck },
+    { href: "/team", label: "Equipo", icon: IconUsers },
+    { href: "/github-stats", label: "GitHub", icon: IconBrandGithub },
+    { href: "/sprints", label: "Sprints", icon: IconFlame },
+    { href: "/meetings", label: "Reuniones", icon: IconVideo },
   ];
 
   return (
@@ -88,7 +88,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 localStorage.removeItem("active_workspace_role");
                 window.location.href = "/workspaces";
               }} title="Cambiar Workspace">
-                <IconSwap className="h-5 w-5" />
+                <IconArrowsExchange className="h-5 w-5" />
               </Button>
             )}
             <div className="h-8 w-px bg-slate-200 hidden sm:block mx-1"></div>
@@ -113,7 +113,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   localStorage.removeItem("active_workspace_role");
                   window.location.href = "/workspaces";
                 }} title="Cambiar Workspace">
-                  <IconSwap className="h-5 w-5" />
+                  <IconArrowsExchange className="h-5 w-5" />
                 </Button>
               )}
               <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-full" onClick={logout} title="Salir">

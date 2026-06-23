@@ -4,8 +4,7 @@ import { useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Timer, Plus, Clock, Users, FolderKanban } from "lucide-react";
-import { IconSprints } from "@/components/ui/custom-icons";
+import { IconHourglass, IconPlus, IconClock, IconUsers, IconFolder, IconFlame } from "@tabler/icons-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -115,7 +114,7 @@ export function Sprints() {
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-2xl">
-              <IconSprints className="h-6 w-6" />
+              <IconFlame className="h-6 w-6 text-primary" />
             </div>
             Sprints y Ciclos
           </h1>
@@ -124,7 +123,7 @@ export function Sprints() {
         
         {isLeader && (
           <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 text-white shadow-sm rounded-full">
-            <Plus className="h-4 w-4 mr-2" />
+            <IconPlus className="h-4 w-4 mr-2" />
             Nuevo Sprint
           </Button>
         )}
@@ -133,7 +132,7 @@ export function Sprints() {
       <div className="space-y-6">
           {sprints?.length === 0 ? (
             <div className="py-16 flex flex-col items-center text-center bg-white rounded-[24px] border border-dashed border-mist">
-              <FolderKanban className="h-12 w-12 text-slate-300 mb-4" />
+              <IconFolder className="h-12 w-12 text-slate-300 mb-4" />
               <h3 className="text-lg font-medium text-ink">Sin Sprints</h3>
               <p className="text-slate mt-1 text-sm">No hay ciclos de trabajo creados.</p>
             </div>
@@ -172,7 +171,7 @@ export function Sprints() {
                       <div>
                         {sprint.startDate && sprint.endDate && (
                           <div className="flex items-center gap-2 text-sm text-slate bg-cloud p-2 rounded-lg mb-4 w-fit">
-                            <Clock className="h-4 w-4 shrink-0 text-slate-400" />
+                            <IconClock className="h-4 w-4 shrink-0 text-slate-400" />
                             <span>{format(new Date(sprint.startDate), "d MMM")} - {format(new Date(sprint.endDate), "d MMM", { locale: es })}</span>
                           </div>
                         )}

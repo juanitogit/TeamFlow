@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaceMembers, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Copy, RefreshCw, Timer, UserPlus, Users, Github, Target, Activity, Trash2, ClipboardList, Settings, Plus, CheckCircle2, AlertCircle, Edit2, BookOpen, Lightbulb, Download, ScrollText } from "lucide-react";
+import { IconCopy, IconRefresh, IconHourglass, IconUserPlus, IconUsers, IconBrandGithub, IconTarget, IconActivity, IconTrash, IconClipboardList, IconSettings, IconPlus, IconCircleCheck, IconAlertCircle, IconEdit, IconBook, IconBulb, IconDownload, IconFileText } from "@tabler/icons-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -354,13 +354,13 @@ export function Team() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <Users className="h-7 w-7 text-primary" />
+            <IconUsers className="h-7 w-7 text-primary" />
             Equipo
           </h1>
           <p className="text-slate mt-1 text-sm">Gestiona los miembros de tu workspace</p>
         </div>
         {isLeaderOrCoLeader && inviteData && (
-          <div className="flex flex-col sm:flex-row items-center gap-3 bg-white border border-mist px-6 py-4 rounded-[24px] shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center gap-3 bg-white border border-mist px-6 py-4 rounded-2xl shadow-sm">
             <div className="text-sm flex-1">
               <span className="text-slate block text-[10px] uppercase font-bold tracking-wider mb-1">Código de Invitación</span>
               <span className={`font-mono font-bold text-xl tracking-[0.2em] ${inviteData.isExpired ? 'text-red-400 line-through' : 'text-primary'}`}>{inviteData.inviteCode}</span>
@@ -368,7 +368,7 @@ export function Team() {
             <div className="flex items-center gap-2">
               {!inviteData.isExpired && (
                 <div className="flex items-center gap-1 text-xs text-slate bg-cloud px-3 py-1.5 rounded-full">
-                  <Timer className="h-4 w-4" />
+                  <IconHourglass className="h-4 w-4" />
                   <span className="font-mono font-medium">{countdown}</span>
                 </div>
               )}
@@ -376,15 +376,15 @@ export function Team() {
                 <span className="text-xs text-red-500 font-medium bg-red-50 px-3 py-1.5 rounded-full">Expirado</span>
               )}
               <Button variant="outline" size="sm" className="rounded-full hover:bg-slate-100 h-9 w-9 p-0" title="Copiar código" onClick={() => { navigator.clipboard.writeText(inviteData.inviteCode); toast({ title: "Código copiado" }); }} disabled={inviteData.isExpired}>
-                <Copy className="h-4 w-4" />
+                <IconCopy className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="sm" className="rounded-full hover:bg-primary/5 h-9 w-9 p-0 border-primary/20" title="Copiar enlace directo" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/workspaces?join_code=${inviteData.inviteCode}`); toast({ title: "Enlace copiado" }); }} disabled={inviteData.isExpired}>
-                <ClipboardList className="h-4 w-4 text-primary" />
+                <IconClipboardList className="h-4 w-4 text-primary" />
               </Button>
               <Dialog open={generateInviteOpen} onOpenChange={setGenerateInviteOpen}>
                 <DialogTrigger asChild>
                   <Button variant="outline" size="sm" className="rounded-full hover:bg-slate-100 h-9 w-9 p-0" title="Generar nuevo">
-                    <RefreshCw className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
+                    <IconRefresh className={`h-4 w-4 ${regenerating ? 'animate-spin' : ''}`} />
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -440,24 +440,24 @@ export function Team() {
 
       <div className="grid grid-cols-2 sm:flex sm:justify-end gap-2 w-full">
         <Button onClick={() => setManualLogOpen(true)} className="w-full sm:w-auto bg-primary text-white hover:bg-primary/90 rounded-full shadow-sm gap-2">
-          <BookOpen className="h-4 w-4" />
+          <IconBook className="h-4 w-4" />
           <span className="hidden sm:inline">Registrar Trabajo</span>
           <span className="sm:hidden">Registrar</span>
         </Button>
         {isLeaderOrCoLeader && (
           <>
             <Button onClick={() => setAuditOpen(true)} variant="outline" className="w-full sm:w-auto rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
-              <ScrollText className="h-4 w-4" />
+              <IconFileText className="h-4 w-4" />
               Historial
             </Button>
             <Button onClick={handleExportExcel} variant="outline" className="w-full sm:w-auto rounded-full shadow-sm gap-2 text-slate hover:bg-slate-50">
-              <Download className="h-4 w-4" />
+              <IconDownload className="h-4 w-4" />
               Exportar
             </Button>
             <Dialog open={githubInviteOpen} onOpenChange={setGithubInviteOpen}>
               <DialogTrigger asChild>
                 <Button className="w-full sm:w-auto bg-slate-900 text-white hover:bg-slate-800 rounded-full shadow-sm gap-2">
-                  <Github className="h-4 w-4" />
+                  <IconBrandGithub className="h-4 w-4" />
                   <span className="hidden sm:inline">Invitar por GitHub</span>
                   <span className="sm:hidden">Invitar (GH)</span>
                 </Button>
@@ -493,13 +493,13 @@ export function Team() {
       </div>
 
       {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-white rounded-[24px] shadow-sm border border-mist">Selecciona un workspace para ver a tu equipo.</div>
+        <div className="text-center py-12 text-slate bg-white rounded-2xl shadow-sm border border-mist">Selecciona un workspace para ver a tu equipo.</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {members?.map((member: any) => (
             <motion.div key={member.id} whileHover={{ y: -4 }}>
               <div 
-                className={`rounded-[24px] shadow-sm h-full flex flex-col bg-white border transition-transform transform hover:scale-[1.02] relative overflow-hidden ${
+                className={`rounded-2xl shadow-sm h-full flex flex-col bg-white border transition-transform transform hover:scale-[1.02] relative overflow-hidden ${
                   member.role === 'leader' ? 'border-indigo-200' :
                   member.role === 'co-leader' ? 'border-blue-200' :
                   'border-mist'
@@ -532,7 +532,7 @@ export function Team() {
                     </div>
                   {isMainLeader && member.id !== user?.id ? (
                     <Select defaultValue={member.role} onValueChange={(val) => roleMutation.mutate({ memberId: member.id, role: val })}>
-                      <SelectTrigger className={`h-8 px-3 shrink-0 w-auto text-[10px] uppercase font-bold tracking-wider rounded-xl ${
+                      <SelectTrigger className={`h-8 px-3 shrink-0 w-auto text-[10px] uppercase font-bold tracking-wider rounded-2xl ${
                         member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                         member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                         'bg-slate-50 text-slate-700 border-slate-200'
@@ -546,7 +546,7 @@ export function Team() {
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge variant="outline" className={`h-8 px-3 shrink-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-wider rounded-xl ${
+                    <Badge variant="outline" className={`h-8 px-3 shrink-0 flex items-center justify-center text-[10px] uppercase font-bold tracking-wider rounded-2xl ${
                       member.role === 'leader' ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white border-transparent shadow-sm' : 
                       member.role === 'co-leader' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
                       'bg-slate-50 text-slate-700 border-slate-200'
@@ -560,7 +560,7 @@ export function Team() {
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><Target className="h-3.5 w-3.5 text-primary" /> Score Rendimiento</span>
+                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><IconTarget className="h-3.5 w-3.5 text-primary" /> Score Rendimiento</span>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-bold text-ink">{member.performanceScore}%</span>
                           {isLeaderOrCoLeader && (
@@ -570,7 +570,7 @@ export function Team() {
                               setScoreValue(member.performanceScore);
                               setScoreOpen(true);
                             }} className="text-slate hover:text-primary transition-colors">
-                              <Edit2 className="h-3 w-3" />
+                              <IconEdit className="h-3 w-3" />
                             </button>
                           )}
                         </div>
@@ -579,7 +579,7 @@ export function Team() {
                     </div>
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><Activity className="h-3.5 w-3.5 text-emerald-500" /> Puntos de Salud</span>
+                        <span className="text-xs font-medium text-slate flex items-center gap-1.5"><IconActivity className="h-3.5 w-3.5 text-emerald-500" /> Puntos de Salud</span>
                         <span className={`text-sm font-bold ${member.healthPoints >= 70 ? 'text-emerald-500' : member.healthPoints >= 40 ? 'text-amber-500' : 'text-red-500'}`}>{member.healthPoints}</span>
                       </div>
                       <Progress value={member.healthPoints} className={`h-2 rounded-full ${member.healthPoints >= 70 ? 'bg-emerald-100 [&>div]:bg-emerald-500' : member.healthPoints >= 40 ? 'bg-slate-200 [&>div]:bg-slate-500' : 'bg-red-100 [&>div]:bg-red-500'}`} />
@@ -605,11 +605,11 @@ export function Team() {
                         setAssignToName(member.name);
                         setAssignOpen(true);
                       }}>
-                        <ClipboardList className="h-3 w-3 mr-1" /> Asignar Tarea
+                        <IconClipboardList className="h-3 w-3 mr-1" /> Asignar Tarea
                       </Button>
                       <Button variant="outline" size="sm" className="text-red-500 hover:bg-red-50 hover:text-red-700 text-xs rounded-full shadow-sm"
                         onClick={() => { if (confirm(`¿Eliminar a ${member.name} del equipo?`)) removeMutation.mutate(member.id); }}>
-                        <Trash2 className="h-3 w-3" />
+                        <IconTrash className="h-3 w-3" />
                       </Button>
                     </div>
                   )}
@@ -681,7 +681,7 @@ export function Team() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <div>
-                <CardTitle className="text-lg flex items-center gap-2"><Settings className="h-5 w-5 text-slate" /> Configuración del Workspace</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2"><IconSettings className="h-5 w-5 text-slate" /> Configuración del Workspace</CardTitle>
                 <CardDescription>Gestiona los repositorios de GitHub vinculados a este espacio.</CardDescription>
               </div>
               <Button variant="outline" onClick={() => setEditingRepos(!editingRepos)}>
@@ -704,7 +704,7 @@ export function Team() {
                   <label className="text-sm font-medium">Logo del Workspace (Opcional)</label>
                   <div className="flex items-center gap-4">
                     {editImageUrl && (
-                      <div className="h-12 w-12 rounded-lg overflow-hidden border border-mist shrink-0">
+                      <div className="h-12 w-12 rounded-2xl overflow-hidden border border-mist shrink-0">
                         <img src={editImageUrl} alt="Preview" className="h-full w-full object-cover" />
                       </div>
                     )}
@@ -746,7 +746,7 @@ export function Team() {
                     ))}
                     <div className="flex gap-2">
                       <Button variant="outline" className="w-full text-slate" onClick={() => setRepos([...repos, ""])}>
-                        <Plus className="h-4 w-4 mr-2" /> Añadir otro repositorio
+                        <IconPlus className="h-4 w-4 mr-2" /> Añadir otro repositorio
                       </Button>
                     </div>
                     <Button className="mt-4" disabled={workspaceMutation.isPending} onClick={() => workspaceMutation.mutate({ repos, name: editName, description: editDesc, imageUrl: editImageUrl })}>
@@ -774,8 +774,8 @@ export function Team() {
                     <p className="text-sm text-slate italic">No hay repositorios vinculados.</p>
                   ) : (
                     repos.map((repo, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                        <Github className="h-5 w-5 text-slate" />
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <IconBrandGithub className="h-5 w-5 text-slate" />
                         <a href={repo} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline font-medium">
                           {repo.replace("https://github.com/", "")}
                         </a>
@@ -798,13 +798,13 @@ export function Team() {
         <Card className="mt-8 border-amber-200 bg-amber-50/30">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2 text-amber-700">
-              <Lightbulb className="h-5 w-5" /> Sugerencias Inteligentes
+              <IconBulb className="h-5 w-5" /> Sugerencias Inteligentes
             </CardTitle>
             <CardDescription className="text-amber-600/80">Acciones sugeridas detectadas automáticamente en el workspace.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {suggestions.map((sug: any) => (
-              <div key={sug.id} className="bg-white p-4 rounded-xl border border-amber-100 shadow-sm flex items-start justify-between gap-4">
+              <div key={sug.id} className="bg-white p-4 rounded-2xl border border-amber-100 shadow-sm flex items-start justify-between gap-4">
                 <div>
                   <h4 className="font-semibold text-amber-900">{sug.title}</h4>
                   <p className="text-sm text-slate mt-1">{sug.description}</p>

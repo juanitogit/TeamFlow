@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
-import { CheckCircle2, Clock } from "lucide-react";
-import { IconTasks } from "@/components/ui/custom-icons";
+import { IconCircleCheck, IconClock, IconListCheck } from "@tabler/icons-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
@@ -112,7 +111,19 @@ export function Tasks() {
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTask) return;
-    editMutation.mutate({ taskId: editingTask.id, data: { title: editingTask.title, description: editingTask.description, status: editingTask.status, dueDate: editingTask.dueDate } });
+    
+    // Ensure empty strings are sent as null for the backend
+    const finalDueDate = editingTask.dueDate === '' ? null : editingTask.dueDate;
+    
+    editMutation.mutate({ taskId: editingTask.id, data: { title: editingTask.title, description: editingTask.description, status: editingTask.status, dueDate: finalDueDate } });
+  };
+
+  const getLocalDatetimeLocal = (dateString: string) => {
+    if (!dateString) return '';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '';
+    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 16);
   };
 
   if (!workspaceId) {
@@ -127,7 +138,7 @@ export function Tasks() {
     if (isLoading) return <div className="py-24 w-full flex items-center justify-center"><LogoLoader className="h-12 w-12" /></div>;
     if (filteredTasks.length === 0) return (
       <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
-        <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
+        <IconCircleCheck className="h-16 w-16 text-emerald-200 mb-6" />
         <h3 className="text-xl font-semibold text-ink">¡Todo al día!</h3>
         <p className="text-slate mt-2">No hay tareas para el filtro seleccionado.</p>
       </div>
@@ -151,7 +162,7 @@ export function Tasks() {
                         onClick={() => task.status !== 'completada' && handleComplete(task)}
                         disabled={task.status === 'completada' || statusMutation.isPending}
                       >
-                        <CheckCircle2 className="h-6 w-6" />
+                        <IconCircleCheck className="h-6 w-6" />
                       </Button>
                     )}
                     <div className="flex-1">
@@ -233,7 +244,7 @@ export function Tasks() {
                     <div className="flex items-center text-sm font-medium">
                       {task.dueDate ? (
                         <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${daysLeft !== null && daysLeft < 0 ? 'bg-red-50 text-red-600' : daysLeft === 0 ? 'bg-slate-50 text-slate-600' : 'bg-blue-50/50 text-blue-600'}`}>
-                          <Clock className="h-3.5 w-3.5" />
+                          <IconClock className="h-3.5 w-3.5" />
                           <span className="text-xs">
                             {daysLeft !== null && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
                           </span>
@@ -248,7 +259,7 @@ export function Tasks() {
                     
                     {showAssignee && isLeader && (
                       <div className="flex gap-2 mt-2 w-full md:w-auto">
-                        <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ''}); }}>
+                        <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: getLocalDatetimeLocal(task.dueDate)}); }}>
                           <DialogTrigger asChild>
                             <Button size="sm" variant="outline" className="h-7 text-xs rounded-full">Editar</Button>
                           </DialogTrigger>
@@ -315,7 +326,7 @@ export function Tasks() {
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-2xl">
-              <IconTasks className="h-6 w-6" />
+              <IconListCheck className="h-6 w-6 text-[#fe81e4]" />
             </div>
             Tareas de Proyecto
           </h1>
