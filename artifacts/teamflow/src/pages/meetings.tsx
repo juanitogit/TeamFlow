@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Video, Clock, Users, X } from "lucide-react";
+import { Video, Clock, Users, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { IconMeetings } from "@/components/ui/custom-icons";
+import { LogoLoader } from "@/components/ui/logo-loader";
 
 function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
@@ -19,8 +21,8 @@ export function Meetings() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { workspaces } = useWorkspaces();
-  const activeWorkspaceId = parseInt(localStorage.getItem("active_workspace_id") || "0");
+  const { data: workspaces } = useWorkspaces();
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<number | null>(parseInt(localStorage.getItem("active_workspace_id") || "0"));
   const role = typeof window !== 'undefined' ? localStorage.getItem("active_workspace_role") : null;
   const isLeader = role === "leader" || role === "co-leader";
 
@@ -85,13 +87,15 @@ export function Meetings() {
     return <div className="text-center py-12 text-slate bg-white rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>;
   }
 
+  if (isLoading) return <div className="py-24 w-full flex items-center justify-center"><LogoLoader className="h-12 w-12" /></div>;
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-2xl">
-              <Calendar className="h-6 w-6 text-primary" />
+              <IconMeetings className="h-6 w-6" />
             </div>
             Reuniones
           </h1>
@@ -145,15 +149,11 @@ export function Meetings() {
         )}
       </div>
 
-      {isLoading ? (
-        <div className="py-12 text-center text-slate bg-white rounded-[24px] shadow-sm border border-mist">
-          Cargando agenda...
-        </div>
-      ) : meetings?.length === 0 ? (
-        <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
-          <Calendar className="h-16 w-16 text-primary/20 mb-6" />
-          <h3 className="text-xl font-semibold text-ink">Agenda libre</h3>
-          <p className="text-slate mt-2">No hay reuniones próximas programadas para este workspace.</p>
+      {meetings?.length === 0 ? (
+        <div className="py-16 flex flex-col items-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
+          <IconMeetings className="h-12 w-12 text-slate-300 mb-4" />
+          <h3 className="text-lg font-medium text-ink">Sin Reuniones</h3>
+          <p className="text-slate mt-1 text-sm">No hay reuniones agendadas por el momento.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -164,9 +164,9 @@ export function Meetings() {
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none"></div>
                 
                 <div className="flex items-start justify-between mb-4 z-10">
-                  <div className="bg-primary/10 text-primary text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {format(new Date(m.startTime), "MMM d", { locale: es })}
+                  <div className="flex items-center gap-2">
+                    <IconMeetings className="h-4 w-4 opacity-50" />
+                    {format(new Date(m.startTime), "EEEE, d 'de' MMMM", { locale: es })}
                   </div>
                   <Users className="w-5 h-5 text-slate opacity-50" />
                 </div>

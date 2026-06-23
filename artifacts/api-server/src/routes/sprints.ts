@@ -72,4 +72,49 @@ router.post("/", async (req: AuthedRequest, res: Response) => {
   }
 });
 
+// Update a sprint
+router.put("/:id", async (req: AuthedRequest, res: Response) => {
+  const userId = req.userId!;
+  const sprintId = parseInt(req.params.id);
+  
+  const parse = z.object({
+    name: z.string().min(1),
+    startDate: z.string().optional().nullable(),
+    endDate: z.string().optional().nullable(),
+  }).safeParse(req.body);
+
+  if (!parse.success) {
+    res.status(400).json({ error: parse.error.errors[0].message });
+    return;
+  }
+
+  try {
+    const [sprint] = await db.select().from(sprintsTable).where(eq(sprintsTable.id, sprintId));
+    if (!sprint) {
+      res.status(404).json({ error: "Sprint no encontrado" });
+      return;
+    }
+
+    const [membership] = await db.select().from(workspaceMembersTable)
+      .where(and(eq(workspaceMembersTable.workspaceId, sprint.workspaceId), eq(workspaceMembersTable.userId, userId)));
+
+    if (!membership || (membership.role !== "leader" && membership.role !== "co-leader")) {
+      res.status(403).json({ error: "Solo líderes pueden editar sprints" });
+      return;
+    }
+
+    const { name, startDate, endDate } = parse.data;
+
+    const [updated] = await db.update(sprintsTable).set({
+      name,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+    }).where(eq(sprintsTable.id, sprintId)).returning();
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: "Error al actualizar el sprint" });
+  }
+});
+
 export default router;

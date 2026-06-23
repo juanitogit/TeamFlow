@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
-import { ListTodo, CheckCircle2, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Clock } from "lucide-react";
+import { IconTasks } from "@/components/ui/custom-icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { LogoLoader } from "@/components/ui/logo-loader";
 
 function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
@@ -22,7 +23,7 @@ export function Tasks() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { workspaces } = useWorkspaces();
+  const { data: workspaces } = useWorkspaces();
   const [workspaceId, setWorkspaceId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState("todos");
   const [commitSha, setCommitSha] = useState("");
@@ -123,7 +124,7 @@ export function Tasks() {
 
   const renderTaskList = (list: any[], showAssignee = false) => {
     const filteredTasks = list.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
-    if (isLoading) return <div className="py-12 text-center text-slate bg-white rounded-[24px] shadow-sm border border-mist">Cargando tareas...</div>;
+    if (isLoading) return <div className="py-24 w-full flex items-center justify-center"><LogoLoader className="h-12 w-12" /></div>;
     if (filteredTasks.length === 0) return (
       <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
         <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
@@ -139,7 +140,7 @@ export function Tasks() {
           
           return (
             <motion.div key={task.id} whileHover={{ y: -4 }}>
-              <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden p-6 transition-all">
+              <div className="bg-white border border-mist rounded-[24px] shadow-sm overflow-hidden p-6 transition-all">
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
                   <div className="flex items-start gap-4 flex-1">
                     {!showAssignee && (
@@ -154,33 +155,38 @@ export function Tasks() {
                       </Button>
                     )}
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <Badge variant="outline" className={`
-                          ${task.type === 'programacion' ? 'bg-blue-50 text-blue-600 border-none' : ''}
-                          ${task.type === 'documentacion' ? 'bg-emerald-50 text-emerald-600 border-none' : ''}
-                          ${task.type === 'investigacion' ? 'bg-purple-50 text-purple-600 border-none' : ''}
-                          text-[10px] px-2 py-0 uppercase tracking-wider
-                        `}>
+                      <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                        <span className={`text-[10px] uppercase font-bold tracking-widest ${
+                          task.type === 'programacion' ? 'text-blue-500' :
+                          task.type === 'documentacion' ? 'text-emerald-500' :
+                          'text-purple-500'
+                        }`}>
                           {task.type}
-                        </Badge>
-                        {task.status === 'completada' && (
-                          <Badge variant="outline" className="bg-emerald-50 text-emerald-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">Completada</Badge>
-                        )}
-                        {task.status === 'en_progreso' && (
-                          <Badge variant="outline" className="bg-blue-50 text-blue-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Progreso</Badge>
-                        )}
-                        {task.status === 'en_revision' && (
-                          <Badge variant="outline" className="bg-orange-50 text-orange-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Revisión</Badge>
-                        )}
+                        </span>
+                        
+                        <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+
+                        <span className={`text-[10px] uppercase font-bold tracking-widest ${
+                          task.status === 'completada' ? 'text-emerald-500' :
+                          task.status === 'en_progreso' ? 'text-blue-500' :
+                          task.status === 'en_revision' ? 'text-orange-500' :
+                          'text-slate-400'
+                        }`}>
+                          {task.status.replace('_', ' ')}
+                        </span>
+
                         {showAssignee && (
-                          <Badge variant="outline" className="bg-slate-100 text-slate-600 border-none flex items-center gap-1.5 ml-auto text-xs py-0.5 pr-2">
-                            <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=fff`} className="w-4 h-4 rounded-full bg-white" />
-                            {task.assignedTo.name}
-                          </Badge>
+                          <>
+                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                            <div className="flex items-center gap-1.5 ml-auto text-xs font-medium text-slate-500">
+                              <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=fff`} className="w-4 h-4 rounded-full bg-slate-100" />
+                              {task.assignedTo.name}
+                            </div>
+                          </>
                         )}
                       </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through opacity-70' : 'text-ink'}`}>
+                        <h3 className={`text-lg font-bold ${task.status === 'completada' ? 'text-slate-400 line-through' : 'text-ink'}`}>
                           {task.title}
                         </h3>
                         {!showAssignee && (
@@ -224,19 +230,19 @@ export function Tasks() {
                   </div>
                   
                   <div className="flex flex-col items-start md:items-end gap-2 pl-12 md:pl-0 shrink-0">
-                    <div className="flex items-center text-sm">
+                    <div className="flex items-center text-sm font-medium">
                       {task.dueDate ? (
-                        <Badge variant="outline" className={`flex items-center gap-1.5 px-2.5 py-1 font-medium ${daysLeft !== null && daysLeft < 0 ? 'border-red-200 bg-red-50 text-red-600' : daysLeft === 0 ? 'border-slate-200 bg-slate-50 text-slate-600' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${daysLeft !== null && daysLeft < 0 ? 'bg-red-50 text-red-600' : daysLeft === 0 ? 'bg-slate-50 text-slate-600' : 'bg-blue-50/50 text-blue-600'}`}>
                           <Clock className="h-3.5 w-3.5" />
-                          <span>
+                          <span className="text-xs">
                             {daysLeft !== null && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
                           </span>
-                          <span className="opacity-70 ml-0.5 border-l pl-1.5 border-current">
+                          <span className="opacity-40 text-xs border-l pl-1.5 border-current">
                             {format(new Date(task.dueDate), "d MMM", { locale: es })}
                           </span>
-                        </Badge>
+                        </div>
                       ) : (
-                        <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-normal px-2.5 py-1">Sin fecha límite</Badge>
+                        <div className="text-xs text-slate-400 font-normal px-3 py-1.5 rounded-full bg-slate-50/50">Sin fecha límite</div>
                       )}
                     </div>
                     
@@ -309,7 +315,7 @@ export function Tasks() {
         <div>
           <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-2xl">
-              <ListTodo className="h-6 w-6 text-primary" />
+              <IconTasks className="h-6 w-6" />
             </div>
             Tareas de Proyecto
           </h1>

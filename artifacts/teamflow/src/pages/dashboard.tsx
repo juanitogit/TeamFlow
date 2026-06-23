@@ -9,7 +9,9 @@ import { useGSAP } from "@gsap/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Activity, CheckCircle2, AlertCircle, Clock, Heart, TrendingUp, BarChart3, Plus, Briefcase } from "lucide-react";
+import { IconDashboard, IconTasks, IconTeam, IconSprints, IconMeetings } from "@/components/ui/custom-icons";
+import { LogoLoader } from "@/components/ui/logo-loader";
+import { Heart, TrendingUp, BarChart3, Plus, Briefcase, Clock, Activity } from "lucide-react";
 import { format } from "date-fns";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -87,7 +89,7 @@ export function Dashboard() {
   if (authLoading || !isAuthenticated || dashboardLoading || !dashboard || contributionsLoading) {
     return (
       <div className="flex h-[50vh] w-full items-center justify-center">
-        <Activity className="h-8 w-8 animate-spin text-primary opacity-50" />
+        <LogoLoader className="h-12 w-12" />
       </div>
     );
   }
@@ -99,7 +101,12 @@ export function Dashboard() {
     <div ref={containerRef} className="space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-ink">Dashboard de Rendimiento</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-ink flex items-center gap-3">
+             <div className="p-2 bg-primary/10 rounded-2xl">
+               <IconDashboard className="h-6 w-6 text-primary" />
+             </div>
+             Dashboard de Rendimiento
+          </h1>
           <div className="flex items-center gap-3 mt-2">
             {activeWorkspace && (
               <span className="flex items-center gap-2.5 text-xl font-semibold text-slate dark:text-slate-300">
@@ -166,7 +173,7 @@ export function Dashboard() {
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Aprobados</span>
             <div className="bg-white p-2 rounded-full shadow-sm">
-              <CheckCircle2 className="h-4 w-4 text-[#fe81e4]" />
+              <IconTasks className="h-4 w-4 text-[#fe81e4]" />
             </div>
           </div>
           <div>
@@ -179,7 +186,7 @@ export function Dashboard() {
           <div className="flex flex-row items-center justify-between pb-2">
             <span className="text-sm font-medium text-slate">Aportes Pendientes</span>
             <div className="bg-white p-2 rounded-full shadow-sm">
-              <AlertCircle className="h-4 w-4 text-[#fda900]" />
+              <IconSprints className="h-4 w-4 text-[#fda900]" />
             </div>
           </div>
           <div>
@@ -224,7 +231,7 @@ export function Dashboard() {
         <div className="gsap-fade-up bg-white rounded-[24px] p-6 md:p-8 border border-mist shadow-sm">
           <div className="flex flex-col mb-6">
             <h3 className="flex items-center text-xl font-semibold text-ink tracking-tight">
-              <Activity className="mr-3 h-6 w-6 text-primary" />
+              <IconTeam className="mr-3 h-6 w-6 text-primary" />
               Aportes Recientes del Equipo
             </h3>
           </div>

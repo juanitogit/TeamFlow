@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Timer, Plus, Clock, Users, FolderKanban } from "lucide-react";
+import { IconSprints } from "@/components/ui/custom-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
+import { LogoLoader } from "@/components/ui/logo-loader";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -26,6 +28,7 @@ export function Sprints() {
   const { data: workspaces } = useWorkspaces();
   
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingSprint, setEditingSprint] = useState<any>(null);
   const [name, setName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -74,22 +77,49 @@ export function Sprints() {
     onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
   });
 
+  const editMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch(`/api/sprints/${data.id}`, { method: "PUT", headers: getAuthHeader(), body: JSON.stringify(data) });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.error); }
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Sprint editado exitosamente" });
+      setEditingSprint(null);
+      queryClient.invalidateQueries({ queryKey: ["sprints", workspaceId] });
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Error", description: e.message }),
+  });
+
   const handleCreate = () => {
     if (!name || !workspaceId) return;
     createMutation.mutate({ workspaceId, name, startDate: startDate || undefined, endDate: endDate || undefined });
   };
 
-  if (loadingSprints) return <div className="h-96 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>;
+  const handleEdit = () => {
+    if (!editingSprint?.name) return;
+    editMutation.mutate({ 
+      id: editingSprint.id, 
+      name: editingSprint.name, 
+      startDate: editingSprint.startDate || undefined, 
+      endDate: editingSprint.endDate || undefined 
+    });
+  };
+
+  if (!workspaceId) return <div className="text-center py-12 text-slate bg-white rounded-[24px] border border-mist">Selecciona un workspace arriba.</div>;
+  if (loadingSprints) return <div className="py-24 w-full flex items-center justify-center"><LogoLoader className="h-12 w-12" /></div>;
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-ink flex items-center gap-3">
-            <FolderKanban className="h-7 w-7 text-primary" />
+          <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-2xl">
+              <IconSprints className="h-6 w-6" />
+            </div>
             Sprints y Ciclos
           </h1>
-          <p className="text-slate mt-1 text-sm">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
+          <p className="text-slate mt-1 text-sm font-medium">Organiza el trabajo en iteraciones y revisa la carga de tu equipo</p>
         </div>
         
         {isLeader && (
@@ -100,10 +130,7 @@ export function Sprints() {
         )}
       </div>
 
-      {!workspaceId ? (
-        <div className="text-center py-12 text-slate bg-white rounded-[24px] border border-mist">Selecciona un workspace arriba.</div>
-      ) : (
-        <div className="space-y-6">
+      <div className="space-y-6">
           {sprints?.length === 0 ? (
             <div className="py-16 flex flex-col items-center text-center bg-white rounded-[24px] border border-dashed border-mist">
               <FolderKanban className="h-12 w-12 text-slate-300 mb-4" />
@@ -116,19 +143,30 @@ export function Sprints() {
                 const sprintTasks = tasks?.filter((t: any) => t.sprintId === sprint.id) || [];
                 const completedCount = sprintTasks.filter((t: any) => t.status === "completada").length;
                 const progress = sprintTasks.length ? Math.round((completedCount / sprintTasks.length) * 100) : 0;
+                const isActive = sprint.status === 'activo';
+                const isPast = sprint.status === 'completado';
                 
                 return (
                   <Card key={sprint.id} className="rounded-[24px] border-mist bg-white shadow-sm overflow-hidden flex flex-col">
-                    <CardHeader className="pb-3 border-b border-mist/50 bg-white">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg text-ink font-semibold">{sprint.name}</CardTitle>
-                        <Badge variant="outline" className={`
-                          ${sprint.status === 'activo' ? 'bg-blue-50 text-blue-600' : ''}
-                          ${sprint.status === 'completado' ? 'bg-emerald-50 text-emerald-600' : ''}
-                          ${sprint.status === 'planificacion' ? 'bg-slate-50 text-slate-600' : ''}
-                          border-none uppercase tracking-wider text-[10px]
-                        `}>{sprint.status}</Badge>
+                    <CardHeader className="bg-snow border-b border-slate-100 pb-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <Badge variant="outline" className={`font-medium ${isActive ? 'bg-blue-50 text-blue-600 border-none' : isPast ? 'bg-slate-50 text-slate-500 border-none' : 'bg-orange-50 text-orange-600 border-none'}`}>
+                          {isActive ? "Activo" : isPast ? "Terminado" : "Próximo"}
+                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-slate uppercase tracking-wider">{sprintTasks.length} tareas</span>
+                          {isLeader && (
+                            <Button variant="ghost" size="sm" className="h-6 text-xs text-blue-500 hover:text-blue-600 hover:bg-blue-50 px-2 rounded-full" onClick={() => {
+                              setEditingSprint({
+                                ...sprint,
+                                startDate: sprint.startDate ? new Date(sprint.startDate).toISOString().split('T')[0] : '',
+                                endDate: sprint.endDate ? new Date(sprint.endDate).toISOString().split('T')[0] : '',
+                              });
+                            }}>Editar</Button>
+                          )}
+                        </div>
                       </div>
+                      <CardTitle className="text-lg text-ink font-semibold">{sprint.name}</CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 space-y-4 flex-1 flex flex-col justify-between">
                       <div>
@@ -175,7 +213,6 @@ export function Sprints() {
             </div>
           )}
         </div>
-      )}
 
       {/* Create Sprint Dialog */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -201,8 +238,41 @@ export function Sprints() {
             </div>
           </div>
           <DialogFooter>
-            <Button disabled={createMutation.isPending || !name} onClick={handleCreate}>
+            <Button disabled={createMutation.isPending || !name} onClick={handleCreate} className="rounded-full">
               {createMutation.isPending ? "Creando..." : "Crear Sprint"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Sprint Dialog */}
+      <Dialog open={!!editingSprint} onOpenChange={(open) => !open && setEditingSprint(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Sprint</DialogTitle>
+          </DialogHeader>
+          {editingSprint && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nombre del Sprint</label>
+                <Input value={editingSprint.name} onChange={e => setEditingSprint({...editingSprint, name: e.target.value})} placeholder="Ej. Sprint 1 - MVP" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Fecha de Inicio</label>
+                  <Input type="date" value={editingSprint.startDate} onChange={e => setEditingSprint({...editingSprint, startDate: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Fecha de Fin</label>
+                  <Input type="date" value={editingSprint.endDate} onChange={e => setEditingSprint({...editingSprint, endDate: e.target.value})} />
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditingSprint(null)} className="rounded-full">Cancelar</Button>
+            <Button disabled={editMutation.isPending || !editingSprint?.name} onClick={handleEdit} className="rounded-full">
+              {editMutation.isPending ? "Guardando..." : "Guardar"}
             </Button>
           </DialogFooter>
         </DialogContent>

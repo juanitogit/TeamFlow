@@ -2,7 +2,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, ListTodo, Users, Menu, X, Github, LogOut, ArrowLeftRight, FolderKanban, Timer, Calendar } from "lucide-react";
+import { Loader2, Menu, X, ArrowLeftRight } from "lucide-react";
+import { IconDashboard, IconTasks, IconTeam, IconSprints, IconMeetings, IconSwap, IconLogout } from "@/components/ui/custom-icons";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { LogoLoader } from "@/components/ui/logo-loader";
@@ -40,11 +41,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: Home },
-    { href: "/tasks", label: "Tareas", icon: ListTodo },
-    { href: "/team", label: "Equipo", icon: Users },
-    { href: "/sprints", label: "Sprints", icon: Timer },
-    { href: "/meetings", label: "Reuniones", icon: Calendar },
+    { href: "/dashboard", label: "Dashboard", icon: IconDashboard },
+    { href: "/tasks", label: "Tareas", icon: IconTasks },
+    { href: "/team", label: "Equipo", icon: IconTeam },
+    { href: "/sprints", label: "Sprints", icon: IconSprints },
+    { href: "/meetings", label: "Reuniones", icon: IconMeetings },
   ];
 
   return (
@@ -82,13 +83,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             {activeWorkspace && (
-              <Button variant="ghost" size="sm" className="hidden sm:flex text-sm font-medium text-slate-500 hover:text-primary hover:bg-primary/5 rounded-full px-4 transition-all" onClick={() => {
+              <Button variant="ghost" size="icon" className="hidden sm:flex text-slate-500 hover:text-primary hover:bg-primary/5 rounded-full" onClick={() => {
                 localStorage.removeItem("active_workspace_id");
                 localStorage.removeItem("active_workspace_role");
                 window.location.href = "/workspaces";
-              }}>
-                <ArrowLeftRight className="h-4 w-4 mr-2" />
-                Cambiar Workspace
+              }} title="Cambiar Workspace">
+                <IconSwap className="h-5 w-5" />
               </Button>
             )}
             <div className="h-8 w-px bg-slate-200 hidden sm:block mx-1"></div>
@@ -103,9 +103,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="hidden sm:flex text-sm rounded-full border-mist hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all px-4" onClick={logout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Salir
+            <Button variant="ghost" size="icon" className="hidden sm:flex text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-full transition-all" onClick={logout} title="Salir">
+              <IconLogout className="h-5 w-5" />
             </Button>
             <div className="md:hidden flex items-center gap-1">
               {activeWorkspace && (
@@ -114,11 +113,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   localStorage.removeItem("active_workspace_role");
                   window.location.href = "/workspaces";
                 }} title="Cambiar Workspace">
-                  <ArrowLeftRight className="h-5 w-5" />
+                  <IconSwap className="h-5 w-5" />
                 </Button>
               )}
               <Button variant="ghost" size="icon" className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-full" onClick={logout} title="Salir">
-                <LogOut className="h-5 w-5" />
+                <IconLogout className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -140,10 +139,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     : "text-slate-400 hover:text-slate-900"
                 }`}
               >
-                <motion.div whileTap={{ scale: 0.9 }}>
-                  <item.icon className={`h-5 w-5 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+                <motion.div whileTap={{ scale: 0.9 }} className="relative">
+                  <item.icon className={`h-6 w-6 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
+                  {isActive && (
+                    <motion.div layoutId="navIndicator" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  )}
                 </motion.div>
-                <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''}`}>{item.label}</span>
               </Link>
             );
           })}
