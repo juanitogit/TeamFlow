@@ -202,17 +202,32 @@ router.post("/:id/resend", async (req: AuthedRequest, res: Response) => {
       new Date(meeting.endTime)
     );
 
+    let allSuccess = true;
+    let lastError = null;
     for (const member of members) {
       if (member.email) {
-        sendEmail(member.email, emailData.subject, emailData.subject, emailData.html, emailData.attachments)
-          .catch(err => console.error("Failed to send meeting invite to", member.email, err));
+        try {
+          const success = await sendEmail(member.email, emailData.subject, emailData.subject, emailData.html, emailData.attachments);
+          if (!success) {
+            allSuccess = false;
+            lastError = "Failed to send email to " + member.email;
+          }
+        } catch (err: any) {
+          allSuccess = false;
+          lastError = err.message || "Unknown error";
+          console.error("Failed to send meeting invite to", member.email, err);
+        }
       }
     }
 
-    res.json({ success: true });
-  } catch (error) {
+    if (!allSuccess) {
+      res.status(500).json({ error: lastError || "Error enviando algunos correos" });
+    } else {
+      res.json({ success: true });
+    }
+  } catch (error: any) {
     console.error("[Meetings] Error resending:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: error.message || "Internal server error" });
   }
 });
 
