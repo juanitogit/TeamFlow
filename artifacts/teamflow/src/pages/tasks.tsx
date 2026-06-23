@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useWorkspaces } from "@/hooks/use-workspaces";
+import { motion } from "framer-motion";
+import { ListTodo, CheckCircle2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -15,26 +17,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
 }
-
-// Corporate SVGs
-const TasksIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-const EmptyIcon = () => (
-  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-slate-300">
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-    <path d="M9 12l2 2 4-4" />
-  </svg>
-);
 
 export function Tasks() {
   const { user } = useAuth();
@@ -122,6 +104,10 @@ export function Tasks() {
     statusMutation.mutate({ taskId: task.id, status: newStatus, sha: commitSha || task.commitSha });
   };
 
+  const handleComplete = (task: any) => {
+    handleStatusChange(task, "completada");
+  };
+
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTask) return;
@@ -129,163 +115,209 @@ export function Tasks() {
   };
 
   if (!workspaceId) {
-    return <div className="text-center py-12 text-slate-500 font-medium bg-white border border-slate-200 rounded-lg shadow-sm">Selecciona un workspace arriba.</div>;
+    return <div className="text-center py-12 text-slate bg-white rounded-[24px] shadow-sm border border-mist">Selecciona un workspace arriba.</div>;
   }
 
   const myTasks = tasks?.filter((t: any) => t.assignedTo.id === user?.id) || [];
   const teamTasks = tasks || [];
 
   const renderTaskList = (list: any[], showAssignee = false) => {
-    const filtered = list.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
-    if (isLoading) return <div className="h-40 flex items-center justify-center text-slate-500 text-sm bg-slate-50 rounded-lg border border-slate-100">Cargando tareas...</div>;
-    if (filtered.length === 0) return (
-      <div className="py-16 flex flex-col items-center text-center bg-white border border-slate-200 border-dashed rounded-lg shadow-sm">
-        <EmptyIcon />
-        <h3 className="text-lg font-semibold text-slate-900">¡Sin tareas!</h3>
-        <p className="text-slate-500 text-sm mt-1">No hay tareas que coincidan con los filtros.</p>
+    const filteredTasks = list.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
+    if (isLoading) return <div className="py-12 text-center text-slate bg-white rounded-[24px] shadow-sm border border-mist">Cargando tareas...</div>;
+    if (filteredTasks.length === 0) return (
+      <div className="py-16 flex flex-col items-center justify-center text-center bg-white rounded-[24px] border border-dashed border-mist shadow-sm">
+        <CheckCircle2 className="h-16 w-16 text-emerald-200 mb-6" />
+        <h3 className="text-xl font-semibold text-ink">¡Todo al día!</h3>
+        <p className="text-slate mt-2">No hay tareas para el filtro seleccionado.</p>
       </div>
     );
 
     return (
-      <div className="flex flex-col space-y-3">
-        {filtered.map((task: any) => (
-          <div key={task.id} className={`bg-white border rounded-lg p-5 transition-all shadow-sm hover:shadow-md ${task.status === 'completada' ? 'border-slate-100 bg-slate-50/50 opacity-80' : 'border-slate-200'}`}>
-            <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-              <div className="flex items-start gap-4 flex-1">
-                {!showAssignee && (
-                  <button 
-                    className={`flex items-center justify-center h-6 w-6 rounded-full border transition-colors flex-shrink-0 mt-0.5 ${
-                      task.status === 'completada' 
-                        ? 'border-emerald-500 bg-emerald-500 text-white' 
-                        : 'border-slate-300 text-transparent hover:border-emerald-500 hover:text-emerald-500/20'
-                    }`}
-                    onClick={() => task.status !== 'completada' && handleStatusChange(task, 'completada')}
-                    disabled={task.status === 'completada' || statusMutation.isPending}
-                  >
-                    <CheckIcon />
-                  </button>
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                    <Badge variant="outline" className="font-normal text-[10px] px-2 py-0 h-5 bg-slate-100 text-slate-600 border-slate-200 uppercase tracking-wider">{task.type}</Badge>
-                    <Badge variant="outline" className={`font-normal text-[10px] px-2 py-0 h-5 uppercase tracking-wider ${
-                      task.status === 'completada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                      task.status === 'en_progreso' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                      task.status === 'en_revision' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                      'bg-slate-50 text-slate-600 border-slate-200'
-                    }`}>{task.status.replace("_", " ")}</Badge>
-                    {showAssignee && (
-                       <span className="flex items-center gap-1.5 ml-auto text-xs font-medium text-slate-700 bg-slate-50 px-2 py-1 rounded-md border border-slate-200">
-                         <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=f8fafc&color=334155`} className="w-4 h-4 rounded-full border border-slate-200 object-cover" />
-                         {task.assignedTo.name}
-                       </span>
+      <div className="space-y-4">
+        {filteredTasks.map((task: any) => {
+          const daysLeft = task.dueDate ? differenceInDays(new Date(task.dueDate), new Date()) : null;
+          
+          return (
+            <motion.div key={task.id} whileHover={{ y: -4 }}>
+              <div className="bg-snow border border-mist rounded-[24px] shadow-sm overflow-hidden p-6 transition-all">
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  <div className="flex items-start gap-4 flex-1">
+                    {!showAssignee && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className={`rounded-full h-8 w-8 mt-0.5 shrink-0 ${task.status === 'completada' ? 'text-emerald-500 bg-emerald-50' : 'text-slate hover:text-primary hover:bg-primary/10 bg-slate-50'}`}
+                        onClick={() => task.status !== 'completada' && handleComplete(task)}
+                        disabled={task.status === 'completada' || statusMutation.isPending}
+                      >
+                        <CheckCircle2 className="h-6 w-6" />
+                      </Button>
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <Badge variant="outline" className={`
+                          ${task.type === 'programacion' ? 'bg-blue-50 text-blue-600 border-none' : ''}
+                          ${task.type === 'documentacion' ? 'bg-emerald-50 text-emerald-600 border-none' : ''}
+                          ${task.type === 'investigacion' ? 'bg-purple-50 text-purple-600 border-none' : ''}
+                          text-[10px] px-2 py-0 uppercase tracking-wider
+                        `}>
+                          {task.type}
+                        </Badge>
+                        {task.status === 'completada' && (
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">Completada</Badge>
+                        )}
+                        {task.status === 'en_progreso' && (
+                          <Badge variant="outline" className="bg-blue-50 text-blue-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Progreso</Badge>
+                        )}
+                        {task.status === 'en_revision' && (
+                          <Badge variant="outline" className="bg-orange-50 text-orange-500 border-none text-[10px] px-2 py-0 uppercase tracking-wider">En Revisión</Badge>
+                        )}
+                        {showAssignee && (
+                          <Badge variant="outline" className="bg-slate-100 text-slate-600 border-none flex items-center gap-1.5 ml-auto text-xs py-0.5 pr-2">
+                            <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=fff`} className="w-4 h-4 rounded-full bg-white" />
+                            {task.assignedTo.name}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <h3 className={`text-lg font-medium ${task.status === 'completada' ? 'text-slate line-through opacity-70' : 'text-ink'}`}>
+                          {task.title}
+                        </h3>
+                        {!showAssignee && (
+                          <Select value={task.status} onValueChange={(val) => handleStatusChange(task, val)}>
+                            <SelectTrigger className="h-7 text-xs px-2 bg-slate-50 border-slate-200 ml-2">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pendiente">Pendiente</SelectItem>
+                              <SelectItem value="en_progreso">En Progreso</SelectItem>
+                              <SelectItem value="en_revision">En Revisión</SelectItem>
+                              <SelectItem value="completada">Completada</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                      {task.description && (
+                        <p className="text-sm text-slate mt-1 whitespace-pre-wrap">{task.description}</p>
+                      )}
+
+                      {completingTask === task.id && !showAssignee && (
+                        <div className="mt-4 flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                          <Input 
+                            placeholder="Commit SHA de GitHub..." 
+                            value={commitSha} 
+                            onChange={e => setCommitSha(e.target.value)}
+                            className="h-8 text-sm bg-white"
+                          />
+                          <Button size="sm" className="h-8 shrink-0 rounded-full" onClick={() => handleComplete(task)}>Confirmar</Button>
+                          <Button size="sm" variant="ghost" className="h-8 shrink-0 text-slate rounded-full" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>Cancelar</Button>
+                        </div>
+                      )}
+
+                      {task.commitSha && (
+                        <div className="mt-3 text-xs text-slate flex items-center gap-1">
+                          <span className="font-semibold">Commit SHA:</span> 
+                          <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">{task.commitSha.substring(0, 7)}</code>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col items-start md:items-end gap-2 pl-12 md:pl-0 shrink-0">
+                    <div className="flex items-center text-sm">
+                      {task.dueDate ? (
+                        <Badge variant="outline" className={`flex items-center gap-1.5 px-2.5 py-1 font-medium ${daysLeft !== null && daysLeft < 0 ? 'border-red-200 bg-red-50 text-red-600' : daysLeft === 0 ? 'border-slate-200 bg-slate-50 text-slate-600' : 'border-blue-200 bg-blue-50 text-blue-600'}`}>
+                          <Clock className="h-3.5 w-3.5" />
+                          <span>
+                            {daysLeft !== null && daysLeft < 0 ? 'Vencida' : daysLeft === 0 ? 'Para hoy' : `En ${daysLeft} días`}
+                          </span>
+                          <span className="opacity-70 ml-0.5 border-l pl-1.5 border-current">
+                            {format(new Date(task.dueDate), "d MMM", { locale: es })}
+                          </span>
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="border-slate-100 bg-slate-50 text-slate-400 font-normal px-2.5 py-1">Sin fecha límite</Badge>
+                      )}
+                    </div>
+                    
+                    {showAssignee && isLeader && (
+                      <div className="flex gap-2 mt-2 w-full md:w-auto">
+                        <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ''}); }}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline" className="h-7 text-xs rounded-full">Editar</Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Editar Tarea</DialogTitle>
+                            </DialogHeader>
+                            {editingTask && (
+                              <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
+                                <div>
+                                  <label className="text-sm font-medium block mb-1.5">Título</label>
+                                  <Input required value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="rounded-xl" />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium block mb-1.5">Descripción</label>
+                                  <Input value={editingTask.description || ''} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="rounded-xl" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="text-sm font-medium block mb-1.5">Fecha Límite</label>
+                                    <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({...editingTask, dueDate: e.target.value})} className="rounded-xl" />
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium block mb-1.5">Estado</label>
+                                    <Select value={editingTask.status} onValueChange={v => setEditingTask({...editingTask, status: v})}>
+                                      <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="pendiente">Pendiente</SelectItem>
+                                        <SelectItem value="en_progreso">En Progreso</SelectItem>
+                                        <SelectItem value="en_revision">En Revisión</SelectItem>
+                                        <SelectItem value="completada">Completada</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                <div className="pt-4 flex gap-2 justify-end">
+                                  <Button type="button" variant="ghost" onClick={() => setEditingTask(null)} className="rounded-full">Cancelar</Button>
+                                  <Button type="submit" className="rounded-full">Guardar</Button>
+                                </div>
+                              </form>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          if(window.confirm("¿Seguro que deseas eliminar esta tarea?")) {
+                            deleteMutation.mutate(task.id);
+                          }
+                        }} className="h-7 text-xs text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full">Borrar</Button>
+                      </div>
                     )}
                   </div>
-                  <h3 className={`text-base font-semibold text-slate-900 ${task.status === 'completada' ? 'line-through text-slate-500' : ''}`}>{task.title}</h3>
-                  {task.description && <p className="text-sm text-slate-500 mt-1">{task.description}</p>}
-                  
-                  {completingTask === task.id && !showAssignee && (
-                    <div className="mt-3 flex items-center gap-2 bg-slate-50 p-2 rounded-md border border-slate-200">
-                      <Input placeholder="Commit SHA..." value={commitSha} onChange={e => setCommitSha(e.target.value)} className="h-8 text-sm font-mono focus-visible:ring-1" />
-                      <Button size="sm" className="h-8 shadow-sm" onClick={() => handleStatusChange(task, 'completada')}>Confirmar</Button>
-                      <Button size="sm" variant="ghost" className="h-8 px-2 text-slate-400 hover:text-slate-600" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>Cancelar</Button>
-                    </div>
-                  )}
-
-                  {task.commitSha && (
-                    <div className="mt-3 text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded inline-flex items-center border border-slate-200">
-                      <span className="font-semibold text-slate-600 mr-1">SHA:</span> {task.commitSha.substring(0, 7)}
-                    </div>
-                  )}
                 </div>
               </div>
-              <div className="flex flex-col items-start md:items-end gap-2 shrink-0 ml-10 md:ml-0">
-                {task.dueDate ? (
-                  <div className={`text-xs font-medium px-2.5 py-1 rounded-md ${
-                    new Date(task.dueDate) < new Date() && task.status !== 'completada' 
-                      ? 'bg-red-50 text-red-700 border border-red-100' 
-                      : 'text-slate-500 border border-transparent'
-                  }`}>
-                    Vence: {format(new Date(task.dueDate), "d MMM", { locale: es })}
-                  </div>
-                ) : <div className="text-xs text-slate-400 px-2.5 py-1">Sin fecha</div>}
-
-                {showAssignee && isLeader && (
-                  <div className="flex gap-2 mt-2 w-full md:w-auto">
-                    <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ''}); }}>
-                      <DialogTrigger asChild>
-                        <Button size="sm" variant="outline" className="h-7 text-xs flex-1 md:flex-none">Editar</Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[425px]">
-                        <DialogHeader>
-                          <DialogTitle className="text-lg">Editar Tarea</DialogTitle>
-                        </DialogHeader>
-                        {editingTask && (
-                          <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
-                            <div>
-                              <label className="text-sm font-medium text-slate-700 block mb-1.5">Título</label>
-                              <Input required value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="focus-visible:ring-1" />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-slate-700 block mb-1.5">Descripción</label>
-                              <Input value={editingTask.description || ''} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="focus-visible:ring-1" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm font-medium text-slate-700 block mb-1.5">Fecha Límite</label>
-                                <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({...editingTask, dueDate: e.target.value})} className="focus-visible:ring-1" />
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-slate-700 block mb-1.5">Estado</label>
-                                <Select value={editingTask.status} onValueChange={v => setEditingTask({...editingTask, status: v})}>
-                                  <SelectTrigger className="focus-visible:ring-1"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pendiente">Pendiente</SelectItem>
-                                    <SelectItem value="en_progreso">En Progreso</SelectItem>
-                                    <SelectItem value="en_revision">En Revisión</SelectItem>
-                                    <SelectItem value="completada">Completada</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            <div className="pt-4 flex gap-2 justify-end">
-                              <Button type="button" variant="outline" onClick={() => setEditingTask(null)}>Cancelar</Button>
-                              <Button type="submit" className="shadow-sm">Guardar cambios</Button>
-                            </div>
-                          </form>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                    <Button size="sm" variant="destructive" onClick={() => {
-                      if(window.confirm("¿Seguro que deseas eliminar esta tarea?")) {
-                        deleteMutation.mutate(task.id);
-                      }
-                    }} className="h-7 text-xs flex-1 md:flex-none opacity-80 hover:opacity-100">Borrar</Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
     );
   };
 
   return (
-    <div className="space-y-6 font-sans">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900 flex items-center gap-3">
-            <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-              <TasksIcon />
+          <h1 className="text-3xl font-bold text-ink flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-2xl">
+              <ListTodo className="h-6 w-6 text-primary" />
             </div>
-            Tareas
+            Tareas de Proyecto
           </h1>
-          <p className="text-slate-500 mt-1 text-sm font-medium">Gestiona y supervisa las tareas del proyecto</p>
+          <p className="text-slate mt-1 text-sm font-medium">Gestiona tu backlog y actividades</p>
         </div>
         
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] bg-white text-sm focus-visible:ring-1 shadow-sm">
+          <SelectTrigger className="w-[180px] bg-white rounded-full border-mist shadow-sm text-sm font-medium text-slate">
             <SelectValue placeholder="Filtrar por estado" />
           </SelectTrigger>
           <SelectContent>
@@ -299,10 +331,10 @@ export function Tasks() {
       </div>
 
       {isLeader ? (
-        <Tabs defaultValue="mis_tareas" className="w-full">
-          <TabsList className="bg-slate-100 p-1 rounded-lg inline-flex mb-6 h-auto">
-            <TabsTrigger value="mis_tareas" className="rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all text-slate-500">Mis Tareas</TabsTrigger>
-            <TabsTrigger value="equipo" className="rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all text-slate-500">Equipo (Líder)</TabsTrigger>
+        <Tabs defaultValue="mis_tareas" className="w-full mt-4">
+          <TabsList className="bg-white border border-mist shadow-sm p-1 rounded-full inline-flex mb-6 h-12">
+            <TabsTrigger value="mis_tareas" className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all text-slate">Mis Tareas</TabsTrigger>
+            <TabsTrigger value="equipo" className="rounded-full px-6 py-2 text-sm font-medium data-[state=active]:bg-primary/10 data-[state=active]:text-primary transition-all text-slate">Equipo (Líder)</TabsTrigger>
           </TabsList>
           <TabsContent value="mis_tareas" className="mt-0 outline-none">
             {renderTaskList(myTasks, false)}
@@ -312,10 +344,10 @@ export function Tasks() {
           </TabsContent>
         </Tabs>
       ) : (
-        <div className="pt-2">
+        <div className="mt-6">
           {renderTaskList(myTasks, false)}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
