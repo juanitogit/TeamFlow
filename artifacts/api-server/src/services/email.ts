@@ -348,25 +348,25 @@ export function meetingInviteEmail(workspaceName: string, meetingTitle: string, 
            pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
   };
 
-  const icsContent = \`BEGIN:VCALENDAR
+  const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//TeamFlow//ES
 CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
-UID:\${Math.random().toString(36).substring(2)}@teamflow.app
-DTSTAMP:\${formatDateIcs(new Date())}
-DTSTART:\${formatDateIcs(startTime)}
-DTEND:\${formatDateIcs(endTime)}
-SUMMARY:\${meetingTitle}
-DESCRIPTION:\${description || "Reunión de equipo en TeamFlow."}
-\${meetLink ? \`LOCATION:\${meetLink}\\n\` : ""}STATUS:CONFIRMED
+UID:${Math.random().toString(36).substring(2)}@teamflow.app
+DTSTAMP:${formatDateIcs(new Date())}
+DTSTART:${formatDateIcs(startTime)}
+DTEND:${formatDateIcs(endTime)}
+SUMMARY:${meetingTitle}
+DESCRIPTION:${description || "Reunión de equipo en TeamFlow."}
+${meetLink ? `LOCATION:${meetLink}\n` : ""}STATUS:CONFIRMED
 SEQUENCE:0
 END:VEVENT
-END:VCALENDAR\`;
+END:VCALENDAR`;
 
   return {
-    subject: \`Invitación: \${meetingTitle} - \${workspaceName}\`,
+    subject: `Invitación: ${meetingTitle} - ${workspaceName}`,
     html: emailLayout(content),
     attachments: [
       {
