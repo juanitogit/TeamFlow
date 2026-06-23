@@ -68,52 +68,52 @@
 }
 
 :root {
-  --background: 0 0% 100%; /* Pure white */
-  --foreground: 0 0% 0%; /* Pure black */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
   
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 0%;
-  --card-border: 0 0% 0%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 91%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 0%;
-  --popover-border: 0 0% 0%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 214 32% 91%;
   
-  --primary: 240 100% 50%; /* Electric Blue */
-  --primary-foreground: 0 0% 100%;
+  --primary: 221 83% 53%; /* Blue 600 */
+  --primary-foreground: 210 40% 98%;
   
-  --secondary: 0 0% 90%; /* Light gray */
-  --secondary-foreground: 0 0% 0%;
+  --secondary: 210 40% 96%; /* Slate 100 */
+  --secondary-foreground: 222 47% 11%;
   
-  --muted: 0 0% 95%;
-  --muted-foreground: 0 0% 40%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
   
-  --accent: 60 100% 50%; /* Electric Yellow */
-  --accent-foreground: 0 0% 0%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222 47% 11%;
   
-  --destructive: 0 100% 50%; /* Pure Red */
-  --destructive-foreground: 0 0% 100%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
   
-  --border: 0 0% 0%;
-  --input: 0 0% 0%;
-  --ring: 0 0% 0%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
   
   --sidebar: 0 0% 100%;
-  --sidebar-foreground: 0 0% 0%;
-  --sidebar-border: 0 0% 0%;
-  --sidebar-primary: 240 100% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 60 100% 50%;
-  --sidebar-accent-foreground: 0 0% 0%;
-  --sidebar-ring: 0 0% 0%;
+  --sidebar-foreground: 222 47% 11%;
+  --sidebar-border: 214 32% 91%;
+  --sidebar-primary: 221 83% 53%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 210 40% 96%;
+  --sidebar-accent-foreground: 222 47% 11%;
+  --sidebar-ring: 221 83% 53%;
 
-  --chart-1: 240 100% 50%;
-  --chart-2: 60 100% 50%;
-  --chart-3: 0 100% 50%;
-  --chart-4: 300 100% 50%;
-  --chart-5: 120 100% 25%;
+  --chart-1: 221 83% 53%;
+  --chart-2: 215 16% 47%;
+  --chart-3: 214 32% 91%;
+  --chart-4: 210 40% 96%;
+  --chart-5: 222 47% 11%;
 
-  --radius: 0px;
+  --radius: 6px;
   
   /* Monday variables */
   --color-monday-violet: #6161ff;
@@ -124,11 +124,11 @@
   --color-mint: #bcfe90;
   --color-sky: #abf0ff;
   --color-apricot: #ff8940;
-  --color-lavender: #ff00ff; /* Magenta */
-  --color-periwinkle: #00ffff; /* Cyan */
-  --color-aqua: #00ffff;
-  --shadow-xl: 4px 4px 0px 0px rgba(0,0,0,1);
-  --shadow-sm: 2px 2px 0px 0px rgba(0,0,0,1);
+  --color-lavender: #f1f5f9;
+  --color-periwinkle: #e2e8f0;
+  --color-aqua: #cbd5e1;
+  --shadow-xl: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
@@ -182,11 +182,11 @@
 }
 
 .card-monday {
-  @apply bg-card border-2 border-border shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none;
+  @apply bg-card border border-border shadow-sm rounded-md;
 }
 
 .btn-pill {
-  @apply rounded-none;
+  @apply rounded-md;
 }
 
 @layer utilities {

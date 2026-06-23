@@ -6,60 +6,59 @@ import { useContributions, useWorkspaces } from "@/hooks/use-workspaces";
 import { motion } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 
-// Neo-Brutalist Abstract SVGs
+// Corporate / Clean SVGs
 const BriefcaseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <rect x="2" y="7" width="20" height="14" />
-    <path d="M16 7V3H8v4" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+    <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
   </svg>
 );
 
 const HealthIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <path d="M12 21l-8-8a5 5 0 017-7l1 1 1-1a5 5 0 017 7l-8 8z" />
-    <path d="M12 9v4M10 11h4" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
   </svg>
 );
 
 const TrendIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <path d="M3 17l6-6 4 4 8-8" />
-    <path d="M14 7h7v7" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+    <polyline points="16 7 22 7 22 13" />
   </svg>
 );
 
-const CheckSquareIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <rect x="3" y="3" width="18" height="18" />
-    <path d="M9 12l2 2 4-4" />
+const CheckCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+    <polyline points="22 4 12 14.01 9 11.01" />
   </svg>
 );
 
-const AlertSquareIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <rect x="3" y="3" width="18" height="18" />
-    <path d="M12 8v4M12 16h.01" />
+const AlertCircleIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
   </svg>
 );
 
 const ChartIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <rect x="4" y="14" width="4" height="6" />
-    <rect x="10" y="8" width="4" height="12" />
-    <rect x="16" y="4" width="4" height="16" />
-    <path d="M2 20h20" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="20" x2="18" y2="10" />
+    <line x1="12" y1="20" x2="12" y2="4" />
+    <line x1="6" y1="20" x2="6" y2="14" />
   </svg>
 );
 
 const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square" className="mr-2">
-    <path d="M12 5v14M5 12h14" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
@@ -73,11 +72,11 @@ export function Dashboard() {
   useGSAP(() => {
     if (containerRef.current) {
       gsap.from(".gsap-fade-up", {
-        y: 40,
+        y: 20,
         opacity: 0,
-        duration: 0.6,
+        duration: 0.5,
         stagger: 0.1,
-        ease: "power3.out",
+        ease: "power2.out",
         clearProps: "all"
       });
     }
@@ -134,7 +133,9 @@ export function Dashboard() {
   if (authLoading || !isAuthenticated || dashboardLoading || !dashboard || contributionsLoading) {
     return (
       <div className="flex h-[50vh] w-full items-center justify-center">
-        <div className="text-2xl font-black uppercase tracking-widest animate-pulse border-4 border-black p-4">Cargando</div>
+        <div className="text-slate-500 text-sm animate-pulse flex items-center gap-2">
+          <ChartIcon /> Cargando información...
+        </div>
       </div>
     );
   }
@@ -143,17 +144,15 @@ export function Dashboard() {
   const approvedContributions = contributions?.filter((c: any) => c.status === "approved").length || 0;
 
   return (
-    <div ref={containerRef} className="space-y-12 animate-in fade-in duration-500 pb-20 md:pb-0">
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b-4 border-black pb-6">
+    <div ref={containerRef} className="space-y-8 animate-in fade-in duration-500 pb-20 md:pb-0 font-sans">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b border-slate-200 pb-6">
         <div>
-          <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-black">Dashboard</h1>
-          <div className="flex items-center gap-3 mt-4">
+          <h1 className="text-3xl font-semibold text-slate-900 tracking-tight">Dashboard Overview</h1>
+          <div className="flex items-center gap-3 mt-2">
             {activeWorkspace && (
-              <span className="flex items-center gap-3 text-xl font-bold uppercase tracking-wider text-black bg-accent px-4 py-2 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <span className="flex items-center gap-2 text-sm font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-md">
                 {activeWorkspace.workspace.imageUrl ? (
-                  <div className="h-8 w-8 border-2 border-black bg-white flex items-center justify-center">
-                    <img src={activeWorkspace.workspace.imageUrl} alt="Workspace Logo" className="h-full w-full object-cover" />
-                  </div>
+                  <img src={activeWorkspace.workspace.imageUrl} alt="Workspace Logo" className="h-5 w-5 rounded-sm object-cover" />
                 ) : (
                   <BriefcaseIcon />
                 )}
@@ -162,16 +161,16 @@ export function Dashboard() {
             )}
           </div>
         </div>
-        <div className="flex gap-4">
-          <Button onClick={() => setLocation("/contributions/new")} className="shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-lg h-12">
+        <div className="flex gap-3">
+          <Button onClick={() => setLocation("/contributions/new")} className="shadow-sm">
             <PlusIcon />
-            Aporte
+            Nuevo Aporte
           </Button>
           {(workspaceRole === "leader" || workspaceRole === "co-leader") && (
-            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="relative shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-lg h-12">
-              Revisar
+            <Button variant="outline" onClick={() => setLocation("/contributions/review")} className="relative shadow-sm bg-white">
+              Revisar Tareas
               {pendingContributions > 0 && (
-                <span className="absolute -top-3 -right-3 h-8 w-8 border-2 border-black bg-destructive text-white text-sm flex items-center justify-center font-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                <span className="absolute -top-2 -right-2 h-5 w-5 bg-primary text-white text-[10px] flex items-center justify-center rounded-full font-medium shadow-sm">
                   {pendingContributions}
                 </span>
               )}
@@ -180,127 +179,126 @@ export function Dashboard() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <motion.div whileHover={{ y: -4, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }} className="gsap-fade-up bg-white p-6 transition-all border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
-          <div className="flex flex-row items-center justify-between pb-4 border-b-2 border-black mb-4">
-            <span className="text-sm font-black uppercase tracking-widest text-black">Salud</span>
-            <div className="bg-primary text-white p-2 border-2 border-black">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <motion.div whileHover={{ y: -2 }} className="gsap-fade-up bg-white p-5 rounded-lg border border-slate-200 shadow-sm transition-all relative">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate-500">Salud del Equipo</span>
+            <div className="text-emerald-500 bg-emerald-50 p-1.5 rounded-md">
               <HealthIcon />
             </div>
           </div>
           <div>
-            <div className="text-5xl font-black text-black">{dashboard.healthPoints}</div>
-            <p className="text-xs font-bold uppercase text-muted-foreground mt-2">Constancia de aportes</p>
+            <div className="text-3xl font-semibold text-slate-900">{dashboard.healthPoints}</div>
+            <p className="text-xs text-slate-500 mt-1">Puntos de constancia</p>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }} className="gsap-fade-up bg-white p-6 transition-all border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
-          <div className="flex flex-row items-center justify-between pb-4 border-b-2 border-black mb-4">
-            <span className="text-sm font-black uppercase tracking-widest text-black">Rendimiento</span>
-            <div className="bg-accent text-black p-2 border-2 border-black">
+        <motion.div whileHover={{ y: -2 }} className="gsap-fade-up bg-white p-5 rounded-lg border border-slate-200 shadow-sm transition-all relative">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate-500">Rendimiento</span>
+            <div className="text-blue-500 bg-blue-50 p-1.5 rounded-md">
               <TrendIcon />
             </div>
           </div>
           <div>
-            <div className="text-5xl font-black text-black">{Math.round(dashboard.performanceScore)}%</div>
-            <p className="text-xs font-bold uppercase text-muted-foreground mt-2">Evaluación Global</p>
+            <div className="text-3xl font-semibold text-slate-900">{Math.round(dashboard.performanceScore)}%</div>
+            <p className="text-xs text-slate-500 mt-1">Score global</p>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }} className="gsap-fade-up bg-white p-6 transition-all border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative">
-          <div className="flex flex-row items-center justify-between pb-4 border-b-2 border-black mb-4">
-            <span className="text-sm font-black uppercase tracking-widest text-black">Aprobados</span>
-            <div className="bg-white text-black p-2 border-2 border-black">
-              <CheckSquareIcon />
+        <motion.div whileHover={{ y: -2 }} className="gsap-fade-up bg-white p-5 rounded-lg border border-slate-200 shadow-sm transition-all relative">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate-500">Aportes Aprobados</span>
+            <div className="text-slate-600 bg-slate-100 p-1.5 rounded-md">
+              <CheckCircleIcon />
             </div>
           </div>
           <div>
-            <div className="text-5xl font-black text-black mt-2">{approvedContributions}</div>
-            <p className="text-xs font-bold uppercase text-muted-foreground mt-2">Validados por líderes</p>
+            <div className="text-3xl font-semibold text-slate-900">{approvedContributions}</div>
+            <p className="text-xs text-slate-500 mt-1">Validados en el ciclo</p>
           </div>
         </motion.div>
 
-        <motion.div whileHover={{ y: -4, boxShadow: "8px 8px 0px 0px rgba(0,0,0,1)" }} className="gsap-fade-up bg-white p-6 transition-all border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] relative bg-secondary">
-          <div className="flex flex-row items-center justify-between pb-4 border-b-2 border-black mb-4">
-            <span className="text-sm font-black uppercase tracking-widest text-black">Pendientes</span>
-            <div className="bg-destructive text-white p-2 border-2 border-black">
-              <AlertSquareIcon />
+        <motion.div whileHover={{ y: -2 }} className="gsap-fade-up bg-white p-5 rounded-lg border border-slate-200 shadow-sm transition-all relative">
+          <div className="flex flex-row items-center justify-between pb-2">
+            <span className="text-sm font-medium text-slate-500">Pendientes</span>
+            <div className="text-amber-500 bg-amber-50 p-1.5 rounded-md">
+              <AlertCircleIcon />
             </div>
           </div>
           <div>
-            <div className="text-5xl font-black text-black mt-2">{pendingContributions}</div>
-            <p className="text-xs font-bold uppercase text-black mt-2">Esperando revisión</p>
+            <div className="text-3xl font-semibold text-slate-900">{pendingContributions}</div>
+            <p className="text-xs text-slate-500 mt-1">Esperando revisión</p>
           </div>
         </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="gsap-fade-up bg-white p-8 transition-all border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-          <div className="flex flex-col mb-8 border-b-4 border-black pb-4">
-            <h3 className="flex items-center text-3xl font-black uppercase text-black tracking-tighter">
-              <span className="mr-3 p-2 bg-primary text-white border-2 border-black"><ChartIcon /></span>
-              Aportes (Semana)
-            </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="gsap-fade-up bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col">
+          <div className="flex items-center gap-2 p-5 border-b border-slate-100">
+            <div className="text-slate-400"><ChartIcon /></div>
+            <h3 className="text-base font-semibold text-slate-900">Actividad de Aportes</h3>
           </div>
-          <div>
-            <div className="h-[300px] w-full mt-4 border-2 border-black bg-secondary p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="0" vertical={false} stroke="#000" strokeWidth={2} />
-                  <XAxis dataKey="name" axisLine={{stroke: '#000', strokeWidth: 4}} tickLine={false} tick={{ fontSize: 14, fontWeight: '900', fill: '#000' }} dy={10} />
-                  <YAxis axisLine={{stroke: '#000', strokeWidth: 4}} tickLine={false} tick={{ fontSize: 14, fontWeight: '900', fill: '#000' }} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '0px', border: '4px solid #000', boxShadow: '4px 4px 0px 0px rgba(0,0,0,1)', fontWeight: '900', textTransform: 'uppercase' }}
-                  />
-                  <Area type="step" dataKey="aportes" name="Aportes" stroke="#000" strokeWidth={4} fillOpacity={1} fill="#0000ff" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="p-5 flex-1 min-h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorAportes" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563EB" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '6px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ color: '#0F172A', fontWeight: 500 }}
+                />
+                <Area type="monotone" dataKey="aportes" name="Aportes" stroke="#2563EB" strokeWidth={2} fillOpacity={1} fill="url(#colorAportes)" />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="gsap-fade-up bg-white p-8 border-4 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-          <div className="flex flex-col mb-8 border-b-4 border-black pb-4">
-            <h3 className="flex items-center text-3xl font-black uppercase text-black tracking-tighter">
-              Aportes Recientes
-            </h3>
+        <div className="gsap-fade-up bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col">
+          <div className="p-5 border-b border-slate-100">
+            <h3 className="text-base font-semibold text-slate-900">Aportes Recientes</h3>
           </div>
-          <div>
-            <div className="space-y-4">
+          <div className="p-0 flex-1">
+            <div className="divide-y divide-slate-100">
               {contributions?.slice(0, 5).map((contrib: any) => (
-                <div key={contrib.id} className="flex items-start gap-4 p-4 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all bg-white">
-                  <div className="relative">
-                    <div className="h-12 w-12 border-2 border-black bg-accent flex-shrink-0 flex items-center justify-center">
-                      {contrib.user.avatarUrl ? (
-                        <img src={contrib.user.avatarUrl} alt={contrib.user.name} className="h-full w-full object-cover" />
-                      ) : (
-                        <span className="font-black text-xl">{contrib.user.name.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
+                <div key={contrib.id} className="flex items-start gap-4 p-5 hover:bg-slate-50 transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200">
+                    {contrib.user.avatarUrl ? (
+                      <img src={contrib.user.avatarUrl} alt={contrib.user.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="font-medium text-slate-600 text-sm">{contrib.user.name.charAt(0).toUpperCase()}</span>
+                    )}
                   </div>
-                  <div className="flex flex-col space-y-2 flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black uppercase">{contrib.user.name}</span>
-                      <Badge variant="outline" className={`border-2 border-black font-black uppercase ${
-                        contrib.status === 'approved' ? 'bg-primary text-white' : 
-                        contrib.status === 'rejected' ? 'bg-destructive text-white' : 
-                        'bg-accent text-black'
+                  <div className="flex flex-col space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-slate-900 text-sm truncate">{contrib.user.name}</span>
+                      <Badge variant="outline" className={`font-normal text-[10px] px-2 py-0 h-5 ${
+                        contrib.status === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                        contrib.status === 'rejected' ? 'bg-red-50 text-red-700 border-red-200' : 
+                        'bg-amber-50 text-amber-700 border-amber-200'
                       }`}>
-                        {contrib.status === 'approved' ? 'OK' : contrib.status === 'rejected' ? 'NO' : 'WAIT'}
+                        {contrib.status === 'approved' ? 'Aprobado' : contrib.status === 'rejected' ? 'Rechazado' : 'Pendiente'}
                       </Badge>
                     </div>
-                    <p className="text-sm font-bold truncate">{contrib.commitMessage}</p>
-                    <div className="text-xs font-bold uppercase flex items-center mt-2 justify-between">
+                    <p className="text-sm text-slate-600 truncate">{contrib.commitMessage}</p>
+                    <div className="text-xs text-slate-400 flex items-center justify-between pt-1">
                       <span>{format(new Date(contrib.createdAt), "dd MMM, HH:mm")}</span>
-                      <span className="bg-black text-white px-2 py-1">SHA: {contrib.commitSha.substring(0, 7)}</span>
+                      <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{contrib.commitSha.substring(0, 7)}</span>
                     </div>
                   </div>
                 </div>
               ))}
               
               {(!contributions || contributions.length === 0) && (
-                <div className="text-center py-8 font-black uppercase border-4 border-dashed border-black">
-                  <p>No hay aportes.</p>
+                <div className="text-center py-12 text-slate-500 text-sm">
+                  <p>No hay aportes recientes en este workspace.</p>
                 </div>
               )}
             </div>

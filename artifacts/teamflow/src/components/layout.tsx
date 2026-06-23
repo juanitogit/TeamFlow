@@ -56,7 +56,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-3">
               <Link href="/" className="flex items-center gap-2">
                 <img src="/logo.png" alt="Logo" className="h-10 object-contain drop-shadow-sm" />
-                <span className="font-black uppercase text-2xl tracking-tighter">TeamFlow</span>
+                <span className="font-semibold text-xl text-primary tracking-tight">TeamFlow</span>
               </Link>
             </div>
             <nav className="hidden md:flex items-center gap-2">
@@ -67,10 +67,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`flex items-center gap-2 px-4 py-2 text-sm font-black uppercase transition-all border-2 border-transparent ${
+                      className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all rounded-md ${
                         isActive
-                          ? "bg-primary text-primary-foreground border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                          : "hover:bg-accent hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                          ? "bg-primary/10 text-primary"
+                          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                       }`}
                     >
                       <item.icon className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="hidden sm:flex text-sm rounded-full border-mist hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all px-4" onClick={logout}>
+            <Button variant="outline" size="sm" className="hidden sm:flex text-sm rounded-md border-mist hover:bg-red-50 hover:text-red-600 transition-all px-4" onClick={logout}>
               <LogOut className="h-4 w-4 mr-2" />
               Salir
             </Button>

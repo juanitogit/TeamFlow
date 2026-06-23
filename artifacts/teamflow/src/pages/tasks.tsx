@@ -4,7 +4,7 @@ import { useWorkspaces } from "@/hooks/use-workspaces";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -16,16 +16,23 @@ function getAuthHeader() {
   return { Authorization: `Bearer ${localStorage.getItem("teamflow_token")}`, "Content-Type": "application/json" };
 }
 
-// Brutalist SVG Icons
+// Corporate SVGs
 const TasksIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <path d="M9 5H21M9 12H21M9 19H21M3 5H5M3 12H5M3 19H5" />
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
   </svg>
 );
 
 const CheckIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square">
-    <path d="M20 6L9 17l-5-5" />
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const EmptyIcon = () => (
+  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mb-4 text-slate-300">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <path d="M9 12l2 2 4-4" />
   </svg>
 );
 
@@ -122,7 +129,7 @@ export function Tasks() {
   };
 
   if (!workspaceId) {
-    return <div className="text-center py-12 border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">Selecciona un workspace arriba.</div>;
+    return <div className="text-center py-12 text-slate-500 font-medium bg-white border border-slate-200 rounded-lg shadow-sm">Selecciona un workspace arriba.</div>;
   }
 
   const myTasks = tasks?.filter((t: any) => t.assignedTo.id === user?.id) || [];
@@ -130,90 +137,109 @@ export function Tasks() {
 
   const renderTaskList = (list: any[], showAssignee = false) => {
     const filtered = list.filter((t: any) => statusFilter === "todos" || t.status === statusFilter);
-    if (isLoading) return <div className="h-40 flex items-center justify-center border-2 border-black bg-secondary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase tracking-widest">Cargando...</div>;
-    if (filtered.length === 0) return <div className="py-16 text-center border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase tracking-widest text-muted-foreground">¡Sin tareas!</div>;
+    if (isLoading) return <div className="h-40 flex items-center justify-center text-slate-500 text-sm bg-slate-50 rounded-lg border border-slate-100">Cargando tareas...</div>;
+    if (filtered.length === 0) return (
+      <div className="py-16 flex flex-col items-center text-center bg-white border border-slate-200 border-dashed rounded-lg shadow-sm">
+        <EmptyIcon />
+        <h3 className="text-lg font-semibold text-slate-900">¡Sin tareas!</h3>
+        <p className="text-slate-500 text-sm mt-1">No hay tareas que coincidan con los filtros.</p>
+      </div>
+    );
 
     return (
-      <div className="space-y-6">
+      <div className="flex flex-col space-y-3">
         {filtered.map((task: any) => (
-          <div key={task.id} className="border-2 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] p-6 transition-all hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5">
+          <div key={task.id} className={`bg-white border rounded-lg p-5 transition-all shadow-sm hover:shadow-md ${task.status === 'completada' ? 'border-slate-100 bg-slate-50/50 opacity-80' : 'border-slate-200'}`}>
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
               <div className="flex items-start gap-4 flex-1">
                 {!showAssignee && (
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className={`rounded-none border-2 h-10 w-10 shrink-0 ${task.status === 'completada' ? 'border-primary bg-primary text-primary-foreground' : 'border-black bg-transparent text-black hover:bg-black hover:text-white'}`}
+                  <button 
+                    className={`flex items-center justify-center h-6 w-6 rounded-full border transition-colors flex-shrink-0 mt-0.5 ${
+                      task.status === 'completada' 
+                        ? 'border-emerald-500 bg-emerald-500 text-white' 
+                        : 'border-slate-300 text-transparent hover:border-emerald-500 hover:text-emerald-500/20'
+                    }`}
                     onClick={() => task.status !== 'completada' && handleStatusChange(task, 'completada')}
                     disabled={task.status === 'completada' || statusMutation.isPending}
                   >
                     <CheckIcon />
-                  </Button>
+                  </button>
                 )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest bg-accent">{task.type}</span>
-                    <span className="border-2 border-black px-2 py-0.5 text-[10px] font-black uppercase tracking-widest">{task.status.replace("_", " ")}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                    <Badge variant="outline" className="font-normal text-[10px] px-2 py-0 h-5 bg-slate-100 text-slate-600 border-slate-200 uppercase tracking-wider">{task.type}</Badge>
+                    <Badge variant="outline" className={`font-normal text-[10px] px-2 py-0 h-5 uppercase tracking-wider ${
+                      task.status === 'completada' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                      task.status === 'en_progreso' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                      task.status === 'en_revision' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                      'bg-slate-50 text-slate-600 border-slate-200'
+                    }`}>{task.status.replace("_", " ")}</Badge>
                     {showAssignee && (
-                       <span className="border-2 border-primary text-primary px-2 py-0.5 text-[10px] font-black uppercase tracking-widest ml-auto flex items-center gap-1">
-                         <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=000&color=fff`} className="w-3 h-3 border border-black" />
+                       <span className="flex items-center gap-1.5 ml-auto text-xs font-medium text-slate-700 bg-slate-50 px-2 py-1 rounded-md border border-slate-200">
+                         <img src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${task.assignedTo.name}&background=f8fafc&color=334155`} className="w-4 h-4 rounded-full border border-slate-200 object-cover" />
                          {task.assignedTo.name}
                        </span>
                     )}
                   </div>
-                  <h3 className={`text-2xl font-black uppercase tracking-tight ${task.status === 'completada' ? 'line-through opacity-50' : ''}`}>{task.title}</h3>
-                  {task.description && <p className="text-sm font-medium mt-2 border-l-4 border-black pl-3">{task.description}</p>}
+                  <h3 className={`text-base font-semibold text-slate-900 ${task.status === 'completada' ? 'line-through text-slate-500' : ''}`}>{task.title}</h3>
+                  {task.description && <p className="text-sm text-slate-500 mt-1">{task.description}</p>}
                   
                   {completingTask === task.id && !showAssignee && (
-                    <div className="mt-4 flex items-center gap-2 bg-secondary p-3 border-2 border-black">
-                      <Input placeholder="Commit SHA..." value={commitSha} onChange={e => setCommitSha(e.target.value)} className="border-2 border-black rounded-none h-8 font-mono text-xs" />
-                      <Button size="sm" className="rounded-none border-2 border-black h-8 font-bold uppercase text-xs" onClick={() => handleStatusChange(task, 'completada')}>OK</Button>
-                      <Button size="sm" variant="ghost" className="rounded-none border-2 border-transparent h-8 font-bold uppercase text-xs" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>X</Button>
+                    <div className="mt-3 flex items-center gap-2 bg-slate-50 p-2 rounded-md border border-slate-200">
+                      <Input placeholder="Commit SHA..." value={commitSha} onChange={e => setCommitSha(e.target.value)} className="h-8 text-sm font-mono focus-visible:ring-1" />
+                      <Button size="sm" className="h-8 shadow-sm" onClick={() => handleStatusChange(task, 'completada')}>Confirmar</Button>
+                      <Button size="sm" variant="ghost" className="h-8 px-2 text-slate-400 hover:text-slate-600" onClick={() => { setCompletingTask(null); setCommitSha(""); }}>Cancelar</Button>
                     </div>
                   )}
 
                   {task.commitSha && (
-                    <div className="mt-3 text-xs font-mono font-bold bg-black text-white px-2 py-1 inline-block">SHA: {task.commitSha.substring(0, 7)}</div>
+                    <div className="mt-3 text-[10px] font-mono text-slate-500 bg-slate-100 px-2 py-1 rounded inline-flex items-center border border-slate-200">
+                      <span className="font-semibold text-slate-600 mr-1">SHA:</span> {task.commitSha.substring(0, 7)}
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2 shrink-0">
+              <div className="flex flex-col items-start md:items-end gap-2 shrink-0 ml-10 md:ml-0">
                 {task.dueDate ? (
-                  <div className="border-2 border-black px-3 py-1 font-bold uppercase text-xs">
+                  <div className={`text-xs font-medium px-2.5 py-1 rounded-md ${
+                    new Date(task.dueDate) < new Date() && task.status !== 'completada' 
+                      ? 'bg-red-50 text-red-700 border border-red-100' 
+                      : 'text-slate-500 border border-transparent'
+                  }`}>
                     Vence: {format(new Date(task.dueDate), "d MMM", { locale: es })}
                   </div>
-                ) : <div className="border-2 border-transparent px-3 py-1 font-bold uppercase text-xs text-muted-foreground">Sin fecha</div>}
+                ) : <div className="text-xs text-slate-400 px-2.5 py-1">Sin fecha</div>}
 
                 {showAssignee && isLeader && (
-                  <div className="flex gap-2 mt-4">
+                  <div className="flex gap-2 mt-2 w-full md:w-auto">
                     <Dialog open={editingTask?.id === task.id} onOpenChange={(open) => { if (!open) setEditingTask(null); else setEditingTask({...task, dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : ''}); }}>
                       <DialogTrigger asChild>
-                        <Button size="sm" className="rounded-none border-2 border-black font-bold uppercase text-xs h-8">Editar</Button>
+                        <Button size="sm" variant="outline" className="h-7 text-xs flex-1 md:flex-none">Editar</Button>
                       </DialogTrigger>
-                      <DialogContent className="border-4 border-black rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                      <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                          <DialogTitle className="text-2xl font-black uppercase border-b-2 border-black pb-2">Editar Tarea</DialogTitle>
+                          <DialogTitle className="text-lg">Editar Tarea</DialogTitle>
                         </DialogHeader>
                         {editingTask && (
-                          <form onSubmit={handleEditSubmit} className="space-y-4 pt-4">
+                          <form onSubmit={handleEditSubmit} className="space-y-4 pt-2">
                             <div>
-                              <label className="text-xs font-bold uppercase block mb-1">Título</label>
-                              <Input required value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="border-2 border-black rounded-none" />
+                              <label className="text-sm font-medium text-slate-700 block mb-1.5">Título</label>
+                              <Input required value={editingTask.title} onChange={e => setEditingTask({...editingTask, title: e.target.value})} className="focus-visible:ring-1" />
                             </div>
                             <div>
-                              <label className="text-xs font-bold uppercase block mb-1">Descripción</label>
-                              <Input value={editingTask.description || ''} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="border-2 border-black rounded-none" />
+                              <label className="text-sm font-medium text-slate-700 block mb-1.5">Descripción</label>
+                              <Input value={editingTask.description || ''} onChange={e => setEditingTask({...editingTask, description: e.target.value})} className="focus-visible:ring-1" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <label className="text-xs font-bold uppercase block mb-1">Fecha Límite</label>
-                                <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({...editingTask, dueDate: e.target.value})} className="border-2 border-black rounded-none" />
+                                <label className="text-sm font-medium text-slate-700 block mb-1.5">Fecha Límite</label>
+                                <Input type="datetime-local" value={editingTask.dueDate} onChange={e => setEditingTask({...editingTask, dueDate: e.target.value})} className="focus-visible:ring-1" />
                               </div>
                               <div>
-                                <label className="text-xs font-bold uppercase block mb-1">Estado</label>
+                                <label className="text-sm font-medium text-slate-700 block mb-1.5">Estado</label>
                                 <Select value={editingTask.status} onValueChange={v => setEditingTask({...editingTask, status: v})}>
-                                  <SelectTrigger className="border-2 border-black rounded-none"><SelectValue /></SelectTrigger>
-                                  <SelectContent className="border-2 border-black rounded-none">
+                                  <SelectTrigger className="focus-visible:ring-1"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
                                     <SelectItem value="pendiente">Pendiente</SelectItem>
                                     <SelectItem value="en_progreso">En Progreso</SelectItem>
                                     <SelectItem value="en_revision">En Revisión</SelectItem>
@@ -222,12 +248,19 @@ export function Tasks() {
                                 </Select>
                               </div>
                             </div>
-                            <Button type="submit" className="w-full rounded-none border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase mt-4">Guardar</Button>
+                            <div className="pt-4 flex gap-2 justify-end">
+                              <Button type="button" variant="outline" onClick={() => setEditingTask(null)}>Cancelar</Button>
+                              <Button type="submit" className="shadow-sm">Guardar cambios</Button>
+                            </div>
                           </form>
                         )}
                       </DialogContent>
                     </Dialog>
-                    <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(task.id)} className="rounded-none border-2 border-black font-bold uppercase text-xs h-8">Borrar</Button>
+                    <Button size="sm" variant="destructive" onClick={() => {
+                      if(window.confirm("¿Seguro que deseas eliminar esta tarea?")) {
+                        deleteMutation.mutate(task.id);
+                      }
+                    }} className="h-7 text-xs flex-1 md:flex-none opacity-80 hover:opacity-100">Borrar</Button>
                   </div>
                 )}
               </div>
@@ -239,35 +272,37 @@ export function Tasks() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-4 border-black pb-4">
+    <div className="space-y-6 font-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-4xl font-black uppercase tracking-tighter flex items-center gap-3">
-            <TasksIcon />
+          <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-slate-900 flex items-center gap-3">
+            <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
+              <TasksIcon />
+            </div>
             Tareas
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm font-medium uppercase tracking-widest">Gestión de Tareas</p>
+          <p className="text-slate-500 mt-1 text-sm font-medium">Gestiona y supervisa las tareas del proyecto</p>
         </div>
         
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px] border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] font-bold uppercase text-xs">
-            <SelectValue placeholder="Filtro" />
+          <SelectTrigger className="w-[180px] bg-white text-sm focus-visible:ring-1 shadow-sm">
+            <SelectValue placeholder="Filtrar por estado" />
           </SelectTrigger>
-          <SelectContent className="border-2 border-black rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-            <SelectItem value="todos" className="font-bold uppercase text-xs">Todas</SelectItem>
-            <SelectItem value="pendiente" className="font-bold uppercase text-xs">Pendientes</SelectItem>
-            <SelectItem value="en_progreso" className="font-bold uppercase text-xs">En Progreso</SelectItem>
-            <SelectItem value="en_revision" className="font-bold uppercase text-xs">En Revisión</SelectItem>
-            <SelectItem value="completada" className="font-bold uppercase text-xs">Completadas</SelectItem>
+          <SelectContent>
+            <SelectItem value="todos">Todas las tareas</SelectItem>
+            <SelectItem value="pendiente">Pendientes</SelectItem>
+            <SelectItem value="en_progreso">En Progreso</SelectItem>
+            <SelectItem value="en_revision">En Revisión</SelectItem>
+            <SelectItem value="completada">Completadas</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {isLeader ? (
         <Tabs defaultValue="mis_tareas" className="w-full">
-          <TabsList className="bg-transparent border-b-2 border-black w-full justify-start rounded-none p-0 h-auto space-x-4 mb-8">
-            <TabsTrigger value="mis_tareas" className="rounded-none border-2 border-transparent data-[state=active]:border-black data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:shadow-[2px_-2px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-black uppercase text-sm">Mis Tareas</TabsTrigger>
-            <TabsTrigger value="equipo" className="rounded-none border-2 border-transparent data-[state=active]:border-black data-[state=active]:border-b-0 data-[state=active]:bg-white data-[state=active]:shadow-[2px_-2px_0px_0px_rgba(0,0,0,1)] px-6 py-3 font-black uppercase text-sm">Equipo (Líder)</TabsTrigger>
+          <TabsList className="bg-slate-100 p-1 rounded-lg inline-flex mb-6 h-auto">
+            <TabsTrigger value="mis_tareas" className="rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all text-slate-500">Mis Tareas</TabsTrigger>
+            <TabsTrigger value="equipo" className="rounded-md px-4 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all text-slate-500">Equipo (Líder)</TabsTrigger>
           </TabsList>
           <TabsContent value="mis_tareas" className="mt-0 outline-none">
             {renderTaskList(myTasks, false)}
@@ -277,7 +312,9 @@ export function Tasks() {
           </TabsContent>
         </Tabs>
       ) : (
-        renderTaskList(myTasks, false)
+        <div className="pt-2">
+          {renderTaskList(myTasks, false)}
+        </div>
       )}
     </div>
   );
